@@ -1,3 +1,51 @@
+<?php
+// ---- version & update check ----
+$VERSION = '1.1.0';
+$GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
+$CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
+$CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
+
+function fetchLatestGithubVersion($repo) {
+    $url = "https://api.github.com/repos/{$repo}/releases/latest";
+    $context = stream_context_create([
+        'http' => [
+            'method'  => 'GET',
+            'header'  => "User-Agent: sudo.me.uk-version-check\r\nAccept: application/vnd.github+json\r\n",
+            'timeout' => 3,
+        ],
+    ]);
+    $response = @file_get_contents($url, false, $context);
+    if ($response === false) return null;
+    $data = json_decode($response, true);
+    if (!isset($data['tag_name'])) return null;
+    return ltrim($data['tag_name'], 'vV');
+}
+
+function getLatestVersion($repo, $cacheFile, $ttl) {
+    $cached = null;
+    if (is_readable($cacheFile)) {
+        $cached = json_decode((string)@file_get_contents($cacheFile), true);
+        if (is_array($cached) && isset($cached['fetched_at'], $cached['version']) && (time() - $cached['fetched_at']) < $ttl) {
+            return $cached['version'];
+        }
+    }
+    $latest = fetchLatestGithubVersion($repo);
+    if ($latest !== null) {
+        @file_put_contents($cacheFile, json_encode(['version' => $latest, 'fetched_at' => time()]));
+        return $latest;
+    }
+    // GitHub unreachable — fall back to a stale cache rather than showing nothing
+    return (is_array($cached) && isset($cached['version'])) ? $cached['version'] : null;
+}
+
+$latestVersion = getLatestVersion($GITHUB_REPO, $CACHE_FILE, $CACHE_TTL);
+// red whenever we can't positively confirm this build matches a published release —
+// either a newer one exists, or there's no release published at all yet
+$updateAvailable = $latestVersion === null || version_compare($latestVersion, $VERSION, '>');
+$updateTitle = $latestVersion === null
+    ? 'No published release found on GitHub — unable to verify this is up to date.'
+    : "A newer version (v{$latestVersion}) is available on GitHub — go update!";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +55,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>sudo rm -rf /* v1.0.0</title>
+<title>sudo rm -rf /* v<?= htmlspecialchars($VERSION) ?></title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -81,6 +129,10 @@
   #methodBox .m-frozen { color:#c0f0ff; text-shadow:0 0 8px #4a90c0; }
   #methodBox .m-land  { color:#c08a50; text-shadow:0 0 8px #4a2a10; }
   #methodBox .m-avp   { color:#8aff40; text-shadow:0 0 8px #a02020; }
+  #methodBox .m-mortal { color:#e0b030; text-shadow:0 0 8px #8a6a20; }
+  #methodBox .m-simp  { color:#ffd90f; text-shadow:0 0 8px #c89a00; }
+  #methodBox .m-emu   { color:#c89050; text-shadow:0 0 8px #6a4020; }
+  #methodBox .m-neil  { color:#c8ccd0; text-shadow:0 0 8px #4a4e54; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -96,7 +148,20 @@
     50%{transform:translate(1px,-2px)} 75%{transform:translate(-1px,2px)}
     100%{transform:translate(2px,-1px)} }
   #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
-  #resetBtn { position:absolute; top:max(10px, env(safe-area-inset-top)); right:max(10px, env(safe-area-inset-right)); z-index:10;
+  #topBar { position:absolute; top:max(10px, env(safe-area-inset-top)); right:max(10px, env(safe-area-inset-right)); z-index:10;
+    display:flex; align-items:center; gap:8px; }
+  #versionBox { background:#111; color:#0f0; border:1px solid #0f0; font-family:"Courier New",monospace;
+    font-size:14px; padding:10px 12px; min-height:40px; display:flex; align-items:center;
+    text-shadow:0 0 6px #0f0; box-shadow:0 0 10px rgba(0,255,0,.3); border-radius:5px; opacity:0.85; }
+  #versionBox.update-needed { background:#2a0505; color:#ff4040; border-color:#ff4040;
+    text-shadow:0 0 8px #ff4040; box-shadow:0 0 12px rgba(255,0,0,.5); opacity:1; cursor:help; }
+  #githubBtn { background:#111; color:#0f0; border:1px solid #0f0;
+    min-height:40px; min-width:40px; padding:8px; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 10px rgba(0,255,0,.3); border-radius:5px; touch-action:manipulation; }
+  #githubBtn svg { width:20px; height:20px; fill:currentColor; filter:drop-shadow(0 0 4px #0f0); }
+  #githubBtn:hover { background:#0f0; color:#000; }
+  #githubBtn:active { background:#0f0; color:#000; transform:scale(0.94); }
+  #resetBtn {
     background:#111; color:#0f0; border:1px solid #0f0; font-family:"Courier New",monospace;
     font-size:14px; padding:10px 16px; min-height:40px; cursor:pointer; text-shadow:0 0 6px #0f0;
     box-shadow:0 0 10px rgba(0,255,0,.3); border-radius:5px; touch-action:manipulation; }
@@ -119,6 +184,10 @@
     #cmd { font-size:clamp(20px,6.5vw,34px); letter-spacing:1px; padding:5px 0; }
     #sub { font-size:11px; padding-bottom:6px; }
     #resetBtn { font-size:12px; padding:8px 11px; min-height:36px; }
+    #versionBox { font-size:12px; padding:8px 10px; min-height:36px; }
+    #githubBtn { min-height:36px; min-width:36px; padding:6px; }
+    #githubBtn svg { width:18px; height:18px; }
+    #topBar { gap:6px; }
   }
   /* very narrow phones: shrink tile text a touch more */
   @media (max-width: 380px){
@@ -135,7 +204,13 @@
 </style>
 </head>
 <body>
-<button id="resetBtn">&#8635; RESET</button>
+<div id="topBar">
+  <a id="githubBtn" href="https://github.com/MichelleFindlay/sudo.me.uk" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+  </a>
+  <div id="versionBox"<?php if ($updateAvailable): ?> class="update-needed" title="<?= htmlspecialchars($updateTitle) ?>"<?php endif; ?>>v<?= htmlspecialchars($VERSION) ?></div>
+  <button id="resetBtn">&#8635; RESET</button>
+</div>
 <div id="stage">
   <pre id="scene"></pre>
   <div id="methodBox">
@@ -177,6 +252,10 @@
       <span class="m-frozen pick" data-method="33">Frozen</span>
       <span class="m-land pick" data-method="34">Landslide</span>
       <span class="m-avp pick" data-method="35">Alien vs Pred</span>
+      <span class="m-mortal pick" data-method="36">Mortal Engines</span>
+      <span class="m-simp pick" data-method="37">Simpsons</span>
+      <span class="m-emu pick" data-method="38">Emu War</span>
+      <span class="m-neil pick" data-method="39">Neil the Seal</span>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -397,6 +476,46 @@ function colorFor(ch,r,c,mode){
   }
   if(mode==='steam'){                                            // funnel smoke
     return (Math.random()<0.5)?"#5a5a60":"#8a8a92";
+  }
+  if(mode==='domeglass'){                                         // the giant glass dome
+    return (Math.random()<0.5)?"#bfe8ff":"#eaf8ff";
+  }
+  if(mode==='landmark'){                                          // the water tower & nuclear plant
+    if(/[A-Za-z]/.test(ch))return "#8aff40";                     // glowing signage
+    return "#9aa2ac";                                             // steel-grey structure
+  }
+  if(mode==='emu'){                                               // the unstoppable emu horde
+    if(ch==="o")return "#8a9aa0";                                // small blue-grey head
+    if(ch===">"||ch==="<")return "#2a2018";                      // beak
+    if(ch==="("||ch===")"||ch==="_")return "#8a6a3a";            // fluffy feathered body
+    return "#c89858";                                             // neck & legs
+  }
+  if(mode==='neil'){                                              // Neil the Seal
+    if(ch==="o")return "#101214";                                // eye
+    if(ch==="z"||ch==="Z")return "#9ad0ff";                       // contented little zzz
+    return "#9aa2a8";                                             // grey seal body
+  }
+  if(mode==='cone'){                                              // the traffic cone
+    if(ch==="-")return "#ffffff";                                 // reflective band
+    return "#ff7a1a";                                             // safety orange
+  }
+  if(mode==='simpsons'){                                          // Springfield, sealed and painted up
+    if(ch==="."||ch===":")return "#ffffff";                      // bright TV-glow windows
+    if(ch==="|")return "#3a8fd9";                                 // Marge-blue walls
+    if(ch==="_")return "#e4000f";                                 // red floors/roofs
+    if(ch==="/"||ch==="\\")return "#ff8c19";                      // Bart/Lisa-orange spires
+    if(ch==="="||ch==="#")return "#ffffff";                       // white trim
+    return "#ffd90f";                                             // Simpsons yellow (everything else)
+  }
+  if(mode==='crane'){                                             // demolition cranes
+    if(ch==="O"||ch==="o")return "#ffcc33";                     // hook / cab light
+    return "#d0a020";                                           // yellow crane steelwork
+  }
+  if(mode==='traction'){                                          // the Traction City rig
+    if(ch==="O"||ch==="o")return "#1a1a1a";                     // wheels/treads
+    if(ch==="[" || ch==="]")return "#e0c060";                   // lit windows
+    if(ch==="#"||ch==="_"||ch==="/"||ch==="\\"||ch==="|")return "#5a6068"; // steel hull
+    return "#848c96";                                           // grey superstructure
   }
   if(mode==='hellfire'){                                          // the chasm & flames
     const rh2=Math.random();
@@ -2588,6 +2707,281 @@ function titanicWreckRender(bx, angleDeg){
   return {grid,mg};
 }
 
+// ---- MORTAL ENGINES: cranes strip the city for parts, which drives off as a Traction City ----
+// tower cranes are taller than anything they're demolishing: the jib sits above the whole
+// skyline and the mast runs almost all the way down to street level, alongside the buildings.
+function craneCols(){ const n=Math.max(3,Math.min(6,Math.floor(COLS/26))); return Array.from({length:n},(_,i)=>Math.round((i+0.5)*COLS/n)); }
+function craneReach(){ const n=craneCols().length; return Math.max(9,Math.ceil(COLS/n/2)+3); }   // wide enough that neighbouring cranes' reach overlaps — no gaps left standing
+// permanently strips buildings within reach of every crane — mutates cityGridArr so the demolition sticks
+function mortalCraneDemolish(rate){
+  if(cityGridArr.length!==ROWS) return;
+  const reach=craneReach();
+  for(const cc of craneCols()){
+    for(let r=0;r<streetRow;r++){ if(!cityGridArr[r]) continue; let ln=cityGridArr[r].split("");
+      for(let c=cc-reach;c<=cc+reach;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<rate) ln[c]=" "; }
+      cityGridArr[r]=ln.join(""); }
+  }
+}
+function craneRender(t){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  mortalCraneDemolish(0.18);
+  const jibRow=1, mastBottom=Math.max(jibRow,streetRow-1), reach=craneReach();
+  // work out each crane's hook position first, and rip an extra chunk out right where it grips —
+  // ties the visible demolition to the hook actually reaching down into the buildings
+  const hooks=craneCols().map(cc=>{
+    const swing=Math.round(Math.sin(t*0.1+cc)*reach*0.8);
+    const hookCol=cc+swing;
+    const cyc=16, ph=(t+Math.round(cc))%cyc;
+    const depth=ph<cyc/2 ? ph/(cyc/2) : (cyc-ph)/(cyc/2);          // 0 raised .. 1 lowered .. 0 raised
+    const hookRow=Math.round(jibRow+2+depth*Math.max(1,mastBottom-jibRow-2));
+    if(depth>0.7){
+      for(let dr=-1;dr<=1;dr++){ for(let dc=-2;dc<=2;dc++){ const r=hookRow+dr,c=hookCol+dc;
+        if(r>=0&&r<streetRow&&c>=0&&c<COLS&&cityGridArr[r]&&cityGridArr[r][c]!==" "&&Math.random()<0.6){
+          let ln=cityGridArr[r].split(""); ln[c]=" "; cityGridArr[r]=ln.join(""); } } }
+    }
+    return {cc,hookCol,hookRow};
+  });
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(const cc of craneCols()){
+    for(let r=jibRow;r<=mastBottom;r++){ setCh(grid,r,cc,"|"); setMode(mg,r,cc,'crane'); }         // mast, down alongside the buildings
+    for(let dc=-reach;dc<=reach;dc++){ const c=cc+dc; if(c<0||c>=COLS)continue; setCh(grid,jibRow,c,(dc===0?"+":"=")); setMode(mg,jibRow,c,'crane'); } // jib, above the skyline
+  }
+  for(const h of hooks){
+    for(let r=jibRow+1;r<h.hookRow;r++){ if(h.hookCol>=0&&h.hookCol<COLS&&r>=0&&r<ROWS){ setCh(grid,r,h.hookCol,":"); setMode(mg,r,h.hookCol,'crane'); } }
+    if(h.hookCol>=0&&h.hookCol<COLS&&h.hookRow>=0&&h.hookRow<ROWS){ setCh(grid,h.hookRow,h.hookCol,"O"); setMode(mg,h.hookRow,h.hookCol,'crane'); }
+  }
+  return {grid,mg};
+}
+// the Traction City: a mobile fortress on tracks, salvaged from the demolished skyline
+const tractionCitySprite=[
+  "        |    |    |          ",   // exhaust stacks
+  "     ___|____|____|________  ",
+  "    /   []   []   []      \\ ",
+  "   /______________________  \\",
+  "  |  T R A C T I O N  C I T Y |",
+  "  |_____________________ ____|",
+  "   (O)(O)   (O)(O)   (O)(O)(O)",
+];
+function tractionRender(tx){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  titanicDemolish(tx);                            // whatever's still standing gets flattened as it drives through
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const spr=tractionCitySprite;
+  const sh=spr.length, sw=spr[0].length;
+  const left=Math.round(tx)-sw;                   // tx = leading (right) edge
+  const keelRow=streetRow;
+  const top=keelRow-sh+1;
+
+  // exhaust plumes billowing back from the stacks as it drives off
+  if(mortalT%2===0){ for(const sc of [8,13,18]){ mortalSmoke.push({x:left+sc, y:top-1, vx:-(0.4+Math.random()*0.6), vy:-(0.2+Math.random()*0.4), life:22}); } }
+  for(const s of mortalSmoke){ s.x+=s.vx; s.y+=s.vy; s.life--; const r=Math.round(s.y), c=Math.round(s.x); if(r>=0&&r<ROWS&&c>=0&&c<COLS && s.life>0){ setCh(grid,r,c,(s.life>12?"@":".")); setMode(mg,r,c,'steam'); } }
+  mortalSmoke=mortalSmoke.filter(s=>s.life>0);
+
+  for(let i=0;i<sh;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'traction'); } }
+
+  return {grid,mg};
+}
+
+// ---- SIMPSONS: a giant glass dome drops over the city, cutting into the ground and sealing it in ----
+// the water tower and nuclear plant from the title-sequence skyline, planted in among the buildings
+const springfieldTower=[
+  "   ___   ",
+  "  /   \\  ",
+  " |     | ",
+  "  \\___/  ",
+  "   | |   ",
+  "  /   \\  ",
+];
+const springfieldPlant=[
+  "    )   (    ",
+  "     \\ /     ",
+  "      |      ",
+  "     / \\     ",
+  "  __(___)__  ",
+  " |NUCLEAR  | ",
+  " |_PLANT___| ",
+];
+function drawSpringfieldSkyline(grid,mg){
+  const land=[[springfieldPlant,Math.floor(COLS*0.22)],[springfieldTower,Math.floor(COLS*0.68)]];
+  for(const [spr,leftWanted] of land){
+    const w=spr[0].length, h=spr.length;
+    const left=Math.max(0,Math.min(COLS-w,leftWanted)), top=streetRow-h+1;
+    for(let i=0;i<h;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=left+j;
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'landmark'); } }
+  }
+}
+// heavy-lift choppers carry the (already full-size) dome down by cable; dropOffset counts the
+// rows it still has to fall (0 once seated). Once seated they cut loose and peel away, and only
+// then does the rim bite into the earth and the city flash over to Springfield colours.
+const heliRotorFrames=["-+-","\\+/"];
+function drawHelicopter(grid,mg,hr,hc){
+  const rotor=heliRotorFrames[simpT%2];
+  for(let j=0;j<rotor.length;j++){ const c=hc-1+j; setCh(grid,hr,c,rotor[j]); setMode(mg,hr,c,'crane'); }
+  const body="(###)";
+  for(let j=0;j<body.length;j++){ const c=hc-2+j; setCh(grid,hr+1,c,body[j]); setMode(mg,hr+1,c,'crane'); }
+}
+function simpsonsRender(domeR, dropOffset, heliFly, sealed){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS, sealed?'simpsons':'city');
+  drawSpringfieldSkyline(grid,mg);
+  const seated=dropOffset<=0;
+  const ground=streetRow-Math.max(0,dropOffset), dig=seated?2:0;   // still airborne = no ground contact yet
+  const domeV=Math.min(streetRow+2, Math.round(domeR*0.9));        // fixed dome shape, only its altitude changes
+  for(let r=ground+dig; r>=ground-domeV; r--){
+    const frac=(ground-r)/Math.max(1,domeV);
+    const cf=Math.max(-1,Math.min(1,frac));
+    const w=Math.round(Math.sqrt(Math.max(0,1-cf*cf))*domeR);
+    for(const s of [-1,1]){
+      for(let k=0;k<2;k++){                          // a couple of characters thick, so the glass reads solid
+        const c=cx+s*(w-k); if(c<0||c>=COLS)continue;
+        setCh(grid,r,c,(s<0?"\\":"/")); setMode(mg,r,c,'domeglass');
+      }
+    }
+    // once seated, the rim bites into the earth — crumble the dirt right at the seam
+    if(dig>0 && r>ground){ for(const c of [cx-w-1,cx-w,cx+w,cx+w+1]){ if(c>=0&&c<COLS&&Math.random()<0.6){ setCh(grid,r,c,["#",".","\u00b7"][(Math.random()*3)|0]); setMode(mg,r,c,'rubble'); } } }
+  }
+  // a curved cap of glass at the very apex, closing the dome off once it's fully seated
+  if(sealed){ const top=ground-domeV; for(let c=cx-2;c<=cx+2;c++){ setCh(grid,top,c,"="); setMode(mg,top,c,'domeglass'); } }
+  // the helicopter crew lowering (or, once seated, casting off from) the dome
+  const apexRow=ground-domeV;
+  if(!seated || heliFly<=14){
+    for(const dx of [-0.5,0,0.5]){
+      let hc=Math.round(cx+dx*domeR), hr=apexRow-3;
+      if(seated){ hr-=Math.round(heliFly*0.7); hc+=Math.round(dx*heliFly*2.2); }        // peel away up and outward
+      else { for(let r=hr+2;r<apexRow;r++){ setCh(grid,r,hc,":"); setMode(mg,r,hc,'crane'); } }  // cable, still attached
+      drawHelicopter(grid,mg,hr,hc);
+    }
+  }
+  return {grid,mg};
+}
+
+// ---- EMU WAR: the army opens fire, the emus don't care, the city loses ----
+const emuSprite=[
+  "      o>",
+  "     /",
+  "    /",
+  " __/",
+  "(   )___",
+  " \\_____/",
+  "   |  |",
+  "   |  |",
+  "   |  |",
+];
+const soldierSprite=[
+  " @",
+  "/|\\",
+  "/ \\",
+];
+function emuInit(){
+  emus=[]; emuBullets=[]; soldiers=[];
+  const n=Math.max(3,Math.floor(COLS/22));
+  for(let i=0;i<n;i++){ soldiers.push({x:(i+0.5)/n*COLS, fleeing:false}); }
+}
+function emuStep(t){
+  if(t%10===0 && emus.length<12){ const fromLeft=Math.random()<0.5;
+    emus.push({x: fromLeft?-8:COLS+8, dir: fromLeft?1:-1, spd:0.8+Math.random()*1.4, ph:Math.random()*6}); }
+  for(const e of emus){
+    e.x+=e.spd*e.dir; e.ph+=0.5;
+    // it tramples whatever it runs through — mutates cityGridArr so the wreckage sticks
+    if(cityGridArr.length===ROWS){ const col=Math.round(e.x);
+      for(let r=0;r<streetRow;r++){ if(!cityGridArr[r])continue; let ln=cityGridArr[r].split("");
+        for(let c=col-2;c<=col+2;c++){ if(c>=0&&c<COLS&&ln[c]!==" "&&Math.random()<0.12) ln[c]=" "; }
+        cityGridArr[r]=ln.join(""); }
+    }
+  }
+  emus=emus.filter(e=>e.x>-14 && e.x<COLS+14);
+  // the army opens fire for a while, then — as history records — gives up and retreats
+  if(t>50){ for(const s of soldiers) s.fleeing=true; }
+  for(const s of soldiers){
+    if(s.fleeing){ s.x += (s.x<COLS/2 ? -1.6 : 1.6); }
+    else if(t%6===0 && emus.length){
+      let nearest=emus[0]; for(const e of emus){ if(Math.abs(e.x-s.x)<Math.abs(nearest.x-s.x)) nearest=e; }
+      emuBullets.push({x:s.x, dir: nearest.x>s.x?1:-1});
+    }
+  }
+  soldiers=soldiers.filter(s=>s.x>-4 && s.x<COLS+4);
+  for(const b of emuBullets) b.x+=b.dir*3;
+  emuBullets=emuBullets.filter(b=>b.x>-2 && b.x<COLS+2);
+}
+function emuRender(){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // tracer fire that never actually connects with anything
+  const fireRow=streetRow-2;
+  for(const b of emuBullets){ const c=Math.round(b.x); if(c>=0&&c<COLS){ setCh(grid,fireRow,c,"-"); setMode(mg,fireRow,c,'warfire'); } }
+  // the doomed defenders
+  for(const s of soldiers){ const xi=Math.round(s.x), top=streetRow-soldierSprite.length+1;
+    for(let i=0;i<soldierSprite.length;i++){ const art=soldierSprite[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=xi+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'war'); } } }
+  // the unstoppable emus
+  for(const e of emus){ const xi=Math.round(e.x); const bob=(Math.sin(e.ph)>0)?0:1; const top=streetRow-emuSprite.length+1-bob;
+    for(let i=0;i<emuSprite.length;i++){ let art=emuSprite[i]; if(e.dir<0) art=art.split("").reverse().join("");
+      for(let j=0;j<art.length;j++){ const c=xi+j, r=top+i; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'emu'); } } }
+  return {grid,mg};
+}
+
+// ---- NEIL THE SEAL: he waddles up to each building, bashes it flat, then moves to the next ----
+const neilSprite=[
+  "   __",
+  "  /  \\__",
+  " (  o    )",
+  "  \\______/",
+  "   ()  ()",
+];
+const neilLeanSprite=[
+  "   __",
+  "  /  \\__",
+  " (  o    )",
+  "  \\______/",
+  "     ()",
+];
+const coneSprite=[
+  " /\\",
+  "/--\\",
+  "/____\\",
+];
+// true while something solid still stands in the few columns right in front of him
+function neilBlocked(col){
+  if(cityGridArr.length!==ROWS) return false;
+  for(let r=0;r<streetRow;r++){ const ln=cityGridArr[r]; if(!ln) continue;
+    for(let c=col;c<=col+2;c++){ if(c>=0&&c<COLS&&ln[c]!==" ") return true; }
+  }
+  return false;
+}
+// headbutts whatever's at this column — punches a hole in its base so the rest crashes down
+function neilBash(col){
+  if(cityGridArr.length!==ROWS) return;
+  for(let r=Math.max(0,streetRow-3); r<streetRow; r++){ if(!cityGridArr[r])continue; let ln=cityGridArr[r].split("");
+    for(let c=col-1;c<=col+3;c++){ if(c>=0&&c<COLS) ln[c]=" "; }
+    cityGridArr[r]=ln.join(""); }
+  collapseCity(1);
+}
+function neilRender(x, leaning, bashing){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // the cone, waiting patiently at the end of the city
+  const coneLeft=COLS-8, coneTop=streetRow-coneSprite.length+1;
+  for(let i=0;i<coneSprite.length;i++){ const art=coneSprite[i], r=coneTop+i;
+    for(let j=0;j<art.length;j++){ const c=coneLeft+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'cone'); } }
+  // Neil himself
+  const spr=leaning?neilLeanSprite:neilSprite;
+  const jitter=bashing?(Math.random()<0.5?-1:0):0;         // a little recoil while he's headbutting
+  const left=Math.round(x)+jitter, top=streetRow-spr.length+1;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'neil'); } }
+  if(bashing){ const nc=left+spr[0].length+1; for(let k=0;k<3;k++){ const c=nc+k, r=top+1+((Math.random()*2)|0);
+    if(c>=0&&c<COLS&&r>=0&&r<ROWS&&Math.random()<0.7){ setCh(grid,r,c,["*","#","'"][(Math.random()*3)|0]); setMode(mg,r,c,'rubble'); } } }
+  if(leaning){ const c=left+spr[0].length, r=top-1; if(c>=0&&c<COLS&&r>=0&&r<ROWS){ setCh(grid,r,c,"z"); setMode(mg,r,c,'neil'); } }
+  return {grid,mg};
+}
+
 // ---- BALDUR'S GATE: a mind flayer nautiloid crashes through the city ----
 // the squid-ship: bulbous fleshy body up top, curling tentacles trailing beneath
 const nautSprite=[
@@ -3474,6 +3868,10 @@ let ghostStarted=false, ghostT=0, ghostPhase='haunt', puftX=0, ghosts=[], proton
 let fznStarted=false, fznT=0, fznLevel=0, castleH=0, olafX=0, snowFall=[];
 let lsStarted=false, lsT=0, lsFront=0, boulders=[], lsDebris=[];
 let avpStarted=false, avpT=0, xenos=[], preds=[], plasma=[], acidPools=[], avpDmg=0;
+let mortalStarted=false, mortalT=0, tcX=0, mortalSmoke=[];
+let simpStarted=false, simpT=0, domeR=0, dropOffset=0, heliFly=0;
+let emuStarted=false, emuT=0, emus=[], soldiers=[], emuBullets=[];
+let neilStarted=false, neilT=0, neilX=0;
 const maxDmg=()=>Math.floor(COLS/2)+2;
 
 function reset(){
@@ -3517,6 +3915,10 @@ function reset(){
   fznStarted=false; fznT=0; fznLevel=0; castleH=0; olafX=0; snowFall=[];
   lsStarted=false; lsT=0; lsFront=0; boulders=[]; lsDebris=[];
   avpStarted=false; avpT=0; xenos=[]; preds=[]; plasma=[]; acidPools=[]; avpDmg=0;
+  mortalStarted=false; mortalT=0; tcX=0; mortalSmoke=[];
+  simpStarted=false; simpT=0; domeR=0; dropOffset=0; heliFly=0;
+  emuStarted=false; emuT=0; emus=[]; soldiers=[]; emuBullets=[];
+  neilStarted=false; neilT=0; neilX=0;
   scene.className=''; stage.className='';
   scene.style.textShadow="none";
   cmd.textContent="sudo rm -rf /*"; cmd.className="";
@@ -3602,12 +4004,20 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — TRIGGER A LANDSLIDE"; sub.style.color="#c08a50"; sub.style.textShadow="0 0 8px #4a2a10"; } }
   else if(cmdColor===35){ cmd.style.color="#5ad020"; cmd.style.textShadow="0 0 18px #a02020";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — ALIEN vs PREDATOR"; sub.style.color="#8aff40"; sub.style.textShadow="0 0 8px #a02020"; } }
+  else if(cmdColor===36){ cmd.style.color="#e0b030"; cmd.style.textShadow="0 0 18px #8a6a20";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — BUILD THE TRACTION CITY"; sub.style.color="#f0c860"; sub.style.textShadow="0 0 8px #8a6a20"; } }
+  else if(cmdColor===37){ cmd.style.color="#ffd90f"; cmd.style.textShadow="0 0 18px #c89a00";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE DOME ON SPRINGFIELD"; sub.style.color="#ffe860"; sub.style.textShadow="0 0 8px #c89a00"; } }
+  else if(cmdColor===38){ cmd.style.color="#c89050"; cmd.style.textShadow="0 0 18px #6a4020";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DECLARE WAR ON THE EMUS"; sub.style.color="#e0b070"; sub.style.textShadow="0 0 8px #6a4020"; } }
+  else if(cmdColor===39){ cmd.style.color="#c8ccd0"; cmd.style.textShadow="0 0 18px #4a4e54";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — RELEASE NEIL THE SEAL"; sub.style.color="#e0e4e8"; sub.style.textShadow="0 0 8px #4a4e54"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%36; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%40; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
@@ -4730,6 +5140,129 @@ function loop(){
     sub.textContent="melted by acid, hunted to ruins. — press RESET"; sub.style.color="#8aff40"; sub.className="";
     avpT++;
     timer=setTimeout(loop,140);
+  }else if(phase==='mortal'){
+    scene.style.textShadow="0 0 8px #d0a020";
+    if(!mortalStarted){ mortalStarted=true; mortalT=0; tcX=0; mortalSmoke=[]; document.body.style.background="#0a0805"; }
+    const {grid,mg}=craneRender(mortalT);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.add('shake');
+    sub.textContent="CRANES TEAR THE CITY DOWN, GIRDER BY GIRDER";
+    sub.style.color="#d0a020"; sub.style.textShadow="0 0 8px #8a6a20";
+    mortalT++;
+    if(mortalT<40){ timer=setTimeout(loop,80); }
+    else { phase='mortal_build'; mortalT=0; tcX=4+tractionCitySprite[0].length; loop(); }
+  }else if(phase==='mortal_build'){
+    stage.classList.remove('shake');
+    const {grid,mg}=tractionRender(tcX);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="THE RUBBLE RISES AS A TRACTION CITY";
+    sub.style.color="#d0a020"; sub.style.textShadow="0 0 8px #8a6a20";
+    mortalT++;
+    if(mortalT<16){ timer=setTimeout(loop,80); }
+    else { phase='mortal_drive'; mortalT=0; loop(); }
+  }else if(phase==='mortal_drive'){
+    stage.classList.add('shake');
+    const sw=tractionCitySprite[0].length;
+    tcX=Math.min(COLS+sw, tcX+Math.max(1,Math.floor(COLS/45)));
+    const {grid,mg}=tractionRender(tcX);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="MUNICIPAL DARWINISM — IT DRIVES OFF, DEVOURING THE HORIZON";
+    sub.style.color="#d0a020"; sub.style.textShadow="0 0 8px #8a6a20";
+    mortalT++;
+    if(tcX<COLS+sw){ timer=setTimeout(loop,70); }
+    else { phase='mortal_hold'; loop(); }
+  }else if(phase==='mortal_hold'){
+    stage.classList.remove('shake');
+    titanicDemolish(COLS);                    // scrub whatever's left of the skyline
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    // drifting exhaust haze settling over the empty wasteland
+    if(mortalT%4===0){ mortalSmoke.push({x:Math.random()*COLS, y:streetRow-2, vx:(Math.random()-0.5)*0.3, vy:-(0.1+Math.random()*0.2), life:30}); }
+    for(const s of mortalSmoke){ s.x+=s.vx; s.y+=s.vy; s.life--; const r=Math.round(s.y), c=Math.round(s.x); if(r>=0&&r<ROWS&&c>=0&&c<COLS && s.life>0){ setCh(grid,r,c,"."); setMode(mg,r,c,'steam'); } }
+    mortalSmoke=mortalSmoke.filter(s=>s.life>0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the city itself became the predator. — press RESET"; sub.style.color="#d0a020"; sub.className="";
+    mortalT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='simpsons'){
+    scene.style.textShadow="0 0 8px #ffd90f";
+    const maxR=Math.floor(COLS/2)-1;
+    if(!simpStarted){ simpStarted=true; simpT=0; domeR=maxR; dropOffset=ROWS+Math.round(maxR*0.9)+8; heliFly=0; document.body.style.background="#0a0a02"; }
+    const seated=dropOffset<=0;
+    if(!seated){ dropOffset=Math.max(0, dropOffset-Math.max(1,Math.floor(ROWS/16))); }
+    else { heliFly++; }
+    const sealed=seated && heliFly>14;
+    const {grid,mg}=simpsonsRender(domeR, dropOffset, heliFly, sealed);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(!seated) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent= !seated ? "HELICOPTERS LOWER THE DOME INTO PLACE"
+                    : (!sealed ? "THE DOME IS SEATED — CHOPPERS PEEL AWAY" : "SPRINGFIELDIFIED — EVERYTHING IS YELLOW NOW");
+    sub.style.color="#ffd90f"; sub.style.textShadow="0 0 8px #c89a00";
+    simpT++;
+    if(!(seated && heliFly>34)){ timer=setTimeout(loop,70); }
+    else { phase='simpsons_hold'; loop(); }
+  }else if(phase==='simpsons_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=simpsonsRender(domeR, 0, 999, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="Springfield, sealed under glass and painted yellow. — press RESET"; sub.style.color="#ffd90f"; sub.className="";
+    simpT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='emu'){
+    scene.style.textShadow="0 0 8px #c89050";
+    if(!emuStarted){ emuStarted=true; emuT=0; emuInit(); document.body.style.background="#100c04"; }
+    emuStep(emuT);
+    const {grid,mg}=emuRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    if(emus.length>2) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent= emuT<50 ? "THE ARMY OPENS FIRE — THE EMUS DO NOT CARE" : "THE TROOPS RETREAT — THE EMUS HAVE WON";
+    sub.style.color="#c89050"; sub.style.textShadow="0 0 8px #6a4020";
+    emuT++;
+    if(emuT<85){ timer=setTimeout(loop,70); }
+    else { phase='emu_hold'; loop(); }
+  }else if(phase==='emu_hold'){
+    stage.classList.remove('shake');
+    emuStep(emuT);
+    const {grid,mg}=emuRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="Emus: 1, City: 0. — press RESET"; sub.style.color="#c89050"; sub.className="";
+    emuT++;
+    timer=setTimeout(loop,140);
+  }else if(phase==='neil'){
+    scene.style.textShadow="0 0 8px #c8ccd0";
+    if(!neilStarted){ neilStarted=true; neilT=0; neilX=-6; document.body.style.background="#0a0c10"; }
+    const coneLeft=COLS-8, stopX=coneLeft-neilSprite[0].length-1;
+    const arrived=neilX>=stopX;
+    const noseCol=Math.round(neilX)+neilSprite[0].length;
+    let bashing=false;
+    if(!arrived){
+      if(neilBlocked(noseCol)){
+        bashing=true;
+        if(neilT%3===0) neilBash(noseCol);       // keep headbutting until it gives way
+      } else {
+        neilX+=Math.max(1,Math.floor(COLS/60));  // nothing in the way — waddle onward
+      }
+    }
+    const {grid,mg}=neilRender(neilX, arrived, bashing);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(bashing) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent= arrived ? "…AND THEN HE FOUND A CONE."
+                    : (bashing ? "NEIL HEADBUTTS THE BUILDING — IT DOESN'T STAND A CHANCE" : "NEIL WADDLES ON, LOOKING FOR SOMETHING TO BASH");
+    sub.style.color="#c8ccd0"; sub.style.textShadow="0 0 8px #4a4e54";
+    neilT++;
+    if(!(arrived && neilT>30)){ timer=setTimeout(loop,80); }
+    else { phase='neil_hold'; loop(); }
+  }else if(phase==='neil_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=neilRender(neilX, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="Neil is having a lovely time. — press RESET"; sub.style.color="#c8ccd0"; sub.className="";
+    neilT++;
+    timer=setTimeout(loop,150);
   }
 }
 
@@ -4878,6 +5411,22 @@ function armDrop(){
     attackMode='avp';
     cmd.style.color="#5ad020"; cmd.style.textShadow="0 0 20px #a02020";
     avpStarted=false; phase='avp';
+  }else if(cmdColor===36){      // CONSTRUCTION YELLOW -> Mortal Engines
+    attackMode='mortal';
+    cmd.style.color="#e0b030"; cmd.style.textShadow="0 0 20px #8a6a20";
+    mortalStarted=false; phase='mortal';
+  }else if(cmdColor===37){      // SPRINGFIELD YELLOW -> Simpsons
+    attackMode='simpsons';
+    cmd.style.color="#ffd90f"; cmd.style.textShadow="0 0 20px #c89a00";
+    simpStarted=false; phase='simpsons';
+  }else if(cmdColor===38){      // OUTBACK BROWN -> Emu War
+    attackMode='emu';
+    cmd.style.color="#c89050"; cmd.style.textShadow="0 0 20px #6a4020";
+    emuStarted=false; phase='emu';
+  }else if(cmdColor===39){      // SEAL GREY -> Neil the Seal
+    attackMode='neil';
+    cmd.style.color="#c8ccd0"; cmd.style.textShadow="0 0 20px #4a4e54";
+    neilStarted=false; phase='neil';
   }else{                        // RED -> nuke
     attackMode='nuke';
     cmd.style.color="#f00"; cmd.style.textShadow="0 0 20px #f00";
@@ -4899,7 +5448,7 @@ methodBox.querySelectorAll('.pick').forEach(el=>{
 });
 // tapping / clicking anywhere else fires whatever colour is currently showing
 function stageTap(e){
-  if(e.target && e.target.id==='resetBtn')return;
+  if(e.target && e.target.closest && e.target.closest('#topBar'))return;     // reset button / version badge
   if(e.target && e.target.closest && e.target.closest('#methodBox'))return;   // handled above
   armDrop();
 }
