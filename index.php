@@ -1,6 +1,6 @@
 <?php
 // ---- version & update check ----
-$VERSION = '1.1.0';
+$VERSION = '1.2.0';
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
 $CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
@@ -133,6 +133,10 @@ $updateTitle = $latestVersion === null
   #methodBox .m-simp  { color:#ffd90f; text-shadow:0 0 8px #c89a00; }
   #methodBox .m-emu   { color:#c89050; text-shadow:0 0 8px #6a4020; }
   #methodBox .m-neil  { color:#c8ccd0; text-shadow:0 0 8px #4a4e54; }
+  #methodBox .m-kool  { color:#ff2a40; text-shadow:0 0 8px #a00010; }
+  #methodBox .m-goo   { color:#b8c4cc; text-shadow:0 0 8px #5a6068; }
+  #methodBox .m-mine  { color:#6a8ad0; text-shadow:0 0 8px #203050; }
+  #methodBox .m-triff { color:#7ad07a; text-shadow:0 0 8px #2a5a2a; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -256,6 +260,10 @@ $updateTitle = $latestVersion === null
       <span class="m-simp pick" data-method="37">Simpsons</span>
       <span class="m-emu pick" data-method="38">Emu War</span>
       <span class="m-neil pick" data-method="39">Neil the Seal</span>
+      <span class="m-kool pick" data-method="40">Kool-Aid</span>
+      <span class="m-goo pick" data-method="41">Gray Goo</span>
+      <span class="m-mine pick" data-method="42">Mine Turtle</span>
+      <span class="m-triff pick" data-method="43">Triffids</span>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -498,6 +506,46 @@ function colorFor(ch,r,c,mode){
   if(mode==='cone'){                                              // the traffic cone
     if(ch==="-")return "#ffffff";                                 // reflective band
     return "#ff7a1a";                                             // safety orange
+  }
+  if(mode==='koolaid'){                                           // the Kool-Aid Man
+    if(ch==="o"||ch==="^")return "#ffffff";                       // eyes
+    if(ch===">"||ch==="-")return "#5a0808";                       // face features
+    return "#e0102a";                                             // red pitcher body
+  }
+  if(mode==='koolaidburst'){                                      // OH YEAH! — shattered glass & spilled punch
+    const rk=Math.random();
+    if(rk<0.45) return "#e0102a";                                 // red punch
+    if(rk<0.75) return "#ff5a70";                                 // splash highlight
+    return "#eafcff";                                             // glass glint
+  }
+  if(mode==='goo'){                                               // settled grey-goo nanite mass
+    return (Math.random()<0.5)?"#8a9098":"#5a6068";
+  }
+  if(mode==='goofront'){                                          // the consuming wavefront — brighter, more agitated
+    const rg=Math.random();
+    return rg<0.4?"#e8f0f4":(rg<0.7?"#b8c4cc":"#7a8890");
+  }
+  if(mode==='mine'){                                              // the mine turtle
+    if(ch==="^")return "#2a2a2a";                                 // spikes
+    if(ch==="o")return "#3a2a10";                                 // head & feet
+    return "#3a7a30";                                             // shell
+  }
+  if(mode==='body'){                                              // do the flop
+    if(ch==="o")return "#e8c090";                                 // head
+    return (Math.random()<0.5)?"#4a6ab0":"#b04a4a";              // shirt, varied
+  }
+  if(mode==='speech'){                                            // speech bubble text
+    return "#f0f0f0";
+  }
+  if(mode==='triffid'){                                           // the triffid stalks
+    if(ch==="@")return "#a030a0";                                 // venomous bulb head
+    return "#2a6a2a";                                             // sickly green stalk
+  }
+  if(mode==='triffidwhip'){                                       // the stinger lash
+    return "#d0208a";
+  }
+  if(mode==='comet'){                                             // the blinding green meteor shower
+    return (Math.random()<0.5)?"#c0ffa0":"#e8ffd0";
   }
   if(mode==='simpsons'){                                          // Springfield, sealed and painted up
     if(ch==="."||ch===":")return "#ffffff";                      // bright TV-glow windows
@@ -2982,6 +3030,192 @@ function neilRender(x, leaning, bashing){
   return {grid,mg};
 }
 
+// ---- KOOL-AID: he bursts through half the city, then shatters into glass and punch ----
+const koolaidSprite=[
+  "   ___",
+  "  /   \\",
+  " | o o |)",
+  " |  >  |",
+  " | --- |",
+  " \\_____/",
+  "  |   |",
+];
+function koolaidRender(x, ohYeah){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  titanicDemolish(x);
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const spr=koolaidSprite;
+  const left=Math.round(x)-spr[0].length, top=streetRow-spr.length+1;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'koolaid'); } }
+  if(ohYeah){ const txt="OH YEAH!", tc=left+Math.floor(spr[0].length/2)-Math.floor(txt.length/2), tr=top-1;
+    for(let j=0;j<txt.length;j++){ const c=tc+j; if(c>=0&&c<COLS&&tr>=0&&tr<ROWS){ setCh(grid,tr,c,txt[j]); setMode(mg,tr,c,'koolaid'); } } }
+  return {grid,mg};
+}
+// he explodes into glass shards + spilled punch, which arc outward then settle on the street
+function koolaidShatterInit(x){
+  koolaidShards=[];
+  const ox=Math.round(x)-Math.floor(koolaidSprite[0].length/2), oy=streetRow-Math.floor(koolaidSprite.length/2);
+  for(let i=0;i<40;i++){ const ang=Math.random()*Math.PI*2, spd=0.5+Math.random()*2.5;
+    koolaidShards.push({x:ox, y:oy, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd*0.6-0.3, glass:Math.random()<0.4}); }
+}
+function koolaidShatterStep(){
+  for(const s of koolaidShards){ s.x+=s.vx; s.y+=s.vy; s.vy+=0.15;
+    if(s.y>=streetRow){ s.y=streetRow; s.vy=0; s.vx*=0.7; } }
+}
+function koolaidShatterRender(){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(const s of koolaidShards){ const r=Math.round(s.y), c=Math.round(s.x); if(r>=0&&r<ROWS&&c>=0&&c<COLS){
+    setCh(grid,r,c, s.glass?["/","\\","*"][(Math.random()*3)|0]:["~",".","'"][(Math.random()*3)|0]); setMode(mg,r,c,'koolaidburst'); } }
+  return {grid,mg};
+}
+
+// ---- GRAY GOO: self-replicating nanomachines consume everything, spreading outward ----
+// r grows from the epicenter until it swallows the farthest corner of the screen — no
+// mutation needed, since the same geometric test just keeps re-covering the same ground.
+const gooGlyphs="%@o0*+.,";
+function gooRender(r){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const gy=Math.floor(streetRow*0.6);             // epicenter roughly mid-skyline
+  const aspect=2;                                 // terminal cells are ~2x taller than wide
+  for(let row=0; row<ROWS; row++){ let ln=(grid[row]||" ".repeat(COLS)).split("");
+    for(let c=0;c<COLS;c++){
+      const dx=c-cx, dy=(row-gy)*aspect;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>r) continue;
+      const front=dist>r-3;                       // the actively-consuming wavefront
+      if(ln[c]!==" " || Math.random()<0.15){       // devour structures; only lightly haze empty space
+        ln[c]=gooGlyphs[(Math.random()*gooGlyphs.length)|0];
+        setMode(mg,row,c, front?'goofront':'goo');
+      }
+    }
+    grid[row]=ln.join(""); }
+  return {grid,mg};
+}
+
+// ---- TOMSKA: everybody does the flop off the rooftops, right onto the mine turtle ----
+const mineTurtleSprite=[
+  " ^ ^ ^",
+  "(=====)",
+  "o|   |o",
+];
+// drops a new flopper off a random rooftop; `doomed` marks the one fated to land on the turtle
+function mtSpawnFaller(mtCol, doomed){
+  if(cityGridArr.length!==ROWS) return;
+  const c=doomed?mtCol:((Math.random()*COLS)|0);
+  let roofRow=streetRow;
+  for(let r=0;r<streetRow;r++){ if(cityGridArr[r] && cityGridArr[r][c]!==" "){ roofRow=r; break; } }
+  mtFallers.push({x:c, y:Math.max(0,roofRow-1), vy:0.3+Math.random()*0.3, doomed:!!doomed, speaks:true});
+}
+// advances fallers + settled bodies; landed fallers become bodies (returns true if the doomed one just landed)
+function mtStep(spawnRandom){
+  if(spawnRandom && Math.random()<0.35 && mtFallers.length<8) mtSpawnFaller();
+  let doomedLanded=false;
+  for(const f of mtFallers){ f.y+=f.vy; f.vy+=0.15;
+    if(f.y>=streetRow){ f.y=streetRow; f.landed=true; mtBodies.push({x:f.x, y:streetRow, vx:0, vy:0, flying:false}); if(f.doomed) doomedLanded=true; } }
+  mtFallers=mtFallers.filter(f=>!f.landed);
+  for(const b of mtBodies){ if(!b.flying) continue;
+    b.x+=b.vx; b.y+=b.vy; b.vy+=0.2;
+    if(b.y>=streetRow){ b.y=streetRow; b.flying=false; b.vx=0; b.vy=0; } }
+  return doomedLanded;
+}
+// the blast flings anyone standing nearby up and outward
+function mtTriggerBlast(mtCol){
+  for(const b of mtBodies){ const d=b.x-mtCol;
+    if(Math.abs(d)<20){ const dir=d===0?(Math.random()<0.5?-1:1):Math.sign(d);
+      b.vx=dir*(1+Math.random()*2.5); b.vy=-(1+Math.random()*1.5); b.flying=true; } }
+}
+// permanently craters the city around the blast — mutates cityGridArr so the wreckage sticks
+function mtBlastDemolish(mtCol, r){
+  if(cityGridArr.length!==ROWS) return;
+  for(let row=0; row<streetRow; row++){ if(!cityGridArr[row]) continue; let ln=cityGridArr[row].split("");
+    for(let c=mtCol-r;c<=mtCol+r;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<0.5) ln[c]=" "; }
+    cityGridArr[row]=ln.join(""); }
+  if(cityGridArr[streetRow]){ let g=cityGridArr[streetRow].split("");
+    for(let c=mtCol-r;c<=mtCol+r;c++){ if(c>=0&&c<COLS&&Math.random()<0.5) g[c]=["#","%","."][(Math.random()*3)|0]; }
+    cityGridArr[streetRow]=g.join(""); }
+}
+// a little speech bubble with a tail, drawn above a given point if there's room
+function mtDrawBubble(grid, mg, c0, r0, text){
+  const bubble="( "+text+" )";
+  const br=r0-2;
+  if(br<0) return;
+  const bc=c0-Math.floor(bubble.length/2);
+  for(let j=0;j<bubble.length;j++){ const c=bc+j; if(c>=0&&c<COLS){ setCh(grid,br,c,bubble[j]); setMode(mg,br,c,'speech'); } }
+  const tr=r0-1;
+  if(tr>=0&&c0>=0&&c0<COLS){ setCh(grid,tr,c0,"v"); setMode(mg,tr,c0,'speech'); }
+}
+function mtRender(t, mtCol, showTurtle, blastR){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(blastR>0) mtBlastDemolish(mtCol, Math.round(blastR));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // settled bodies littering the street
+  for(const b of mtBodies){ const c=Math.round(b.x), r=Math.round(b.y); const art=(t+c)%2===0?"-o-":"~o~";
+    for(let j=0;j<art.length;j++){ const cc=c-1+j; if(cc>=0&&cc<COLS&&r>=0&&r<ROWS){ setCh(grid,r,cc,art[j]); setMode(mg,r,cc,'body'); } } }
+  // mid-air flops, tumbling down — shouting the mantra on the way
+  for(const f of mtFallers){ const r=Math.round(f.y), c=Math.round(f.x); const art=(t%2===0)?"\\o/":"/o\\";
+    for(let j=0;j<art.length;j++){ const cc=c-1+j; if(cc>=0&&cc<COLS&&r>=0&&r<ROWS){ setCh(grid,r,cc,art[j]); setMode(mg,r,cc,'body'); } }
+    if(f.speaks) mtDrawBubble(grid,mg,c,r,"EVERYBODY DO THE FLOP!"); }
+  // the mine turtle, patiently waiting (and friendly, right up until it isn't)
+  if(showTurtle){ const left=mtCol-3, top=streetRow-mineTurtleSprite.length+1;
+    for(let i=0;i<mineTurtleSprite.length;i++){ const art=mineTurtleSprite[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'mine'); } }
+    mtDrawBubble(grid,mg,mtCol,top,"Hello!"); }
+  // the blast itself
+  if(blastR>0){ const R=blastR, ground=streetRow, domeH=Math.min(ground,Math.floor(R*0.7));
+    for(let r=ground;r>=ground-domeH;r--){ const frac=(ground-r)/Math.max(1,domeH);
+      const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*R*1.1);
+      for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=mtCol+j; if(c<0||c>=COLS)continue;
+        setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'impact'); } } }
+  return {grid,mg};
+}
+
+// ---- THE DAY OF THE TRIFFIDS: a green comet blinds everyone, then the triffids walk ----
+function triffidInit(){
+  triffStalks=[];
+  const n=Math.max(4,Math.floor(COLS/16));
+  for(let i=0;i<n;i++){ triffStalks.push({
+    x: Math.round((i+0.5)*COLS/n), h:0, maxH: 6+((Math.random()*4)|0),
+    lash:0, lashDir: Math.random()<0.5?-1:1 }); }
+}
+// each stalk grows, then periodically lashes its stinger out and stings whatever it hits
+function triffidStep(){
+  for(const s of triffStalks){
+    if(s.h<s.maxH){ s.h+=0.15; continue; }
+    if(s.lash>0){ s.lash--; }
+    else if(Math.random()<0.05){ s.lash=6; triffidLash(s.x+s.lashDir*8); s.lashDir=Math.random()<0.5?-1:1; }
+  }
+}
+// the sting permanently damages whatever it connects with — mutates cityGridArr
+function triffidLash(col){
+  if(cityGridArr.length!==ROWS) return;
+  for(let r=Math.max(0,streetRow-3); r<streetRow; r++){ if(!cityGridArr[r]) continue; let ln=cityGridArr[r].split("");
+    for(let c=col-1;c<=col+1;c++){ if(c>=0&&c<COLS && ln[c]!==" " && Math.random()<0.6) ln[c]=" "; }
+    cityGridArr[r]=ln.join(""); }
+  collapseCity(1);
+}
+function triffidRender(t, cometFlash){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // the strange green comet, streaking overhead and blinding everyone who watches it
+  if(cometFlash>0){ for(let c=0;c<COLS;c++){ if(Math.random()<0.4){ const r=1+((Math.random()*3)|0);
+    setCh(grid,r,c,["*",".","'"][(Math.random()*3)|0]); setMode(mg,r,c,'comet'); } } }
+  // the stalks: grown height, a bulb head once mature, and an occasional stinger lash
+  for(const s of triffStalks){ const h=Math.floor(s.h);
+    for(let k=0;k<h;k++){ const r=streetRow-1-k; if(r<0) break; setCh(grid,r,s.x,"|"); setMode(mg,r,s.x,'triffid'); }
+    if(s.h>=s.maxH){ const topR=streetRow-1-h; if(topR>=0){ setCh(grid,topR,s.x,"@"); setMode(mg,topR,s.x,'triffid');
+      if(s.lash>0){ const len=6-s.lash+1; for(let k=1;k<=len;k++){ const c=s.x+s.lashDir*k; if(c>=0&&c<COLS){ setCh(grid,topR,c,"~"); setMode(mg,topR,c,'triffidwhip'); } } } } }
+  }
+  return {grid,mg};
+}
+
 // ---- BALDUR'S GATE: a mind flayer nautiloid crashes through the city ----
 // the squid-ship: bulbous fleshy body up top, curling tentacles trailing beneath
 const nautSprite=[
@@ -3872,6 +4106,10 @@ let mortalStarted=false, mortalT=0, tcX=0, mortalSmoke=[];
 let simpStarted=false, simpT=0, domeR=0, dropOffset=0, heliFly=0;
 let emuStarted=false, emuT=0, emus=[], soldiers=[], emuBullets=[];
 let neilStarted=false, neilT=0, neilX=0;
+let koolStarted=false, koolT=0, koolX=0, koolaidShards=[];
+let gooStarted=false, gooT=0, gooR=0;
+let mtStartedFlag=false, mtT=0, mtCol=0, mtFallers=[], mtBodies=[], mtBlastR=0;
+let triffStarted=false, triffT=0, triffStalks=[];
 const maxDmg=()=>Math.floor(COLS/2)+2;
 
 function reset(){
@@ -3919,6 +4157,10 @@ function reset(){
   simpStarted=false; simpT=0; domeR=0; dropOffset=0; heliFly=0;
   emuStarted=false; emuT=0; emus=[]; soldiers=[]; emuBullets=[];
   neilStarted=false; neilT=0; neilX=0;
+  koolStarted=false; koolT=0; koolX=0; koolaidShards=[];
+  gooStarted=false; gooT=0; gooR=0;
+  mtStartedFlag=false; mtT=0; mtCol=0; mtFallers=[]; mtBodies=[]; mtBlastR=0;
+  triffStarted=false; triffT=0; triffStalks=[];
   scene.className=''; stage.className='';
   scene.style.textShadow="none";
   cmd.textContent="sudo rm -rf /*"; cmd.className="";
@@ -4012,12 +4254,20 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DECLARE WAR ON THE EMUS"; sub.style.color="#e0b070"; sub.style.textShadow="0 0 8px #6a4020"; } }
   else if(cmdColor===39){ cmd.style.color="#c8ccd0"; cmd.style.textShadow="0 0 18px #4a4e54";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — RELEASE NEIL THE SEAL"; sub.style.color="#e0e4e8"; sub.style.textShadow="0 0 8px #4a4e54"; } }
+  else if(cmdColor===40){ cmd.style.color="#ff2a40"; cmd.style.textShadow="0 0 18px #a00010";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — OH YEAH!"; sub.style.color="#ff5a70"; sub.style.textShadow="0 0 8px #a00010"; } }
+  else if(cmdColor===41){ cmd.style.color="#b8c4cc"; cmd.style.textShadow="0 0 18px #5a6068";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — UNLEASH THE GRAY GOO"; sub.style.color="#e0e8ec"; sub.style.textShadow="0 0 8px #5a6068"; } }
+  else if(cmdColor===42){ cmd.style.color="#6a8ad0"; cmd.style.textShadow="0 0 18px #203050";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — MINE TURTLE!"; sub.style.color="#9ab0e8"; sub.style.textShadow="0 0 8px #203050"; } }
+  else if(cmdColor===43){ cmd.style.color="#7ad07a"; cmd.style.textShadow="0 0 18px #2a5a2a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LOOSE THE TRIFFIDS"; sub.style.color="#a0e8a0"; sub.style.textShadow="0 0 8px #2a5a2a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%40; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%44; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
@@ -5263,6 +5513,122 @@ function loop(){
     sub.textContent="Neil is having a lovely time. — press RESET"; sub.style.color="#c8ccd0"; sub.className="";
     neilT++;
     timer=setTimeout(loop,150);
+  }else if(phase==='koolaid'){
+    scene.style.textShadow="0 0 8px #ff2a40";
+    if(!koolStarted){ koolStarted=true; koolT=0; koolX=-10; document.body.style.background="#0c0405"; }
+    const stopAt=cx;                                        // he only bursts through half the city
+    koolX=Math.min(stopAt, koolX+Math.max(1,Math.floor(COLS/45)));
+    const arrived=koolX>=stopAt;
+    const ohYeah=(koolT%10)<4;
+    const {grid,mg}=koolaidRender(koolX, ohYeah);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(!arrived) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent= arrived ? "OH YEAH!" : "THE KOOL-AID MAN BURSTS THROUGH EVERYTHING";
+    sub.style.color="#ff2a40"; sub.style.textShadow="0 0 8px #a00010";
+    koolT++;
+    if(!arrived){ timer=setTimeout(loop,70); }
+    else { koolaidShatterInit(koolX); phase='koolaid_shatter'; koolT=0; loop(); }
+  }else if(phase==='koolaid_shatter'){
+    stage.classList.add('shake');
+    koolaidShatterStep();
+    const {grid,mg}=koolaidShatterRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="…AND THEN HE JUST KIND OF FELL APART.";
+    sub.style.color="#ff2a40"; sub.style.textShadow="0 0 8px #a00010";
+    koolT++;
+    if(koolT<24){ timer=setTimeout(loop,60); }
+    else { phase='koolaid_hold'; loop(); }
+  }else if(phase==='koolaid_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=koolaidShatterRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="just a puddle of punch and broken glass now. — press RESET"; sub.style.color="#ff2a40"; sub.className="";
+    koolT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='goo'){
+    scene.style.textShadow="0 0 8px #b8c4cc";
+    if(!gooStarted){ gooStarted=true; gooT=0; gooR=0; document.body.style.background="#0a0b0c"; }
+    const maxR=Math.sqrt(Math.pow(Math.max(cx,COLS-cx),2)+Math.pow(streetRow*2,2))+4;
+    gooR=Math.min(maxR, gooR+Math.max(1,COLS/70));
+    const covered=gooR>=maxR;
+    const {grid,mg}=gooRender(gooR);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(!covered) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent= covered ? "ECOPHAGY COMPLETE." : "SELF-REPLICATING NANITES CONSUME EVERYTHING";
+    sub.style.color="#b8c4cc"; sub.style.textShadow="0 0 8px #5a6068";
+    gooT++;
+    if(!(covered && gooT>30)){ timer=setTimeout(loop,70); }
+    else { phase='goo_hold'; loop(); }
+  }else if(phase==='goo_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=gooRender(999999);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="all biomass. all matter. gray goo. — press RESET"; sub.style.color="#b8c4cc"; sub.className="";
+    gooT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='mineturtle'){
+    scene.style.textShadow="0 0 8px #4a6ab0";
+    if(!mtStartedFlag){
+      mtStartedFlag=true; mtT=0; mtCol=cx; mtFallers=[]; mtBodies=[]; mtBlastR=0;
+      document.body.style.background="#0a0c10";
+      // everybody jumps together — one of them is fated to land right on the turtle
+      const n=Math.max(6,Math.floor(COLS/14));
+      const doomedIdx=(Math.random()*n)|0;
+      for(let i=0;i<n;i++){ mtSpawnFaller(mtCol, i===doomedIdx); }
+    }
+    const doomedLanded=mtStep(false);
+    const {grid,mg}=mtRender(mtT, mtCol, true, 0);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="EVERYBODY DO THE FLOP";
+    sub.style.color="#4a6ab0"; sub.style.textShadow="0 0 8px #203050";
+    mtT++;
+    if(!doomedLanded){ timer=setTimeout(loop,70); }
+    else { mtTriggerBlast(mtCol); phase='mineturtle_blast'; mtT=0; mtBlastR=0; loop(); }
+  }else if(phase==='mineturtle_blast'){
+    stage.classList.add('shake');
+    mtStep(false);
+    mtBlastR=Math.min(14, mtBlastR+1.2);
+    const {grid,mg}=mtRender(mtT, mtCol, false, mtBlastR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="MINE TURTLE!";
+    sub.style.color="#ff6a2a"; sub.style.textShadow="0 0 10px #ff2a00";
+    mtT++;
+    if(mtBlastR<14){ timer=setTimeout(loop,60); }
+    else { phase='mineturtle_hold'; loop(); }
+  }else if(phase==='mineturtle_hold'){
+    stage.classList.remove('shake');
+    mtStep(false);
+    const {grid,mg}=mtRender(mtT, mtCol, false, 0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="mine turtle. — press RESET"; sub.style.color="#4a6ab0"; sub.className="";
+    mtT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='triffid'){
+    scene.style.textShadow="0 0 8px #3a8a3a";
+    if(!triffStarted){ triffStarted=true; triffT=0; triffidInit(); document.body.style.background="#04100a"; }
+    triffidStep();
+    const cometFlash = triffT<20 ? (20-triffT) : 0;
+    const {grid,mg}=triffidRender(triffT, cometFlash);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(triffStalks.some(s=>s.lash>0)) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent = cometFlash>0 ? "A STRANGE GREEN COMET LIGHTS THE SKY…" : "THE TRIFFIDS ARE LOOSE, AND EVERYONE IS BLIND";
+    sub.style.color="#7ad07a"; sub.style.textShadow="0 0 8px #2a5a2a";
+    triffT++;
+    if(triffT<90){ timer=setTimeout(loop,80); }
+    else { phase='triffid_hold'; loop(); }
+  }else if(phase==='triffid_hold'){
+    stage.classList.remove('shake');
+    triffidStep();
+    const {grid,mg}=triffidRender(triffT, 0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the triffids have inherited the earth. — press RESET"; sub.style.color="#7ad07a"; sub.className="";
+    triffT++;
+    timer=setTimeout(loop,150);
   }
 }
 
@@ -5427,6 +5793,22 @@ function armDrop(){
     attackMode='neil';
     cmd.style.color="#c8ccd0"; cmd.style.textShadow="0 0 20px #4a4e54";
     neilStarted=false; phase='neil';
+  }else if(cmdColor===40){      // PUNCH RED -> Kool-Aid
+    attackMode='koolaid';
+    cmd.style.color="#ff2a40"; cmd.style.textShadow="0 0 20px #a00010";
+    koolStarted=false; phase='koolaid';
+  }else if(cmdColor===41){      // NANITE GREY -> Gray Goo
+    attackMode='goo';
+    cmd.style.color="#b8c4cc"; cmd.style.textShadow="0 0 20px #5a6068";
+    gooStarted=false; phase='goo';
+  }else if(cmdColor===42){      // FLOP BLUE -> Mine Turtle
+    attackMode='mineturtle';
+    cmd.style.color="#6a8ad0"; cmd.style.textShadow="0 0 20px #203050";
+    mtStartedFlag=false; phase='mineturtle';
+  }else if(cmdColor===43){      // TRIFFID GREEN -> Day of the Triffids
+    attackMode='triffid';
+    cmd.style.color="#7ad07a"; cmd.style.textShadow="0 0 20px #2a5a2a";
+    triffStarted=false; phase='triffid';
   }else{                        // RED -> nuke
     attackMode='nuke';
     cmd.style.color="#f00"; cmd.style.textShadow="0 0 20px #f00";
