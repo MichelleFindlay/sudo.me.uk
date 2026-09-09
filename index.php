@@ -1,6 +1,6 @@
 <?php
 // ---- version & update check ----
-$VERSION = '1.1.0';
+$VERSION = '1.2.0';
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
 $CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
@@ -133,6 +133,16 @@ $updateTitle = $latestVersion === null
   #methodBox .m-simp  { color:#ffd90f; text-shadow:0 0 8px #c89a00; }
   #methodBox .m-emu   { color:#c89050; text-shadow:0 0 8px #6a4020; }
   #methodBox .m-neil  { color:#c8ccd0; text-shadow:0 0 8px #4a4e54; }
+  #methodBox .m-kool  { color:#ff2a40; text-shadow:0 0 8px #a00010; }
+  #methodBox .m-goo   { color:#b8c4cc; text-shadow:0 0 8px #5a6068; }
+  #methodBox .m-mine  { color:#6a8ad0; text-shadow:0 0 8px #203050; }
+  #methodBox .m-triff { color:#7ad07a; text-shadow:0 0 8px #2a5a2a; }
+  #methodBox .m-tikes { color:#ff4a30; text-shadow:0 0 8px #8a1010; }
+  #methodBox .m-ion   { color:#7ad4ff; text-shadow:0 0 8px #2a5a8a; }
+  #methodBox .m-ds    { color:#7affa0; text-shadow:0 0 8px #1a6a2a; }
+  #methodBox .m-pride { background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    color:#ff9ad6; text-shadow:0 0 8px #a0308a; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -256,6 +266,14 @@ $updateTitle = $latestVersion === null
       <span class="m-simp pick" data-method="37">Simpsons</span>
       <span class="m-emu pick" data-method="38">Emu War</span>
       <span class="m-neil pick" data-method="39">Neil the Seal</span>
+      <span class="m-kool pick" data-method="40">Kool-Aid</span>
+      <span class="m-goo pick" data-method="41">Gray Goo</span>
+      <span class="m-mine pick" data-method="42">Mine Turtle</span>
+      <span class="m-triff pick" data-method="43">Triffids</span>
+      <span class="m-tikes pick" data-method="44">Little Tikes</span>
+      <span class="m-ion pick" data-method="45">Ion Cannon</span>
+      <span class="m-ds pick" data-method="46">Death Star</span>
+      <span class="m-pride pick" data-method="47">LGBT Agenda</span>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -498,6 +516,87 @@ function colorFor(ch,r,c,mode){
   if(mode==='cone'){                                              // the traffic cone
     if(ch==="-")return "#ffffff";                                 // reflective band
     return "#ff7a1a";                                             // safety orange
+  }
+  if(mode==='koolaid'){                                           // the Kool-Aid Man
+    if(ch==="o"||ch==="^")return "#ffffff";                       // eyes
+    if(ch===">"||ch==="-")return "#5a0808";                       // face features
+    return "#e0102a";                                             // red pitcher body
+  }
+  if(mode==='koolaidburst'){                                      // OH YEAH! — shattered glass & spilled punch
+    const rk=Math.random();
+    if(rk<0.45) return "#e0102a";                                 // red punch
+    if(rk<0.75) return "#ff5a70";                                 // splash highlight
+    return "#eafcff";                                             // glass glint
+  }
+  if(mode==='goo'){                                               // settled grey-goo nanite mass
+    return (Math.random()<0.5)?"#8a9098":"#5a6068";
+  }
+  if(mode==='goofront'){                                          // the consuming wavefront — brighter, more agitated
+    const rg=Math.random();
+    return rg<0.4?"#e8f0f4":(rg<0.7?"#b8c4cc":"#7a8890");
+  }
+  if(mode==='mine'){                                              // the mine turtle
+    if(ch==="^")return "#2a2a2a";                                 // spikes
+    if(ch==="o")return "#3a2a10";                                 // head & feet
+    return "#3a7a30";                                             // shell
+  }
+  if(mode==='body'){                                              // do the flop
+    if(ch==="o")return "#e8c090";                                 // head
+    return (Math.random()<0.5)?"#4a6ab0":"#b04a4a";              // shirt, varied
+  }
+  if(mode==='speech'){                                            // speech bubble text
+    return "#f0f0f0";
+  }
+  if(mode==='triffid'){                                           // the triffid stalks
+    if(ch==="@")return "#a030a0";                                 // venomous bulb head
+    return "#2a6a2a";                                             // sickly green stalk
+  }
+  if(mode==='triffidwhip'){                                       // the stinger lash
+    return "#d0208a";
+  }
+  if(mode==='comet'){                                             // the blinding green meteor shower
+    return (Math.random()<0.5)?"#c0ffa0":"#e8ffd0";
+  }
+  if(mode==='tikes'){                                             // the Little Tikes monster truck
+    if(ch==="o")return "#ffffff";                                // round headlight eyes
+    if(ch==="@")return "#1a1a1a";                                // monster-truck tire tread
+    if(ch==="("||ch===")")return "#f0c800";                      // yellow wheel-well trim
+    return "#e0201a";                                            // Cozy Coupe red body
+  }
+  if(mode==='mom'){                                               // one furious, doomed mother
+    if(ch==="o")return "#ff6a4a";                                 // red-faced with rage
+    return "#8a3a8a";                                             // cardigan
+  }
+  if(mode==='ion'){                                               // the Ion Cannon
+    const ri=Math.random();
+    if(ri<0.4) return "#eaffff";
+    if(ri<0.7) return "#7ad4ff";
+    return "#2a8ad0";
+  }
+  if(mode==='deathstar'){                                         // the Death Star's hull
+    if(ch==="("||ch===")")return "#14161a";                      // the dish crater, dark
+    if(ch==="."||ch==="'")return "#4a4e54";                       // panel seams
+    return "#8a9098";                                             // grey hull plating
+  }
+  if(mode==='superlaser'){                                        // the superlaser beam & blast
+    const rs=Math.random();
+    if(rs<0.4) return "#eaffea";
+    if(rs<0.7) return "#4aff6a";
+    return "#0ac02a";
+  }
+  if(mode==='pride'){                                             // buildings + flags, freshly repainted
+    if(ch==="."||ch===":")return "#ffffff";                      // festive window sparkle
+    if(ch==="|")return "#8a8f99";                                 // flagpoles stay neutral
+    return prideColors[((c%prideColors.length)+prideColors.length)%prideColors.length];
+  }
+  if(mode==='pridevenue'){                                        // the community centre, fabulous as ever
+    if(/[A-Za-z&]/.test(ch)) return prideColors[(Math.random()*prideColors.length)|0];
+    if(ch==="["||ch==="]")return "#ffe680";
+    return "#7a7a82";
+  }
+  if(mode==='parade'){                                            // the marchers
+    if(ch==="o")return "#e8c090";
+    return prideColors[(Math.random()*prideColors.length)|0];
   }
   if(mode==='simpsons'){                                          // Springfield, sealed and painted up
     if(ch==="."||ch===":")return "#ffffff";                      // bright TV-glow windows
@@ -2982,6 +3081,365 @@ function neilRender(x, leaning, bashing){
   return {grid,mg};
 }
 
+// ---- KOOL-AID: he bursts through half the city, then shatters into glass and punch ----
+const koolaidSprite=[
+  "   ___",
+  "  /   \\",
+  " | o o |)",
+  " |  >  |",
+  " | --- |",
+  " \\_____/",
+  "  |   |",
+];
+function koolaidRender(x, ohYeah){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  titanicDemolish(x);
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const spr=koolaidSprite;
+  const left=Math.round(x)-spr[0].length, top=streetRow-spr.length+1;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'koolaid'); } }
+  if(ohYeah){ const txt="OH YEAH!", tc=left+Math.floor(spr[0].length/2)-Math.floor(txt.length/2), tr=top-1;
+    for(let j=0;j<txt.length;j++){ const c=tc+j; if(c>=0&&c<COLS&&tr>=0&&tr<ROWS){ setCh(grid,tr,c,txt[j]); setMode(mg,tr,c,'koolaid'); } } }
+  return {grid,mg};
+}
+// he explodes into glass shards + spilled punch, which arc outward then settle on the street
+function koolaidShatterInit(x){
+  koolaidShards=[];
+  const ox=Math.round(x)-Math.floor(koolaidSprite[0].length/2), oy=streetRow-Math.floor(koolaidSprite.length/2);
+  for(let i=0;i<40;i++){ const ang=Math.random()*Math.PI*2, spd=0.5+Math.random()*2.5;
+    koolaidShards.push({x:ox, y:oy, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd*0.6-0.3, glass:Math.random()<0.4}); }
+}
+function koolaidShatterStep(){
+  for(const s of koolaidShards){ s.x+=s.vx; s.y+=s.vy; s.vy+=0.15;
+    if(s.y>=streetRow){ s.y=streetRow; s.vy=0; s.vx*=0.7; } }
+}
+function koolaidShatterRender(){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(const s of koolaidShards){ const r=Math.round(s.y), c=Math.round(s.x); if(r>=0&&r<ROWS&&c>=0&&c<COLS){
+    setCh(grid,r,c, s.glass?["/","\\","*"][(Math.random()*3)|0]:["~",".","'"][(Math.random()*3)|0]); setMode(mg,r,c,'koolaidburst'); } }
+  return {grid,mg};
+}
+
+// ---- GRAY GOO: self-replicating nanomachines consume everything, spreading outward ----
+// r grows from the epicenter until it swallows the farthest corner of the screen — no
+// mutation needed, since the same geometric test just keeps re-covering the same ground.
+const gooGlyphs="%@o0*+.,";
+function gooRender(r){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const gy=Math.floor(streetRow*0.6);             // epicenter roughly mid-skyline
+  const aspect=2;                                 // terminal cells are ~2x taller than wide
+  for(let row=0; row<ROWS; row++){ let ln=(grid[row]||" ".repeat(COLS)).split("");
+    for(let c=0;c<COLS;c++){
+      const dx=c-cx, dy=(row-gy)*aspect;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>r) continue;
+      const front=dist>r-3;                       // the actively-consuming wavefront
+      if(ln[c]!==" " || Math.random()<0.15){       // devour structures; only lightly haze empty space
+        ln[c]=gooGlyphs[(Math.random()*gooGlyphs.length)|0];
+        setMode(mg,row,c, front?'goofront':'goo');
+      }
+    }
+    grid[row]=ln.join(""); }
+  return {grid,mg};
+}
+
+// ---- TOMSKA: everybody does the flop off the rooftops, right onto the mine turtle ----
+const mineTurtleSprite=[
+  " ^ ^ ^",
+  "(=====)",
+  "o|   |o",
+];
+// drops a new flopper off a random rooftop; `doomed` marks the one fated to land on the turtle
+function mtSpawnFaller(mtCol, doomed){
+  if(cityGridArr.length!==ROWS) return;
+  const c=doomed?mtCol:((Math.random()*COLS)|0);
+  let roofRow=streetRow;
+  for(let r=0;r<streetRow;r++){ if(cityGridArr[r] && cityGridArr[r][c]!==" "){ roofRow=r; break; } }
+  mtFallers.push({x:c, y:Math.max(0,roofRow-1), vy:0.3+Math.random()*0.3, doomed:!!doomed, speaks:true});
+}
+// advances fallers + settled bodies; landed fallers become bodies (returns true if the doomed one just landed)
+function mtStep(spawnRandom){
+  if(spawnRandom && Math.random()<0.35 && mtFallers.length<8) mtSpawnFaller();
+  let doomedLanded=false;
+  for(const f of mtFallers){ f.y+=f.vy; f.vy+=0.15;
+    if(f.y>=streetRow){ f.y=streetRow; f.landed=true; mtBodies.push({x:f.x, y:streetRow, vx:0, vy:0, flying:false}); if(f.doomed) doomedLanded=true; } }
+  mtFallers=mtFallers.filter(f=>!f.landed);
+  for(const b of mtBodies){ if(!b.flying) continue;
+    b.x+=b.vx; b.y+=b.vy; b.vy+=0.2;
+    if(b.y>=streetRow){ b.y=streetRow; b.flying=false; b.vx=0; b.vy=0; } }
+  return doomedLanded;
+}
+// the blast flings anyone standing nearby up and outward
+function mtTriggerBlast(mtCol){
+  for(const b of mtBodies){ const d=b.x-mtCol;
+    if(Math.abs(d)<20){ const dir=d===0?(Math.random()<0.5?-1:1):Math.sign(d);
+      b.vx=dir*(1+Math.random()*2.5); b.vy=-(1+Math.random()*1.5); b.flying=true; } }
+}
+// permanently craters the city around the blast — mutates cityGridArr so the wreckage sticks
+function mtBlastDemolish(mtCol, r){
+  if(cityGridArr.length!==ROWS) return;
+  for(let row=0; row<streetRow; row++){ if(!cityGridArr[row]) continue; let ln=cityGridArr[row].split("");
+    for(let c=mtCol-r;c<=mtCol+r;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<0.5) ln[c]=" "; }
+    cityGridArr[row]=ln.join(""); }
+  if(cityGridArr[streetRow]){ let g=cityGridArr[streetRow].split("");
+    for(let c=mtCol-r;c<=mtCol+r;c++){ if(c>=0&&c<COLS&&Math.random()<0.5) g[c]=["#","%","."][(Math.random()*3)|0]; }
+    cityGridArr[streetRow]=g.join(""); }
+}
+// a little speech bubble with a tail, drawn above a given point if there's room
+function mtDrawBubble(grid, mg, c0, r0, text){
+  const bubble="( "+text+" )";
+  const br=r0-2;
+  if(br<0) return;
+  const bc=c0-Math.floor(bubble.length/2);
+  for(let j=0;j<bubble.length;j++){ const c=bc+j; if(c>=0&&c<COLS){ setCh(grid,br,c,bubble[j]); setMode(mg,br,c,'speech'); } }
+  const tr=r0-1;
+  if(tr>=0&&c0>=0&&c0<COLS){ setCh(grid,tr,c0,"v"); setMode(mg,tr,c0,'speech'); }
+}
+function mtRender(t, mtCol, showTurtle, blastR){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(blastR>0) mtBlastDemolish(mtCol, Math.round(blastR));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // settled bodies littering the street
+  for(const b of mtBodies){ const c=Math.round(b.x), r=Math.round(b.y); const art=(t+c)%2===0?"-o-":"~o~";
+    for(let j=0;j<art.length;j++){ const cc=c-1+j; if(cc>=0&&cc<COLS&&r>=0&&r<ROWS){ setCh(grid,r,cc,art[j]); setMode(mg,r,cc,'body'); } } }
+  // mid-air flops, tumbling down — shouting the mantra on the way
+  for(const f of mtFallers){ const r=Math.round(f.y), c=Math.round(f.x); const art=(t%2===0)?"\\o/":"/o\\";
+    for(let j=0;j<art.length;j++){ const cc=c-1+j; if(cc>=0&&cc<COLS&&r>=0&&r<ROWS){ setCh(grid,r,cc,art[j]); setMode(mg,r,cc,'body'); } }
+    if(f.speaks) mtDrawBubble(grid,mg,c,r,"EVERYBODY DO THE FLOP!"); }
+  // the mine turtle, patiently waiting (and friendly, right up until it isn't)
+  if(showTurtle){ const left=mtCol-3, top=streetRow-mineTurtleSprite.length+1;
+    for(let i=0;i<mineTurtleSprite.length;i++){ const art=mineTurtleSprite[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'mine'); } }
+    mtDrawBubble(grid,mg,mtCol,top,"Hello!"); }
+  // the blast itself
+  if(blastR>0){ const R=blastR, ground=streetRow, domeH=Math.min(ground,Math.floor(R*0.7));
+    for(let r=ground;r>=ground-domeH;r--){ const frac=(ground-r)/Math.max(1,domeH);
+      const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*R*1.1);
+      for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=mtCol+j; if(c<0||c>=COLS)continue;
+        setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'impact'); } } }
+  return {grid,mg};
+}
+
+// ---- THE DAY OF THE TRIFFIDS: a green comet blinds everyone, then the triffids walk ----
+function triffidInit(){
+  triffStalks=[];
+  const n=Math.max(4,Math.floor(COLS/16));
+  for(let i=0;i<n;i++){ triffStalks.push({
+    x: Math.round((i+0.5)*COLS/n), h:0, maxH: 6+((Math.random()*4)|0),
+    lash:0, lashDir: Math.random()<0.5?-1:1 }); }
+}
+// each stalk grows, then periodically lashes its stinger out and stings whatever it hits
+function triffidStep(){
+  for(const s of triffStalks){
+    if(s.h<s.maxH){ s.h+=0.15; continue; }
+    if(s.lash>0){ s.lash--; }
+    else if(Math.random()<0.05){ s.lash=6; triffidLash(s.x+s.lashDir*8); s.lashDir=Math.random()<0.5?-1:1; }
+  }
+}
+// the sting permanently damages whatever it connects with — mutates cityGridArr
+function triffidLash(col){
+  if(cityGridArr.length!==ROWS) return;
+  for(let r=Math.max(0,streetRow-3); r<streetRow; r++){ if(!cityGridArr[r]) continue; let ln=cityGridArr[r].split("");
+    for(let c=col-1;c<=col+1;c++){ if(c>=0&&c<COLS && ln[c]!==" " && Math.random()<0.6) ln[c]=" "; }
+    cityGridArr[r]=ln.join(""); }
+  collapseCity(1);
+}
+function triffidRender(t, cometFlash){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // the strange green comet, streaking overhead and blinding everyone who watches it
+  if(cometFlash>0){ for(let c=0;c<COLS;c++){ if(Math.random()<0.4){ const r=1+((Math.random()*3)|0);
+    setCh(grid,r,c,["*",".","'"][(Math.random()*3)|0]); setMode(mg,r,c,'comet'); } } }
+  // the stalks: grown height, a bulb head once mature, and an occasional stinger lash
+  for(const s of triffStalks){ const h=Math.floor(s.h);
+    for(let k=0;k<h;k++){ const r=streetRow-1-k; if(r<0) break; setCh(grid,r,s.x,"|"); setMode(mg,r,s.x,'triffid'); }
+    if(s.h>=s.maxH){ const topR=streetRow-1-h; if(topR>=0){ setCh(grid,topR,s.x,"@"); setMode(mg,topR,s.x,'triffid');
+      if(s.lash>0){ const len=6-s.lash+1; for(let k=1;k<=len;k++){ const c=s.x+s.lashDir*k; if(c>=0&&c<COLS){ setCh(grid,topR,c,"~"); setMode(mg,topR,c,'triffidwhip'); } } } } }
+  }
+  return {grid,mg};
+}
+
+// ---- LITTLE TIKES: a kid climbs into the Cozy Coupe (monster-truck edition) ----
+const tikesSprite=[
+  " ______",
+  "/ o  o \\",
+  "|_______|",
+  "(@@)  (@@)",
+];
+const tikesChildSprite=["o","/|\\","/ \\"];
+const tikesFlippedSprite=[
+  "(@@)  (@@)",
+  "|_______|",
+  "/ o  o \\",
+  " ______",
+];
+function tikesRender(x, childXpos, showChild, bubbleText, momX, momDown, flipped){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  titanicDemolish(x);                             // whatever's in its path gets flattened
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const spr=flipped?tikesFlippedSprite:tikesSprite;
+  const left=Math.round(x)-spr[0].length, top=streetRow-spr.length+1;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tikes'); } }
+  if(showChild){ const cspr=tikesChildSprite, ctop=streetRow-cspr.length+1, cleft=Math.round(childXpos);
+    for(let i=0;i<cspr.length;i++){ const art=cspr[i], r=ctop+i;
+      for(let j=0;j<art.length;j++){ const c=cleft+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'body'); } } }
+  if(bubbleText) mtDrawBubble(grid, mg, left+Math.floor(spr[0].length/2), top, bubbleText);
+  // mom: furiously chasing the truck, right up until she isn't
+  if(momX!==undefined){ const mc=Math.round(momX);
+    if(momDown){ const r=streetRow, art=(mc%2===0)?"-o-":"~o~";
+      for(let j=0;j<art.length;j++){ const c=mc-1+j; if(c>=0&&c<COLS){ setCh(grid,r,c,art[j]); setMode(mg,r,c,'mom'); } } }
+    else { const r=streetRow-1;
+      for(let j=0;j<3;j++){ const c=mc-1+j; if(c>=0&&c<COLS){ setCh(grid,r,c,"\\o/"[j]); setMode(mg,r,c,'mom'); } }
+      mtDrawBubble(grid, mg, mc, r, "GET BACK HERE THIS INSTANT!"); }
+  }
+  return {grid,mg};
+}
+
+// ---- ION CANNON: a satellite locks on, then drops a column of pure energy on the city ----
+// permanently craters the target zone — mutates cityGridArr so the wreckage sticks
+function ionDemolish(tx, r){
+  if(cityGridArr.length!==ROWS) return;
+  for(let row=0; row<streetRow; row++){ if(!cityGridArr[row]) continue; let ln=cityGridArr[row].split("");
+    for(let c=tx-r;c<=tx+r;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<0.55) ln[c]=" "; }
+    cityGridArr[row]=ln.join(""); }
+  if(cityGridArr[streetRow]){ let g=cityGridArr[streetRow].split("");
+    for(let c=tx-r;c<=tx+r;c++){ if(c>=0&&c<COLS&&Math.random()<0.5) g[c]=["#","%","."][(Math.random()*3)|0]; }
+    cityGridArr[streetRow]=g.join(""); }
+}
+function ionRender(t, stageName, tx, beamY, blastR){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(blastR>0) ionDemolish(tx, Math.round(blastR));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  if(stageName==='target'){
+    // a pulsing HUD-style targeting reticle locked onto the street
+    const pulse=(t%6<3), ty=streetRow-1;
+    setCh(grid,ty,tx,pulse?"+":"x"); setMode(mg,ty,tx,'ion');
+    for(const d of [-3,-2,2,3]){ const c=tx+d; if(c>=0&&c<COLS){ setCh(grid,ty,c,"-"); setMode(mg,ty,c,'ion'); } }
+    for(const d of [-2,-1,1,2]){ const r=ty+d; if(r>=0&&r<ROWS){ setCh(grid,r,tx,"|"); setMode(mg,r,tx,'ion'); } }
+    for(const p of [[-2,-3],[-2,3],[2,-3],[2,3]]){ const r=ty+p[0], c=tx+p[1]; if(r>=0&&r<ROWS&&c>=0&&c<COLS){ setCh(grid,r,c,p[1]<0?"[":"]"); setMode(mg,r,c,'ion'); } }
+  } else if(stageName==='beam' || stageName==='blast'){
+    // the beam, punching straight down from orbit with static crackling around it
+    for(let r=0;r<=beamY;r++){ setCh(grid,r,tx,"|"); setMode(mg,r,tx,'ion');
+      if(Math.random()<0.3){ const c=tx+(Math.random()<0.5?-1:1); if(c>=0&&c<COLS){ setCh(grid,r,c,["*",".","'"][(Math.random()*3)|0]); setMode(mg,r,c,'ion'); } } }
+  }
+  if(stageName==='blast'){
+    const R=blastR, ground=streetRow, domeH=Math.min(ground,Math.floor(R*0.75));
+    for(let r=ground;r>=ground-domeH;r--){ const frac=(ground-r)/Math.max(1,domeH);
+      const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*R*1.1);
+      for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=tx+j; if(c<0||c>=COLS)continue;
+        setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'ion'); } }
+  }
+  if(stageName==='hold'){
+    // lingering ion sparks drifting over the crater
+    for(let k=0;k<COLS*0.04;k++){ const c=tx+(((Math.random()*24)|0)-12), r=streetRow-((Math.random()*4)|0);
+      if(c>=0&&c<COLS&&r>=0&&r<ROWS&&Math.random()<0.5){ setCh(grid,r,c,["*","'","."][(Math.random()*3)|0]); setMode(mg,r,c,'ion'); } }
+  }
+  return {grid,mg};
+}
+
+// ---- DEATH STAR: it hovers above the city, then unleashes its superlaser ----
+const deathStarSprite=[
+  "    .---------.",
+  "  /             \\",
+  " |               |",
+  " |_______________|",
+  " |   .-----.     |",
+  " |  (   .   )    |",
+  "  \\  '-----'    /",
+  "    '---------'",
+];
+const dsEmitterCol=8, dsEmitterRow=5;               // the dish's centre, where the beam originates
+function deathstarRender(t, stageName, beamW, blastR){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const sw=18, sh=deathStarSprite.length;
+  const bob=Math.sin(t*0.1)>0?0:1;                  // a slow, menacing hover
+  const top=2+bob, left=cx-Math.floor(sw/2);
+  const shipBottom=top+sh;
+  const beamCol=left+dsEmitterCol, beamStartRow=top+dsEmitterRow+1;
+  if(blastR>0) ionDemolish(beamCol, Math.round(blastR));   // the same persistent city-clearing the Ion Cannon uses
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // the beam, punching straight down from the dish
+  if(stageName==='beam' || stageName==='blast'){
+    for(let r=beamStartRow;r<streetRow;r++){ for(let dc=-Math.floor(beamW/2);dc<=Math.floor(beamW/2);dc++){ const c=beamCol+dc;
+      if(c<0||c>=COLS)continue; setCh(grid,r,c,"|"); setMode(mg,r,c,'superlaser'); } }
+  }
+  // the blast dome, radiating from ground zero — capped so it never climbs high enough to touch the ship
+  if(stageName==='blast'){
+    const ground=streetRow, maxDomeH=Math.max(1, ground-shipBottom-1);
+    const domeH=Math.min(maxDomeH, Math.floor(blastR*0.75));
+    for(let r=ground;r>=ground-domeH;r--){ const frac=(ground-r)/Math.max(1,domeH);
+      const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*blastR*1.1);
+      for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=beamCol+j; if(c<0||c>=COLS)continue;
+        setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'superlaser'); } }
+  }
+  // residual glow drifting over the ruins, once it's all over
+  if(stageName==='hold'){
+    for(let k=0;k<COLS*0.03;k++){ const c=beamCol+(((Math.random()*30)|0)-15), r=streetRow-((Math.random()*3)|0);
+      if(c>=0&&c<COLS&&r>=0&&r<ROWS&&Math.random()<0.5){ setCh(grid,r,c,["*","'","."][(Math.random()*3)|0]); setMode(mg,r,c,'superlaser'); } }
+  }
+  // the Death Star itself, drawn last so it always sits above the beam and blast
+  for(let i=0;i<sh;i++){ const art=deathStarSprite[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=left+j;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'deathstar'); } }
+  if(stageName==='charge'){ const glow=(t%4<2)?"*":"."; const r=top+dsEmitterRow;
+    if(r>=0&&r<ROWS&&beamCol>=0&&beamCol<COLS){ setCh(grid,r,beamCol,glow); setMode(mg,r,beamCol,'superlaser'); } }
+  return {grid,mg};
+}
+
+// ---- LGBT AGENDA: no destruction here — the city just gets a very fabulous makeover ----
+const prideColors=["#e40303","#ff8c00","#ffed00","#008026","#004dff","#750787"];
+const prideVenueSprite=[
+  " _____________ ",
+  "|   PRIDE     |",
+  "|  BAR & GRILL|",
+  "|=============|",
+  "| [] [] [] [] |",
+  "|_____________|",
+];
+function prideStep(){
+  if(Math.random()<0.3 && prideMarchers.length<10){ prideMarchers.push({x:-3, ph:Math.random()*6}); }
+  for(const m of prideMarchers){ m.x+=0.8; m.ph+=0.4; }
+  prideMarchers=prideMarchers.filter(m=>m.x<COLS+4);
+}
+function prideRender(t, front){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // every swept column gets repainted, and every ninth gets a flag on its roof
+  for(let c=0;c<Math.min(COLS,Math.ceil(front));c++){
+    for(let r=0;r<streetRow;r++){ if(grid[r] && grid[r][c]!==" ") setMode(mg,r,c,'pride'); }
+    if(c%9===4){
+      let roofRow=streetRow;
+      for(let r=0;r<streetRow;r++){ if(grid[r] && grid[r][c]!==" "){ roofRow=r; break; } }
+      const poleTop=Math.max(0, roofRow-3);
+      for(let r=poleTop;r<roofRow;r++){ setCh(grid,r,c,"|"); setMode(mg,r,c,'pride'); }
+      if(poleTop>=0 && c+1<COLS){ setCh(grid,poleTop,c+1,">"); setMode(mg,poleTop,c+1,'pride'); }
+    }
+  }
+  // the pride venue — fabulous from the very first frame
+  const vspr=prideVenueSprite, vleft=Math.max(1,Math.floor(COLS*0.12)), vtop=streetRow-vspr.length+1;
+  for(let i=0;i<vspr.length;i++){ const art=vspr[i], r=vtop+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=vleft+j;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'pridevenue'); } }
+  // the parade, marching down the street
+  for(const m of prideMarchers){ const xi=Math.round(m.x), bob=(Math.sin(m.ph)>0)?0:1, r=streetRow-1-bob;
+    const art=(Math.floor(m.ph)%2===0)?"o/":"\\o";
+    for(let j=0;j<art.length;j++){ const c=xi+j; if(c>=0&&c<COLS&&r>=0&&r<ROWS){ setCh(grid,r,c,art[j]); setMode(mg,r,c,'parade'); } } }
+  return {grid,mg};
+}
+
 // ---- BALDUR'S GATE: a mind flayer nautiloid crashes through the city ----
 // the squid-ship: bulbous fleshy body up top, curling tentacles trailing beneath
 const nautSprite=[
@@ -3872,6 +4330,14 @@ let mortalStarted=false, mortalT=0, tcX=0, mortalSmoke=[];
 let simpStarted=false, simpT=0, domeR=0, dropOffset=0, heliFly=0;
 let emuStarted=false, emuT=0, emus=[], soldiers=[], emuBullets=[];
 let neilStarted=false, neilT=0, neilX=0;
+let koolStarted=false, koolT=0, koolX=0, koolaidShards=[];
+let gooStarted=false, gooT=0, gooR=0;
+let mtStartedFlag=false, mtT=0, mtCol=0, mtFallers=[], mtBodies=[], mtBlastR=0;
+let triffStarted=false, triffT=0, triffStalks=[];
+let tikesStarted=false, tikesT=0, tikesX=0, childX=0, tikesBoarded=false, tikesMomX=0, tikesMomDown=false;
+let ionStarted=false, ionT=0, ionTx=0, ionBlastR=0;
+let dsStarted=false, dsT=0, dsBlastR=0;
+let prideStarted=false, prideT=0, prideFront=0, prideMarchers=[];
 const maxDmg=()=>Math.floor(COLS/2)+2;
 
 function reset(){
@@ -3919,6 +4385,14 @@ function reset(){
   simpStarted=false; simpT=0; domeR=0; dropOffset=0; heliFly=0;
   emuStarted=false; emuT=0; emus=[]; soldiers=[]; emuBullets=[];
   neilStarted=false; neilT=0; neilX=0;
+  koolStarted=false; koolT=0; koolX=0; koolaidShards=[];
+  gooStarted=false; gooT=0; gooR=0;
+  mtStartedFlag=false; mtT=0; mtCol=0; mtFallers=[]; mtBodies=[]; mtBlastR=0;
+  triffStarted=false; triffT=0; triffStalks=[];
+  tikesStarted=false; tikesT=0; tikesX=0; childX=0; tikesBoarded=false; tikesMomX=0; tikesMomDown=false;
+  ionStarted=false; ionT=0; ionTx=0; ionBlastR=0;
+  dsStarted=false; dsT=0; dsBlastR=0;
+  prideStarted=false; prideT=0; prideFront=0; prideMarchers=[];
   scene.className=''; stage.className='';
   scene.style.textShadow="none";
   cmd.textContent="sudo rm -rf /*"; cmd.className="";
@@ -4012,12 +4486,28 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DECLARE WAR ON THE EMUS"; sub.style.color="#e0b070"; sub.style.textShadow="0 0 8px #6a4020"; } }
   else if(cmdColor===39){ cmd.style.color="#c8ccd0"; cmd.style.textShadow="0 0 18px #4a4e54";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — RELEASE NEIL THE SEAL"; sub.style.color="#e0e4e8"; sub.style.textShadow="0 0 8px #4a4e54"; } }
+  else if(cmdColor===40){ cmd.style.color="#ff2a40"; cmd.style.textShadow="0 0 18px #a00010";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — OH YEAH!"; sub.style.color="#ff5a70"; sub.style.textShadow="0 0 8px #a00010"; } }
+  else if(cmdColor===41){ cmd.style.color="#b8c4cc"; cmd.style.textShadow="0 0 18px #5a6068";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — UNLEASH THE GRAY GOO"; sub.style.color="#e0e8ec"; sub.style.textShadow="0 0 8px #5a6068"; } }
+  else if(cmdColor===42){ cmd.style.color="#6a8ad0"; cmd.style.textShadow="0 0 18px #203050";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — MINE TURTLE!"; sub.style.color="#9ab0e8"; sub.style.textShadow="0 0 8px #203050"; } }
+  else if(cmdColor===43){ cmd.style.color="#7ad07a"; cmd.style.textShadow="0 0 18px #2a5a2a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LOOSE THE TRIFFIDS"; sub.style.color="#a0e8a0"; sub.style.textShadow="0 0 8px #2a5a2a"; } }
+  else if(cmdColor===44){ cmd.style.color="#e0201a"; cmd.style.textShadow="0 0 18px #8a1010";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — MONSTER TRUUUUUUCK"; sub.style.color="#ff5a40"; sub.style.textShadow="0 0 8px #8a1010"; } }
+  else if(cmdColor===45){ cmd.style.color="#7ad4ff"; cmd.style.textShadow="0 0 18px #2a5a8a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — FIRE THE ION CANNON"; sub.style.color="#aae8ff"; sub.style.textShadow="0 0 8px #2a5a8a"; } }
+  else if(cmdColor===46){ cmd.style.color="#7affa0"; cmd.style.textShadow="0 0 18px #1a6a2a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — THAT'S NO MOON"; sub.style.color="#c0ffd0"; sub.style.textShadow="0 0 8px #1a6a2a"; } }
+  else if(cmdColor===47){ cmd.style.color="#ff66cc"; cmd.style.textShadow="0 0 18px #a0308a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — START THE PARADE"; sub.style.color="#ffb0e6"; sub.style.textShadow="0 0 8px #a0308a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%40; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%48; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
@@ -5263,6 +5753,273 @@ function loop(){
     sub.textContent="Neil is having a lovely time. — press RESET"; sub.style.color="#c8ccd0"; sub.className="";
     neilT++;
     timer=setTimeout(loop,150);
+  }else if(phase==='koolaid'){
+    scene.style.textShadow="0 0 8px #ff2a40";
+    if(!koolStarted){ koolStarted=true; koolT=0; koolX=-10; document.body.style.background="#0c0405"; }
+    const stopAt=cx;                                        // he only bursts through half the city
+    koolX=Math.min(stopAt, koolX+Math.max(1,Math.floor(COLS/45)));
+    const arrived=koolX>=stopAt;
+    const ohYeah=(koolT%10)<4;
+    const {grid,mg}=koolaidRender(koolX, ohYeah);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(!arrived) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent= arrived ? "OH YEAH!" : "THE KOOL-AID MAN BURSTS THROUGH EVERYTHING";
+    sub.style.color="#ff2a40"; sub.style.textShadow="0 0 8px #a00010";
+    koolT++;
+    if(!arrived){ timer=setTimeout(loop,70); }
+    else { koolaidShatterInit(koolX); phase='koolaid_shatter'; koolT=0; loop(); }
+  }else if(phase==='koolaid_shatter'){
+    stage.classList.add('shake');
+    koolaidShatterStep();
+    const {grid,mg}=koolaidShatterRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="…AND THEN HE JUST KIND OF FELL APART.";
+    sub.style.color="#ff2a40"; sub.style.textShadow="0 0 8px #a00010";
+    koolT++;
+    if(koolT<24){ timer=setTimeout(loop,60); }
+    else { phase='koolaid_hold'; loop(); }
+  }else if(phase==='koolaid_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=koolaidShatterRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="just a puddle of punch and broken glass now. — press RESET"; sub.style.color="#ff2a40"; sub.className="";
+    koolT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='goo'){
+    scene.style.textShadow="0 0 8px #b8c4cc";
+    if(!gooStarted){ gooStarted=true; gooT=0; gooR=0; document.body.style.background="#0a0b0c"; }
+    const maxR=Math.sqrt(Math.pow(Math.max(cx,COLS-cx),2)+Math.pow(streetRow*2,2))+4;
+    gooR=Math.min(maxR, gooR+Math.max(1,COLS/70));
+    const covered=gooR>=maxR;
+    const {grid,mg}=gooRender(gooR);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(!covered) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent= covered ? "ECOPHAGY COMPLETE." : "SELF-REPLICATING NANITES CONSUME EVERYTHING";
+    sub.style.color="#b8c4cc"; sub.style.textShadow="0 0 8px #5a6068";
+    gooT++;
+    if(!(covered && gooT>30)){ timer=setTimeout(loop,70); }
+    else { phase='goo_hold'; loop(); }
+  }else if(phase==='goo_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=gooRender(999999);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="all biomass. all matter. gray goo. — press RESET"; sub.style.color="#b8c4cc"; sub.className="";
+    gooT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='mineturtle'){
+    scene.style.textShadow="0 0 8px #4a6ab0";
+    if(!mtStartedFlag){
+      mtStartedFlag=true; mtT=0; mtCol=cx; mtFallers=[]; mtBodies=[]; mtBlastR=0;
+      document.body.style.background="#0a0c10";
+      // everybody jumps together — one of them is fated to land right on the turtle
+      const n=Math.max(6,Math.floor(COLS/14));
+      const doomedIdx=(Math.random()*n)|0;
+      for(let i=0;i<n;i++){ mtSpawnFaller(mtCol, i===doomedIdx); }
+    }
+    const doomedLanded=mtStep(false);
+    const {grid,mg}=mtRender(mtT, mtCol, true, 0);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="EVERYBODY DO THE FLOP";
+    sub.style.color="#4a6ab0"; sub.style.textShadow="0 0 8px #203050";
+    mtT++;
+    if(!doomedLanded){ timer=setTimeout(loop,70); }
+    else { mtTriggerBlast(mtCol); phase='mineturtle_blast'; mtT=0; mtBlastR=0; loop(); }
+  }else if(phase==='mineturtle_blast'){
+    stage.classList.add('shake');
+    mtStep(false);
+    mtBlastR=Math.min(14, mtBlastR+1.2);
+    const {grid,mg}=mtRender(mtT, mtCol, false, mtBlastR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="MINE TURTLE!";
+    sub.style.color="#ff6a2a"; sub.style.textShadow="0 0 10px #ff2a00";
+    mtT++;
+    if(mtBlastR<14){ timer=setTimeout(loop,60); }
+    else { phase='mineturtle_hold'; loop(); }
+  }else if(phase==='mineturtle_hold'){
+    stage.classList.remove('shake');
+    mtStep(false);
+    const {grid,mg}=mtRender(mtT, mtCol, false, 0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="mine turtle. — press RESET"; sub.style.color="#4a6ab0"; sub.className="";
+    mtT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='triffid'){
+    scene.style.textShadow="0 0 8px #3a8a3a";
+    if(!triffStarted){ triffStarted=true; triffT=0; triffidInit(); document.body.style.background="#04100a"; }
+    triffidStep();
+    const cometFlash = triffT<20 ? (20-triffT) : 0;
+    const {grid,mg}=triffidRender(triffT, cometFlash);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(triffStalks.some(s=>s.lash>0)) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent = cometFlash>0 ? "A STRANGE GREEN COMET LIGHTS THE SKY…" : "THE TRIFFIDS ARE LOOSE, AND EVERYONE IS BLIND";
+    sub.style.color="#7ad07a"; sub.style.textShadow="0 0 8px #2a5a2a";
+    triffT++;
+    if(triffT<90){ timer=setTimeout(loop,80); }
+    else { phase='triffid_hold'; loop(); }
+  }else if(phase==='triffid_hold'){
+    stage.classList.remove('shake');
+    triffidStep();
+    const {grid,mg}=triffidRender(triffT, 0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the triffids have inherited the earth. — press RESET"; sub.style.color="#7ad07a"; sub.className="";
+    triffT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='tikes'){
+    scene.style.textShadow="0 0 8px #e0201a";
+    if(!tikesStarted){ tikesStarted=true; tikesT=0; tikesX=14; childX=-4; tikesBoarded=false; tikesMomX=-2; tikesMomDown=false; document.body.style.background="#100504"; }
+    const boardAt=tikesX-tikesSprite[0].length+2;
+    if(!tikesBoarded){
+      childX=Math.min(boardAt, childX+0.35);
+      if(childX>=boardAt) tikesBoarded=true;
+    }
+    tikesMomX=Math.min(boardAt-2, tikesMomX+0.3);     // furious, but always a step behind
+    const shout=tikesBoarded && tikesT%20<13;
+    const {grid,mg}=tikesRender(tikesX, childX, !tikesBoarded, shout?"MONSTER TRUUUUUUCK!":null, tikesMomX, false);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent= tikesBoarded ? "MONSTER TRUUUUUUCK!" : "A CHILD CLIMBS INTO THE LITTLE TIKES MONSTER TRUCK, MOM IN HOT PURSUIT";
+    sub.style.color="#e0201a"; sub.style.textShadow="0 0 8px #8a1010";
+    tikesT++;
+    if(!(tikesBoarded && tikesT>70)){ timer=setTimeout(loop,90); }
+    else { phase='tikes_drive'; tikesT=0; loop(); }
+  }else if(phase==='tikes_drive'){
+    stage.classList.add('shake');
+    if(!tikesMomDown){ tikesMomDown=true; }           // the engine roars to life right as she catches up
+    const stopAt=Math.floor(COLS/3);                 // knocks over a third of the city
+    tikesX=Math.min(stopAt, tikesX+Math.max(1,Math.floor(COLS/40)));
+    const arrived=tikesX>=stopAt;
+    const {grid,mg}=tikesRender(tikesX, 0, false, null, tikesMomX, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="MONSTER TRUUUUUUCK!!!";
+    sub.style.color="#e0201a"; sub.style.textShadow="0 0 10px #ff2010";
+    tikesT++;
+    if(!arrived){ timer=setTimeout(loop,65); }
+    else { phase='tikes_flip'; tikesT=0; loop(); }
+  }else if(phase==='tikes_flip'){
+    stage.classList.add('shake');
+    // two full end-over-end flips, held long enough per pose to actually read, landing on flipped
+    const flipped=Math.floor(tikesT/3)%2===1;
+    const {grid,mg}=tikesRender(tikesX, 0, false, null, tikesMomX, true, flipped);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="IT FLIPS!";
+    sub.style.color="#ff5a40"; sub.style.textShadow="0 0 10px #ff2010";
+    tikesT++;
+    if(tikesT<12){ timer=setTimeout(loop,70); }
+    else { phase='tikes_hold'; loop(); }
+  }else if(phase==='tikes_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=tikesRender(tikesX, 0, false, "MUM look what i did!", tikesMomX, true, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the child is thrilled. mom and a third of the city are not. — press RESET"; sub.style.color="#e0201a"; sub.className="";
+    tikesT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='ion'){
+    scene.style.textShadow="0 0 8px #7ad4ff";
+    if(!ionStarted){ ionStarted=true; ionT=0; ionTx=cx; document.body.style.background="#050a10"; }
+    const {grid,mg}=ionRender(ionT,'target',ionTx,0,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent= ionT<10 ? "TARGET ACQUIRED" : "ION CANNON — FIRING";
+    sub.style.color="#7ad4ff"; sub.style.textShadow="0 0 8px #2a5a8a";
+    ionT++;
+    if(ionT<18){ timer=setTimeout(loop,80); }
+    else { phase='ion_beam'; ionT=0; loop(); }
+  }else if(phase==='ion_beam'){
+    stage.classList.add('shake');
+    ionT++;
+    const beamY=Math.min(streetRow, ionT*Math.max(2,Math.floor(streetRow/6)));
+    const {grid,mg}=ionRender(ionT,'beam',ionTx,beamY,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="IMPACT IMMINENT";
+    sub.style.color="#eaffff"; sub.style.textShadow="0 0 10px #7ad4ff";
+    if(beamY<streetRow){ timer=setTimeout(loop,50); }
+    else { phase='ion_blast'; ionT=0; ionBlastR=0; loop(); }
+  }else if(phase==='ion_blast'){
+    stage.classList.add('shake');
+    ionBlastR=Math.min(16, ionBlastR+1.3);
+    const {grid,mg}=ionRender(ionT,'blast',ionTx,streetRow,ionBlastR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="DIRECT HIT";
+    sub.style.color="#eaffff"; sub.style.textShadow="0 0 10px #7ad4ff";
+    ionT++;
+    if(ionBlastR<16){ timer=setTimeout(loop,60); }
+    else { phase='ion_hold'; loop(); }
+  }else if(phase==='ion_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=ionRender(ionT,'hold',ionTx,streetRow,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="target eliminated. — press RESET"; sub.style.color="#7ad4ff"; sub.className="";
+    ionT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='deathstar'){
+    scene.style.textShadow="0 0 10px #4aff6a";
+    if(!dsStarted){ dsStarted=true; dsT=0; document.body.style.background="#04060a"; }
+    const {grid,mg}=deathstarRender(dsT,'charge',0,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent= dsT<10 ? "THE DEATH STAR HOVERS ABOVE THE CITY" : "SUPERLASER CHARGING…";
+    sub.style.color="#7affa0"; sub.style.textShadow="0 0 8px #1a6a2a";
+    dsT++;
+    if(dsT<24){ timer=setTimeout(loop,80); }
+    else { phase='deathstar_beam'; dsT=0; loop(); }
+  }else if(phase==='deathstar_beam'){
+    stage.classList.add('shake');
+    dsT++;
+    const beamW=Math.min(5, 1+Math.floor(dsT/3));
+    const {grid,mg}=deathstarRender(dsT,'beam',beamW,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="IT UNLEASHES ITS LASER";
+    sub.style.color="#aaffc0"; sub.style.textShadow="0 0 10px #4aff6a";
+    if(dsT<14){ timer=setTimeout(loop,55); }
+    else { phase='deathstar_blast'; dsT=0; dsBlastR=0; loop(); }
+  }else if(phase==='deathstar_blast'){
+    stage.classList.add('shake');
+    const maxR=Math.ceil(COLS/2)+2;                  // grows until it's cleared the entire city
+    dsBlastR=Math.min(maxR, dsBlastR+Math.max(1,COLS/40));
+    const {grid,mg}=deathstarRender(dsT,'blast',5,dsBlastR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="THAT'S NO MOON.";
+    sub.style.color="#aaffc0"; sub.style.textShadow="0 0 10px #4aff6a";
+    dsT++;
+    if(dsBlastR<maxR){ timer=setTimeout(loop,60); }
+    else { phase='deathstar_hold'; loop(); }
+  }else if(phase==='deathstar_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=deathstarRender(dsT,'hold',0,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the city has been eliminated. — press RESET"; sub.style.color="#7affa0"; sub.className="";
+    dsT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='pride'){
+    scene.style.textShadow="0 0 10px #ff66cc";
+    if(!prideStarted){ prideStarted=true; prideT=0; prideFront=0; prideMarchers=[]; document.body.style.background="#0a0410"; }
+    prideFront=Math.min(COLS, prideFront+Math.max(1,COLS/70));
+    prideStep();
+    const {grid,mg}=prideRender(prideT, prideFront);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="THE PRIDE PARADE SWEEPS THROUGH THE CITY";
+    sub.style.color="#ff9ad6"; sub.style.textShadow="0 0 8px #a0308a";
+    prideT++;
+    if(prideFront<COLS){ timer=setTimeout(loop,70); }
+    else { phase='pride_hold'; loop(); }
+  }else if(phase==='pride_hold'){
+    stage.classList.remove('shake');
+    prideStep();
+    const {grid,mg}=prideRender(prideT, COLS);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the city has never looked better. — press RESET"; sub.style.color="#ff9ad6"; sub.className="";
+    prideT++;
+    timer=setTimeout(loop,120);
   }
 }
 
@@ -5427,6 +6184,38 @@ function armDrop(){
     attackMode='neil';
     cmd.style.color="#c8ccd0"; cmd.style.textShadow="0 0 20px #4a4e54";
     neilStarted=false; phase='neil';
+  }else if(cmdColor===40){      // PUNCH RED -> Kool-Aid
+    attackMode='koolaid';
+    cmd.style.color="#ff2a40"; cmd.style.textShadow="0 0 20px #a00010";
+    koolStarted=false; phase='koolaid';
+  }else if(cmdColor===41){      // NANITE GREY -> Gray Goo
+    attackMode='goo';
+    cmd.style.color="#b8c4cc"; cmd.style.textShadow="0 0 20px #5a6068";
+    gooStarted=false; phase='goo';
+  }else if(cmdColor===42){      // FLOP BLUE -> Mine Turtle
+    attackMode='mineturtle';
+    cmd.style.color="#6a8ad0"; cmd.style.textShadow="0 0 20px #203050";
+    mtStartedFlag=false; phase='mineturtle';
+  }else if(cmdColor===43){      // TRIFFID GREEN -> Day of the Triffids
+    attackMode='triffid';
+    cmd.style.color="#7ad07a"; cmd.style.textShadow="0 0 20px #2a5a2a";
+    triffStarted=false; phase='triffid';
+  }else if(cmdColor===44){      // COZY COUPE RED -> Little Tikes
+    attackMode='tikes';
+    cmd.style.color="#e0201a"; cmd.style.textShadow="0 0 20px #8a1010";
+    tikesStarted=false; phase='tikes';
+  }else if(cmdColor===45){      // ION BLUE -> Ion Cannon
+    attackMode='ion';
+    cmd.style.color="#7ad4ff"; cmd.style.textShadow="0 0 20px #2a5a8a";
+    ionStarted=false; phase='ion';
+  }else if(cmdColor===46){      // SUPERLASER GREEN -> Death Star
+    attackMode='deathstar';
+    cmd.style.color="#7affa0"; cmd.style.textShadow="0 0 20px #1a6a2a";
+    dsStarted=false; phase='deathstar';
+  }else if(cmdColor===47){      // RAINBOW PINK -> LGBT Agenda
+    attackMode='pride';
+    cmd.style.color="#ff66cc"; cmd.style.textShadow="0 0 20px #a0308a";
+    prideStarted=false; phase='pride';
   }else{                        // RED -> nuke
     attackMode='nuke';
     cmd.style.color="#f00"; cmd.style.textShadow="0 0 20px #f00";
