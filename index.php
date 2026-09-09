@@ -137,6 +137,12 @@ $updateTitle = $latestVersion === null
   #methodBox .m-goo   { color:#b8c4cc; text-shadow:0 0 8px #5a6068; }
   #methodBox .m-mine  { color:#6a8ad0; text-shadow:0 0 8px #203050; }
   #methodBox .m-triff { color:#7ad07a; text-shadow:0 0 8px #2a5a2a; }
+  #methodBox .m-tikes { color:#ff4a30; text-shadow:0 0 8px #8a1010; }
+  #methodBox .m-ion   { color:#7ad4ff; text-shadow:0 0 8px #2a5a8a; }
+  #methodBox .m-ds    { color:#7affa0; text-shadow:0 0 8px #1a6a2a; }
+  #methodBox .m-pride { background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    color:#ff9ad6; text-shadow:0 0 8px #a0308a; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -264,6 +270,10 @@ $updateTitle = $latestVersion === null
       <span class="m-goo pick" data-method="41">Gray Goo</span>
       <span class="m-mine pick" data-method="42">Mine Turtle</span>
       <span class="m-triff pick" data-method="43">Triffids</span>
+      <span class="m-tikes pick" data-method="44">Little Tikes</span>
+      <span class="m-ion pick" data-method="45">Ion Cannon</span>
+      <span class="m-ds pick" data-method="46">Death Star</span>
+      <span class="m-pride pick" data-method="47">LGBT Agenda</span>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -546,6 +556,47 @@ function colorFor(ch,r,c,mode){
   }
   if(mode==='comet'){                                             // the blinding green meteor shower
     return (Math.random()<0.5)?"#c0ffa0":"#e8ffd0";
+  }
+  if(mode==='tikes'){                                             // the Little Tikes monster truck
+    if(ch==="o")return "#ffffff";                                // round headlight eyes
+    if(ch==="@")return "#1a1a1a";                                // monster-truck tire tread
+    if(ch==="("||ch===")")return "#f0c800";                      // yellow wheel-well trim
+    return "#e0201a";                                            // Cozy Coupe red body
+  }
+  if(mode==='mom'){                                               // one furious, doomed mother
+    if(ch==="o")return "#ff6a4a";                                 // red-faced with rage
+    return "#8a3a8a";                                             // cardigan
+  }
+  if(mode==='ion'){                                               // the Ion Cannon
+    const ri=Math.random();
+    if(ri<0.4) return "#eaffff";
+    if(ri<0.7) return "#7ad4ff";
+    return "#2a8ad0";
+  }
+  if(mode==='deathstar'){                                         // the Death Star's hull
+    if(ch==="("||ch===")")return "#14161a";                      // the dish crater, dark
+    if(ch==="."||ch==="'")return "#4a4e54";                       // panel seams
+    return "#8a9098";                                             // grey hull plating
+  }
+  if(mode==='superlaser'){                                        // the superlaser beam & blast
+    const rs=Math.random();
+    if(rs<0.4) return "#eaffea";
+    if(rs<0.7) return "#4aff6a";
+    return "#0ac02a";
+  }
+  if(mode==='pride'){                                             // buildings + flags, freshly repainted
+    if(ch==="."||ch===":")return "#ffffff";                      // festive window sparkle
+    if(ch==="|")return "#8a8f99";                                 // flagpoles stay neutral
+    return prideColors[((c%prideColors.length)+prideColors.length)%prideColors.length];
+  }
+  if(mode==='pridevenue'){                                        // the community centre, fabulous as ever
+    if(/[A-Za-z&]/.test(ch)) return prideColors[(Math.random()*prideColors.length)|0];
+    if(ch==="["||ch==="]")return "#ffe680";
+    return "#7a7a82";
+  }
+  if(mode==='parade'){                                            // the marchers
+    if(ch==="o")return "#e8c090";
+    return prideColors[(Math.random()*prideColors.length)|0];
   }
   if(mode==='simpsons'){                                          // Springfield, sealed and painted up
     if(ch==="."||ch===":")return "#ffffff";                      // bright TV-glow windows
@@ -3216,6 +3267,179 @@ function triffidRender(t, cometFlash){
   return {grid,mg};
 }
 
+// ---- LITTLE TIKES: a kid climbs into the Cozy Coupe (monster-truck edition) ----
+const tikesSprite=[
+  " ______",
+  "/ o  o \\",
+  "|_______|",
+  "(@@)  (@@)",
+];
+const tikesChildSprite=["o","/|\\","/ \\"];
+const tikesFlippedSprite=[
+  "(@@)  (@@)",
+  "|_______|",
+  "/ o  o \\",
+  " ______",
+];
+function tikesRender(x, childXpos, showChild, bubbleText, momX, momDown, flipped){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  titanicDemolish(x);                             // whatever's in its path gets flattened
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const spr=flipped?tikesFlippedSprite:tikesSprite;
+  const left=Math.round(x)-spr[0].length, top=streetRow-spr.length+1;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tikes'); } }
+  if(showChild){ const cspr=tikesChildSprite, ctop=streetRow-cspr.length+1, cleft=Math.round(childXpos);
+    for(let i=0;i<cspr.length;i++){ const art=cspr[i], r=ctop+i;
+      for(let j=0;j<art.length;j++){ const c=cleft+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'body'); } } }
+  if(bubbleText) mtDrawBubble(grid, mg, left+Math.floor(spr[0].length/2), top, bubbleText);
+  // mom: furiously chasing the truck, right up until she isn't
+  if(momX!==undefined){ const mc=Math.round(momX);
+    if(momDown){ const r=streetRow, art=(mc%2===0)?"-o-":"~o~";
+      for(let j=0;j<art.length;j++){ const c=mc-1+j; if(c>=0&&c<COLS){ setCh(grid,r,c,art[j]); setMode(mg,r,c,'mom'); } } }
+    else { const r=streetRow-1;
+      for(let j=0;j<3;j++){ const c=mc-1+j; if(c>=0&&c<COLS){ setCh(grid,r,c,"\\o/"[j]); setMode(mg,r,c,'mom'); } }
+      mtDrawBubble(grid, mg, mc, r, "GET BACK HERE THIS INSTANT!"); }
+  }
+  return {grid,mg};
+}
+
+// ---- ION CANNON: a satellite locks on, then drops a column of pure energy on the city ----
+// permanently craters the target zone — mutates cityGridArr so the wreckage sticks
+function ionDemolish(tx, r){
+  if(cityGridArr.length!==ROWS) return;
+  for(let row=0; row<streetRow; row++){ if(!cityGridArr[row]) continue; let ln=cityGridArr[row].split("");
+    for(let c=tx-r;c<=tx+r;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<0.55) ln[c]=" "; }
+    cityGridArr[row]=ln.join(""); }
+  if(cityGridArr[streetRow]){ let g=cityGridArr[streetRow].split("");
+    for(let c=tx-r;c<=tx+r;c++){ if(c>=0&&c<COLS&&Math.random()<0.5) g[c]=["#","%","."][(Math.random()*3)|0]; }
+    cityGridArr[streetRow]=g.join(""); }
+}
+function ionRender(t, stageName, tx, beamY, blastR){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(blastR>0) ionDemolish(tx, Math.round(blastR));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  if(stageName==='target'){
+    // a pulsing HUD-style targeting reticle locked onto the street
+    const pulse=(t%6<3), ty=streetRow-1;
+    setCh(grid,ty,tx,pulse?"+":"x"); setMode(mg,ty,tx,'ion');
+    for(const d of [-3,-2,2,3]){ const c=tx+d; if(c>=0&&c<COLS){ setCh(grid,ty,c,"-"); setMode(mg,ty,c,'ion'); } }
+    for(const d of [-2,-1,1,2]){ const r=ty+d; if(r>=0&&r<ROWS){ setCh(grid,r,tx,"|"); setMode(mg,r,tx,'ion'); } }
+    for(const p of [[-2,-3],[-2,3],[2,-3],[2,3]]){ const r=ty+p[0], c=tx+p[1]; if(r>=0&&r<ROWS&&c>=0&&c<COLS){ setCh(grid,r,c,p[1]<0?"[":"]"); setMode(mg,r,c,'ion'); } }
+  } else if(stageName==='beam' || stageName==='blast'){
+    // the beam, punching straight down from orbit with static crackling around it
+    for(let r=0;r<=beamY;r++){ setCh(grid,r,tx,"|"); setMode(mg,r,tx,'ion');
+      if(Math.random()<0.3){ const c=tx+(Math.random()<0.5?-1:1); if(c>=0&&c<COLS){ setCh(grid,r,c,["*",".","'"][(Math.random()*3)|0]); setMode(mg,r,c,'ion'); } } }
+  }
+  if(stageName==='blast'){
+    const R=blastR, ground=streetRow, domeH=Math.min(ground,Math.floor(R*0.75));
+    for(let r=ground;r>=ground-domeH;r--){ const frac=(ground-r)/Math.max(1,domeH);
+      const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*R*1.1);
+      for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=tx+j; if(c<0||c>=COLS)continue;
+        setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'ion'); } }
+  }
+  if(stageName==='hold'){
+    // lingering ion sparks drifting over the crater
+    for(let k=0;k<COLS*0.04;k++){ const c=tx+(((Math.random()*24)|0)-12), r=streetRow-((Math.random()*4)|0);
+      if(c>=0&&c<COLS&&r>=0&&r<ROWS&&Math.random()<0.5){ setCh(grid,r,c,["*","'","."][(Math.random()*3)|0]); setMode(mg,r,c,'ion'); } }
+  }
+  return {grid,mg};
+}
+
+// ---- DEATH STAR: it hovers above the city, then unleashes its superlaser ----
+const deathStarSprite=[
+  "    .---------.",
+  "  /             \\",
+  " |               |",
+  " |_______________|",
+  " |   .-----.     |",
+  " |  (   .   )    |",
+  "  \\  '-----'    /",
+  "    '---------'",
+];
+const dsEmitterCol=8, dsEmitterRow=5;               // the dish's centre, where the beam originates
+function deathstarRender(t, stageName, beamW, blastR){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const sw=18, sh=deathStarSprite.length;
+  const bob=Math.sin(t*0.1)>0?0:1;                  // a slow, menacing hover
+  const top=2+bob, left=cx-Math.floor(sw/2);
+  const shipBottom=top+sh;
+  const beamCol=left+dsEmitterCol, beamStartRow=top+dsEmitterRow+1;
+  if(blastR>0) ionDemolish(beamCol, Math.round(blastR));   // the same persistent city-clearing the Ion Cannon uses
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // the beam, punching straight down from the dish
+  if(stageName==='beam' || stageName==='blast'){
+    for(let r=beamStartRow;r<streetRow;r++){ for(let dc=-Math.floor(beamW/2);dc<=Math.floor(beamW/2);dc++){ const c=beamCol+dc;
+      if(c<0||c>=COLS)continue; setCh(grid,r,c,"|"); setMode(mg,r,c,'superlaser'); } }
+  }
+  // the blast dome, radiating from ground zero — capped so it never climbs high enough to touch the ship
+  if(stageName==='blast'){
+    const ground=streetRow, maxDomeH=Math.max(1, ground-shipBottom-1);
+    const domeH=Math.min(maxDomeH, Math.floor(blastR*0.75));
+    for(let r=ground;r>=ground-domeH;r--){ const frac=(ground-r)/Math.max(1,domeH);
+      const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*blastR*1.1);
+      for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=beamCol+j; if(c<0||c>=COLS)continue;
+        setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'superlaser'); } }
+  }
+  // residual glow drifting over the ruins, once it's all over
+  if(stageName==='hold'){
+    for(let k=0;k<COLS*0.03;k++){ const c=beamCol+(((Math.random()*30)|0)-15), r=streetRow-((Math.random()*3)|0);
+      if(c>=0&&c<COLS&&r>=0&&r<ROWS&&Math.random()<0.5){ setCh(grid,r,c,["*","'","."][(Math.random()*3)|0]); setMode(mg,r,c,'superlaser'); } }
+  }
+  // the Death Star itself, drawn last so it always sits above the beam and blast
+  for(let i=0;i<sh;i++){ const art=deathStarSprite[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=left+j;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'deathstar'); } }
+  if(stageName==='charge'){ const glow=(t%4<2)?"*":"."; const r=top+dsEmitterRow;
+    if(r>=0&&r<ROWS&&beamCol>=0&&beamCol<COLS){ setCh(grid,r,beamCol,glow); setMode(mg,r,beamCol,'superlaser'); } }
+  return {grid,mg};
+}
+
+// ---- LGBT AGENDA: no destruction here — the city just gets a very fabulous makeover ----
+const prideColors=["#e40303","#ff8c00","#ffed00","#008026","#004dff","#750787"];
+const prideVenueSprite=[
+  " _____________ ",
+  "|   PRIDE     |",
+  "|  BAR & GRILL|",
+  "|=============|",
+  "| [] [] [] [] |",
+  "|_____________|",
+];
+function prideStep(){
+  if(Math.random()<0.3 && prideMarchers.length<10){ prideMarchers.push({x:-3, ph:Math.random()*6}); }
+  for(const m of prideMarchers){ m.x+=0.8; m.ph+=0.4; }
+  prideMarchers=prideMarchers.filter(m=>m.x<COLS+4);
+}
+function prideRender(t, front){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // every swept column gets repainted, and every ninth gets a flag on its roof
+  for(let c=0;c<Math.min(COLS,Math.ceil(front));c++){
+    for(let r=0;r<streetRow;r++){ if(grid[r] && grid[r][c]!==" ") setMode(mg,r,c,'pride'); }
+    if(c%9===4){
+      let roofRow=streetRow;
+      for(let r=0;r<streetRow;r++){ if(grid[r] && grid[r][c]!==" "){ roofRow=r; break; } }
+      const poleTop=Math.max(0, roofRow-3);
+      for(let r=poleTop;r<roofRow;r++){ setCh(grid,r,c,"|"); setMode(mg,r,c,'pride'); }
+      if(poleTop>=0 && c+1<COLS){ setCh(grid,poleTop,c+1,">"); setMode(mg,poleTop,c+1,'pride'); }
+    }
+  }
+  // the pride venue — fabulous from the very first frame
+  const vspr=prideVenueSprite, vleft=Math.max(1,Math.floor(COLS*0.12)), vtop=streetRow-vspr.length+1;
+  for(let i=0;i<vspr.length;i++){ const art=vspr[i], r=vtop+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=vleft+j;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'pridevenue'); } }
+  // the parade, marching down the street
+  for(const m of prideMarchers){ const xi=Math.round(m.x), bob=(Math.sin(m.ph)>0)?0:1, r=streetRow-1-bob;
+    const art=(Math.floor(m.ph)%2===0)?"o/":"\\o";
+    for(let j=0;j<art.length;j++){ const c=xi+j; if(c>=0&&c<COLS&&r>=0&&r<ROWS){ setCh(grid,r,c,art[j]); setMode(mg,r,c,'parade'); } } }
+  return {grid,mg};
+}
+
 // ---- BALDUR'S GATE: a mind flayer nautiloid crashes through the city ----
 // the squid-ship: bulbous fleshy body up top, curling tentacles trailing beneath
 const nautSprite=[
@@ -4110,6 +4334,10 @@ let koolStarted=false, koolT=0, koolX=0, koolaidShards=[];
 let gooStarted=false, gooT=0, gooR=0;
 let mtStartedFlag=false, mtT=0, mtCol=0, mtFallers=[], mtBodies=[], mtBlastR=0;
 let triffStarted=false, triffT=0, triffStalks=[];
+let tikesStarted=false, tikesT=0, tikesX=0, childX=0, tikesBoarded=false, tikesMomX=0, tikesMomDown=false;
+let ionStarted=false, ionT=0, ionTx=0, ionBlastR=0;
+let dsStarted=false, dsT=0, dsBlastR=0;
+let prideStarted=false, prideT=0, prideFront=0, prideMarchers=[];
 const maxDmg=()=>Math.floor(COLS/2)+2;
 
 function reset(){
@@ -4161,6 +4389,10 @@ function reset(){
   gooStarted=false; gooT=0; gooR=0;
   mtStartedFlag=false; mtT=0; mtCol=0; mtFallers=[]; mtBodies=[]; mtBlastR=0;
   triffStarted=false; triffT=0; triffStalks=[];
+  tikesStarted=false; tikesT=0; tikesX=0; childX=0; tikesBoarded=false; tikesMomX=0; tikesMomDown=false;
+  ionStarted=false; ionT=0; ionTx=0; ionBlastR=0;
+  dsStarted=false; dsT=0; dsBlastR=0;
+  prideStarted=false; prideT=0; prideFront=0; prideMarchers=[];
   scene.className=''; stage.className='';
   scene.style.textShadow="none";
   cmd.textContent="sudo rm -rf /*"; cmd.className="";
@@ -4262,12 +4494,20 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — MINE TURTLE!"; sub.style.color="#9ab0e8"; sub.style.textShadow="0 0 8px #203050"; } }
   else if(cmdColor===43){ cmd.style.color="#7ad07a"; cmd.style.textShadow="0 0 18px #2a5a2a";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LOOSE THE TRIFFIDS"; sub.style.color="#a0e8a0"; sub.style.textShadow="0 0 8px #2a5a2a"; } }
+  else if(cmdColor===44){ cmd.style.color="#e0201a"; cmd.style.textShadow="0 0 18px #8a1010";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — MONSTER TRUUUUUUCK"; sub.style.color="#ff5a40"; sub.style.textShadow="0 0 8px #8a1010"; } }
+  else if(cmdColor===45){ cmd.style.color="#7ad4ff"; cmd.style.textShadow="0 0 18px #2a5a8a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — FIRE THE ION CANNON"; sub.style.color="#aae8ff"; sub.style.textShadow="0 0 8px #2a5a8a"; } }
+  else if(cmdColor===46){ cmd.style.color="#7affa0"; cmd.style.textShadow="0 0 18px #1a6a2a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — THAT'S NO MOON"; sub.style.color="#c0ffd0"; sub.style.textShadow="0 0 8px #1a6a2a"; } }
+  else if(cmdColor===47){ cmd.style.color="#ff66cc"; cmd.style.textShadow="0 0 18px #a0308a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — START THE PARADE"; sub.style.color="#ffb0e6"; sub.style.textShadow="0 0 8px #a0308a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%44; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%48; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
@@ -5629,6 +5869,157 @@ function loop(){
     sub.textContent="the triffids have inherited the earth. — press RESET"; sub.style.color="#7ad07a"; sub.className="";
     triffT++;
     timer=setTimeout(loop,150);
+  }else if(phase==='tikes'){
+    scene.style.textShadow="0 0 8px #e0201a";
+    if(!tikesStarted){ tikesStarted=true; tikesT=0; tikesX=14; childX=-4; tikesBoarded=false; tikesMomX=-2; tikesMomDown=false; document.body.style.background="#100504"; }
+    const boardAt=tikesX-tikesSprite[0].length+2;
+    if(!tikesBoarded){
+      childX=Math.min(boardAt, childX+0.35);
+      if(childX>=boardAt) tikesBoarded=true;
+    }
+    tikesMomX=Math.min(boardAt-2, tikesMomX+0.3);     // furious, but always a step behind
+    const shout=tikesBoarded && tikesT%20<13;
+    const {grid,mg}=tikesRender(tikesX, childX, !tikesBoarded, shout?"MONSTER TRUUUUUUCK!":null, tikesMomX, false);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent= tikesBoarded ? "MONSTER TRUUUUUUCK!" : "A CHILD CLIMBS INTO THE LITTLE TIKES MONSTER TRUCK, MOM IN HOT PURSUIT";
+    sub.style.color="#e0201a"; sub.style.textShadow="0 0 8px #8a1010";
+    tikesT++;
+    if(!(tikesBoarded && tikesT>70)){ timer=setTimeout(loop,90); }
+    else { phase='tikes_drive'; tikesT=0; loop(); }
+  }else if(phase==='tikes_drive'){
+    stage.classList.add('shake');
+    if(!tikesMomDown){ tikesMomDown=true; }           // the engine roars to life right as she catches up
+    const stopAt=Math.floor(COLS/3);                 // knocks over a third of the city
+    tikesX=Math.min(stopAt, tikesX+Math.max(1,Math.floor(COLS/40)));
+    const arrived=tikesX>=stopAt;
+    const {grid,mg}=tikesRender(tikesX, 0, false, null, tikesMomX, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="MONSTER TRUUUUUUCK!!!";
+    sub.style.color="#e0201a"; sub.style.textShadow="0 0 10px #ff2010";
+    tikesT++;
+    if(!arrived){ timer=setTimeout(loop,65); }
+    else { phase='tikes_flip'; tikesT=0; loop(); }
+  }else if(phase==='tikes_flip'){
+    stage.classList.add('shake');
+    // two full end-over-end flips, held long enough per pose to actually read, landing on flipped
+    const flipped=Math.floor(tikesT/3)%2===1;
+    const {grid,mg}=tikesRender(tikesX, 0, false, null, tikesMomX, true, flipped);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="IT FLIPS!";
+    sub.style.color="#ff5a40"; sub.style.textShadow="0 0 10px #ff2010";
+    tikesT++;
+    if(tikesT<12){ timer=setTimeout(loop,70); }
+    else { phase='tikes_hold'; loop(); }
+  }else if(phase==='tikes_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=tikesRender(tikesX, 0, false, "MUM look what i did!", tikesMomX, true, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the child is thrilled. mom and a third of the city are not. — press RESET"; sub.style.color="#e0201a"; sub.className="";
+    tikesT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='ion'){
+    scene.style.textShadow="0 0 8px #7ad4ff";
+    if(!ionStarted){ ionStarted=true; ionT=0; ionTx=cx; document.body.style.background="#050a10"; }
+    const {grid,mg}=ionRender(ionT,'target',ionTx,0,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent= ionT<10 ? "TARGET ACQUIRED" : "ION CANNON — FIRING";
+    sub.style.color="#7ad4ff"; sub.style.textShadow="0 0 8px #2a5a8a";
+    ionT++;
+    if(ionT<18){ timer=setTimeout(loop,80); }
+    else { phase='ion_beam'; ionT=0; loop(); }
+  }else if(phase==='ion_beam'){
+    stage.classList.add('shake');
+    ionT++;
+    const beamY=Math.min(streetRow, ionT*Math.max(2,Math.floor(streetRow/6)));
+    const {grid,mg}=ionRender(ionT,'beam',ionTx,beamY,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="IMPACT IMMINENT";
+    sub.style.color="#eaffff"; sub.style.textShadow="0 0 10px #7ad4ff";
+    if(beamY<streetRow){ timer=setTimeout(loop,50); }
+    else { phase='ion_blast'; ionT=0; ionBlastR=0; loop(); }
+  }else if(phase==='ion_blast'){
+    stage.classList.add('shake');
+    ionBlastR=Math.min(16, ionBlastR+1.3);
+    const {grid,mg}=ionRender(ionT,'blast',ionTx,streetRow,ionBlastR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="DIRECT HIT";
+    sub.style.color="#eaffff"; sub.style.textShadow="0 0 10px #7ad4ff";
+    ionT++;
+    if(ionBlastR<16){ timer=setTimeout(loop,60); }
+    else { phase='ion_hold'; loop(); }
+  }else if(phase==='ion_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=ionRender(ionT,'hold',ionTx,streetRow,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="target eliminated. — press RESET"; sub.style.color="#7ad4ff"; sub.className="";
+    ionT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='deathstar'){
+    scene.style.textShadow="0 0 10px #4aff6a";
+    if(!dsStarted){ dsStarted=true; dsT=0; document.body.style.background="#04060a"; }
+    const {grid,mg}=deathstarRender(dsT,'charge',0,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent= dsT<10 ? "THE DEATH STAR HOVERS ABOVE THE CITY" : "SUPERLASER CHARGING…";
+    sub.style.color="#7affa0"; sub.style.textShadow="0 0 8px #1a6a2a";
+    dsT++;
+    if(dsT<24){ timer=setTimeout(loop,80); }
+    else { phase='deathstar_beam'; dsT=0; loop(); }
+  }else if(phase==='deathstar_beam'){
+    stage.classList.add('shake');
+    dsT++;
+    const beamW=Math.min(5, 1+Math.floor(dsT/3));
+    const {grid,mg}=deathstarRender(dsT,'beam',beamW,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="IT UNLEASHES ITS LASER";
+    sub.style.color="#aaffc0"; sub.style.textShadow="0 0 10px #4aff6a";
+    if(dsT<14){ timer=setTimeout(loop,55); }
+    else { phase='deathstar_blast'; dsT=0; dsBlastR=0; loop(); }
+  }else if(phase==='deathstar_blast'){
+    stage.classList.add('shake');
+    const maxR=Math.ceil(COLS/2)+2;                  // grows until it's cleared the entire city
+    dsBlastR=Math.min(maxR, dsBlastR+Math.max(1,COLS/40));
+    const {grid,mg}=deathstarRender(dsT,'blast',5,dsBlastR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="THAT'S NO MOON.";
+    sub.style.color="#aaffc0"; sub.style.textShadow="0 0 10px #4aff6a";
+    dsT++;
+    if(dsBlastR<maxR){ timer=setTimeout(loop,60); }
+    else { phase='deathstar_hold'; loop(); }
+  }else if(phase==='deathstar_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=deathstarRender(dsT,'hold',0,0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the city has been eliminated. — press RESET"; sub.style.color="#7affa0"; sub.className="";
+    dsT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='pride'){
+    scene.style.textShadow="0 0 10px #ff66cc";
+    if(!prideStarted){ prideStarted=true; prideT=0; prideFront=0; prideMarchers=[]; document.body.style.background="#0a0410"; }
+    prideFront=Math.min(COLS, prideFront+Math.max(1,COLS/70));
+    prideStep();
+    const {grid,mg}=prideRender(prideT, prideFront);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="THE PRIDE PARADE SWEEPS THROUGH THE CITY";
+    sub.style.color="#ff9ad6"; sub.style.textShadow="0 0 8px #a0308a";
+    prideT++;
+    if(prideFront<COLS){ timer=setTimeout(loop,70); }
+    else { phase='pride_hold'; loop(); }
+  }else if(phase==='pride_hold'){
+    stage.classList.remove('shake');
+    prideStep();
+    const {grid,mg}=prideRender(prideT, COLS);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the city has never looked better. — press RESET"; sub.style.color="#ff9ad6"; sub.className="";
+    prideT++;
+    timer=setTimeout(loop,120);
   }
 }
 
@@ -5809,6 +6200,22 @@ function armDrop(){
     attackMode='triffid';
     cmd.style.color="#7ad07a"; cmd.style.textShadow="0 0 20px #2a5a2a";
     triffStarted=false; phase='triffid';
+  }else if(cmdColor===44){      // COZY COUPE RED -> Little Tikes
+    attackMode='tikes';
+    cmd.style.color="#e0201a"; cmd.style.textShadow="0 0 20px #8a1010";
+    tikesStarted=false; phase='tikes';
+  }else if(cmdColor===45){      // ION BLUE -> Ion Cannon
+    attackMode='ion';
+    cmd.style.color="#7ad4ff"; cmd.style.textShadow="0 0 20px #2a5a8a";
+    ionStarted=false; phase='ion';
+  }else if(cmdColor===46){      // SUPERLASER GREEN -> Death Star
+    attackMode='deathstar';
+    cmd.style.color="#7affa0"; cmd.style.textShadow="0 0 20px #1a6a2a";
+    dsStarted=false; phase='deathstar';
+  }else if(cmdColor===47){      // RAINBOW PINK -> LGBT Agenda
+    attackMode='pride';
+    cmd.style.color="#ff66cc"; cmd.style.textShadow="0 0 20px #a0308a";
+    prideStarted=false; phase='pride';
   }else{                        // RED -> nuke
     attackMode='nuke';
     cmd.style.color="#f00"; cmd.style.textShadow="0 0 20px #f00";
