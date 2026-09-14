@@ -1,6 +1,6 @@
 <?php
 // ---- version & update check ----
-$VERSION = '1.2.0';
+$VERSION = '1.3.0';
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
 $CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
@@ -45,6 +45,99 @@ $updateAvailable = $latestVersion === null || version_compare($latestVersion, $V
 $updateTitle = $latestVersion === null
     ? 'No published release found on GitHub — unable to verify this is up to date.'
     : "A newer version (v{$latestVersion}) is available on GitHub — go update!";
+// this build is ahead of the latest published release — label it DEV rather than a version number
+$isDevBuild = $latestVersion !== null && version_compare($VERSION, $latestVersion, '>');
+$displayVersion = $isDevBuild ? 'DEV' : $VERSION;
+
+// ---- server-side destruction statistics (shared across every visitor) ----
+// stored as a small JSON file under a dot-directory next to this script; a .htaccess
+// alongside it denies direct HTTP access on Apache. Not a database — this is a one-file
+// joke site, so a flock()-guarded JSON file is the right amount of infrastructure.
+$STATS_DIR = __DIR__ . '/.data';
+$STATS_FILE = $STATS_DIR . '/stats.json';
+// salted hash of the visitor's IP, never the raw address, so we can count unique
+// visitors without actually storing anyone's IP on disk.
+const IP_HASH_SALT = 'sudo.me.uk-stats-v1';
+
+function clientIpHash() {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    return hash('sha256', $ip . IP_HASH_SALT);
+}
+
+function statsRead($path) {
+    if (!is_readable($path)) return ['total' => 0, 'methods' => new stdClass(), 'uniqueVisitors' => 0];
+    $raw = @file_get_contents($path);
+    $data = json_decode((string)$raw, true);
+    if (!is_array($data)) return ['total' => 0, 'methods' => new stdClass(), 'uniqueVisitors' => 0];
+    $ips = (isset($data['ips']) && is_array($data['ips'])) ? $data['ips'] : [];
+    return [
+        'total'          => isset($data['total']) ? (int)$data['total'] : 0,
+        'methods'        => (isset($data['methods']) && is_array($data['methods'])) ? $data['methods'] : new stdClass(),
+        'uniqueVisitors' => count($ips),
+    ];
+}
+
+// atomically increments the total + one method's count + the visitor's IP hash,
+// guarded by a file lock so concurrent requests from different visitors can't
+// clobber each other's writes
+function statsRecord($dir, $path, $methodId, $ipHash) {
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    $fp = @fopen($path, 'c+');
+    if (!$fp) return ['total' => 0, 'methods' => new stdClass(), 'uniqueVisitors' => 0];
+    flock($fp, LOCK_EX);
+    $raw = stream_get_contents($fp);
+    $data = json_decode((string)$raw, true);
+    if (!is_array($data)) $data = [];
+    $total = isset($data['total']) ? (int)$data['total'] : 0;
+    $methods = (isset($data['methods']) && is_array($data['methods'])) ? $data['methods'] : [];
+    $ips = (isset($data['ips']) && is_array($data['ips'])) ? $data['ips'] : [];
+    $total += 1;
+    $methods[$methodId] = (isset($methods[$methodId]) ? (int)$methods[$methodId] : 0) + 1;
+    $ips[$ipHash] = true;
+    $out = ['total' => $total, 'methods' => $methods, 'ips' => $ips];
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($out));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    return ['total' => $total, 'methods' => $methods, 'uniqueVisitors' => count($ips)];
+}
+
+function statsReset($dir, $path) {
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    $out = ['total' => 0, 'methods' => new stdClass(), 'ips' => new stdClass()];
+    @file_put_contents($path, json_encode($out), LOCK_EX);
+    return ['total' => 0, 'methods' => new stdClass(), 'uniqueVisitors' => 0];
+}
+
+if (isset($_GET['stats'])) {
+    header('Content-Type: application/json');
+    header('Cache-Control: no-store');
+    $action = $_GET['stats'];
+    if ($action === 'get') {
+        echo json_encode(statsRead($STATS_FILE));
+        exit;
+    }
+    if ($action === 'record' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $body = json_decode((string)file_get_contents('php://input'), true);
+        $methodId = isset($body['method']) ? preg_replace('/[^0-9]/', '', (string)$body['method']) : '';
+        if ($methodId === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'invalid method']);
+            exit;
+        }
+        echo json_encode(statsRecord($STATS_DIR, $STATS_FILE, $methodId, clientIpHash()));
+        exit;
+    }
+    if ($action === 'reset' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        echo json_encode(statsReset($STATS_DIR, $STATS_FILE));
+        exit;
+    }
+    http_response_code(400);
+    echo json_encode(['error' => 'unknown stats action']);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -55,7 +148,7 @@ $updateTitle = $latestVersion === null
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>sudo rm -rf /* v<?= htmlspecialchars($VERSION) ?></title>
+<title>sudo rm -rf /* <?= $isDevBuild ? 'DEV' : 'v'.htmlspecialchars($VERSION) ?></title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -83,8 +176,18 @@ $updateTitle = $latestVersion === null
   #methodBox::-webkit-scrollbar-thumb:hover { background:#556680; }
   #methodBox .mbTitle { font-size:clamp(10px,2.4vw,16px); letter-spacing:2px;
     color:#c7d2e0; text-shadow:0 0 6px #38507a; margin-bottom:6px; }
+  #methodBox .mbFilters { display:flex; flex-wrap:wrap; justify-content:center; gap:6px;
+    margin-bottom:10px; }
+  #methodBox .filterBtn { font-family:"Courier New", monospace; font-size:clamp(10px,1.8vw,13px);
+    letter-spacing:0.5px; font-weight:bold; color:#8a97ac; background:rgba(255,255,255,0.04);
+    border:1px solid #3a4658; border-radius:14px; padding:5px 12px; cursor:pointer;
+    transition:transform .1s, background .15s, color .15s, border-color .15s; }
+  #methodBox .filterBtn:hover { color:#dfe6f0; border-color:#5a6a86; transform:scale(1.05); }
+  #methodBox .filterBtn.active { color:#0f0; border-color:#0f0; background:rgba(0,255,0,0.08);
+    text-shadow:0 0 6px #0f0; }
   #methodBox .mbList { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px 10px;
     font-size:clamp(12px,2.2vw,18px); letter-spacing:0.5px; font-weight:bold; justify-items:stretch; }
+  #methodBox .pick.mHidden { display:none; }
   #methodBox .pick { cursor:pointer; padding:7px 6px; border-radius:5px; transition:transform .1s;
     white-space:nowrap; text-align:center; overflow:hidden; text-overflow:ellipsis;
     border:1px solid rgba(255,255,255,0.06); }
@@ -143,6 +246,10 @@ $updateTitle = $latestVersion === null
   #methodBox .m-pride { background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787);
     -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
     color:#ff9ad6; text-shadow:0 0 8px #a0308a; }
+  #methodBox .m-joker { color:#7a2a9a; text-shadow:0 0 8px #3a1a4a; }
+  #methodBox .m-squad { color:#e0c000; text-shadow:0 0 8px #4a1a6a; }
+  #methodBox .m-squad2 { color:#4080ff; text-shadow:0 0 8px #1a2a6a; }
+  #methodBox .m-monkeys { color:#8a6a3a; text-shadow:0 0 8px #4a2a10; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -160,6 +267,8 @@ $updateTitle = $latestVersion === null
   #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
   #topBar { position:absolute; top:max(10px, env(safe-area-inset-top)); right:max(10px, env(safe-area-inset-right)); z-index:10;
     display:flex; align-items:center; gap:8px; }
+  #topBarLeft { position:absolute; top:max(10px, env(safe-area-inset-top)); left:max(10px, env(safe-area-inset-left)); z-index:10;
+    display:flex; align-items:center; gap:8px; }
   #versionBox { background:#111; color:#0f0; border:1px solid #0f0; font-family:"Courier New",monospace;
     font-size:14px; padding:10px 12px; min-height:40px; display:flex; align-items:center;
     text-shadow:0 0 6px #0f0; box-shadow:0 0 10px rgba(0,255,0,.3); border-radius:5px; opacity:0.85; }
@@ -171,6 +280,27 @@ $updateTitle = $latestVersion === null
   #githubBtn svg { width:20px; height:20px; fill:currentColor; filter:drop-shadow(0 0 4px #0f0); }
   #githubBtn:hover { background:#0f0; color:#000; }
   #githubBtn:active { background:#0f0; color:#000; transform:scale(0.94); }
+  #statsBtn { background:#111; color:#0f0; border:1px solid #0f0;
+    min-height:40px; min-width:40px; padding:8px; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 10px rgba(0,255,0,.3); border-radius:5px; touch-action:manipulation; cursor:pointer; }
+  #statsBtn svg { width:20px; height:20px; fill:currentColor; filter:drop-shadow(0 0 4px #0f0); }
+  #statsBtn:hover { background:#0f0; color:#000; }
+  #statsBtn:active { background:#0f0; color:#000; transform:scale(0.94); }
+  #statsOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:50;
+    display:none; align-items:center; justify-content:center; padding:20px; }
+  #statsOverlay.open { display:flex; }
+  #statsPanel { background:#0a0e14; border:1px solid #0f0; border-radius:8px; padding:18px 20px;
+    max-width:480px; width:100%; max-height:80vh; overflow-y:auto; box-shadow:0 0 24px rgba(0,255,0,.25);
+    font-family:"Courier New", monospace; color:#c7d2e0; }
+  #statsPanel h2 { margin:0 0 4px; font-size:16px; color:#0f0; text-shadow:0 0 8px #0f0; letter-spacing:1px; }
+  #statsPanel .statsTotal { font-size:13px; color:#9ad; margin-bottom:12px; }
+  #statsList .statsRow { display:flex; justify-content:space-between; gap:10px; padding:4px 0;
+    border-bottom:1px solid rgba(255,255,255,0.06); font-size:13px; }
+  #statsList .statsRow .cnt { color:#0f0; font-weight:bold; min-width:2.5em; text-align:right; }
+  #statsPanel .statsFooter { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+  #statsPanel button { font-family:inherit; background:#111; color:#0f0; border:1px solid #0f0;
+    border-radius:5px; padding:6px 12px; cursor:pointer; font-size:12px; touch-action:manipulation; }
+  #statsPanel button:hover { background:#0f0; color:#000; }
   #resetBtn {
     background:#111; color:#0f0; border:1px solid #0f0; font-family:"Courier New",monospace;
     font-size:14px; padding:10px 16px; min-height:40px; cursor:pointer; text-shadow:0 0 6px #0f0;
@@ -197,7 +327,10 @@ $updateTitle = $latestVersion === null
     #versionBox { font-size:12px; padding:8px 10px; min-height:36px; }
     #githubBtn { min-height:36px; min-width:36px; padding:6px; }
     #githubBtn svg { width:18px; height:18px; }
+    #statsBtn { min-height:36px; min-width:36px; padding:6px; }
+    #statsBtn svg { width:18px; height:18px; }
     #topBar { gap:6px; }
+    #topBarLeft { gap:6px; }
   }
   /* very narrow phones: shrink tile text a touch more */
   @media (max-width: 380px){
@@ -214,78 +347,157 @@ $updateTitle = $latestVersion === null
 </style>
 </head>
 <body>
+<div id="topBarLeft">
+  <button id="statsBtn" aria-label="View destruction statistics" title="Statistics">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16v2H2V2h2v18zm3-2h2V9H7v9zm5 0h2V4h-2v14zm5 0h2v-6h-2v6z"/></svg>
+  </button>
+</div>
 <div id="topBar">
   <a id="githubBtn" href="https://github.com/MichelleFindlay/sudo.me.uk" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
   </a>
-  <div id="versionBox"<?php if ($updateAvailable): ?> class="update-needed" title="<?= htmlspecialchars($updateTitle) ?>"<?php endif; ?>>v<?= htmlspecialchars($VERSION) ?></div>
+  <div id="versionBox"<?php if ($updateAvailable): ?> class="update-needed" title="<?= htmlspecialchars($updateTitle) ?>"<?php endif; ?>><?= $isDevBuild ? 'DEV' : 'v'.htmlspecialchars($VERSION) ?></div>
   <button id="resetBtn">&#8635; RESET</button>
 </div>
 <div id="stage">
   <pre id="scene"></pre>
   <div id="methodBox">
     <div class="mbTitle">PICK YOUR METHOD</div>
+    <div class="mbFilters">
+      <button class="filterBtn" data-cat="all">All</button>
+      <button class="filterBtn active" data-cat="popular">Popular</button>
+      <button class="filterBtn" data-cat="classic">Classic Disasters</button>
+      <button class="filterBtn" data-cat="scifi">Kaiju &amp; Sci-Fi</button>
+      <button class="filterBtn" data-cat="movie">Movies &amp; Games</button>
+      <button class="filterBtn" data-cat="fun">Whimsical</button>
+    </div>
     <div class="mbList">
-      <span class="m-nuke pick" data-method="0">Nuclear Bomb</span>
-      <span class="m-wave pick" data-method="1">Tsunami</span>
-      <span class="m-ast pick" data-method="2">Asteroid</span>
-      <span class="m-gz pick" data-method="3">Godzilla</span>
-      <span class="m-nap pick" data-method="4">Napalm</span>
-      <span class="m-sun pick" data-method="5">The Sun</span>
-      <span class="m-alien pick" data-method="6">Aliens</span>
-      <span class="m-zombie pick" data-method="7">Zombies</span>
-      <span class="m-locust pick" data-method="8">Locusts</span>
-      <span class="m-torn pick" data-method="9">Tornado</span>
-      <span class="m-quake pick" data-method="10">Earthquake</span>
-      <span class="m-volc pick" data-method="11">Volcano</span>
-      <span class="m-riot pick" data-method="12">Riots</span>
-      <span class="m-crash pick" data-method="13">Air Crash</span>
-      <span class="m-toxic pick" data-method="14">Toxic Waste</span>
-      <span class="m-iss pick" data-method="15">ISS Crash</span>
-      <span class="m-shark pick" data-method="16">Sharknado</span>
-      <span class="m-sauron pick" data-method="17">Sauron</span>
-      <span class="m-freeze pick" data-method="18">Snowpiercer</span>
-      <span class="m-thanos pick" data-method="19">Thanos</span>
-      <span class="m-inc pick" data-method="20">Inception</span>
-      <span class="m-drag pick" data-method="21">Dragons</span>
-      <span class="m-ai pick" data-method="22">AI Takeover</span>
-      <span class="m-bttf pick" data-method="23">Back to Future</span>
-      <span class="m-steel pick" data-method="24">Man of Steel</span>
-      <span class="m-dino pick" data-method="25">Jurassic Park</span>
-      <span class="m-satan pick" data-method="26">Satan</span>
-      <span class="m-titanic pick" data-method="27">Titanic</span>
-      <span class="m-jum pick" data-method="31">Jumanji</span>
-      <span class="m-naut pick" data-method="28">Baldur's Gate</span>
-      <span class="m-emp pick" data-method="29">EMP</span>
-      <span class="m-war pick" data-method="30">War</span>
-      <span class="m-ghost pick" data-method="32">Ghostbusters</span>
-      <span class="m-frozen pick" data-method="33">Frozen</span>
-      <span class="m-land pick" data-method="34">Landslide</span>
-      <span class="m-avp pick" data-method="35">Alien vs Pred</span>
-      <span class="m-mortal pick" data-method="36">Mortal Engines</span>
-      <span class="m-simp pick" data-method="37">Simpsons</span>
-      <span class="m-emu pick" data-method="38">Emu War</span>
-      <span class="m-neil pick" data-method="39">Neil the Seal</span>
-      <span class="m-kool pick" data-method="40">Kool-Aid</span>
-      <span class="m-goo pick" data-method="41">Gray Goo</span>
-      <span class="m-mine pick" data-method="42">Mine Turtle</span>
-      <span class="m-triff pick" data-method="43">Triffids</span>
-      <span class="m-tikes pick" data-method="44">Little Tikes</span>
-      <span class="m-ion pick" data-method="45">Ion Cannon</span>
-      <span class="m-ds pick" data-method="46">Death Star</span>
-      <span class="m-pride pick" data-method="47">LGBT Agenda</span>
+      <span class="m-nuke pick" data-method="0" data-cat="classic">Nuclear Bomb</span>
+      <span class="m-wave pick" data-method="1" data-cat="classic">Tsunami</span>
+      <span class="m-ast pick" data-method="2" data-cat="classic">Asteroid</span>
+      <span class="m-gz pick" data-method="3" data-cat="scifi">Godzilla</span>
+      <span class="m-nap pick" data-method="4" data-cat="classic">Napalm</span>
+      <span class="m-sun pick" data-method="5" data-cat="scifi">The Sun</span>
+      <span class="m-alien pick" data-method="6" data-cat="scifi">Aliens</span>
+      <span class="m-zombie pick" data-method="7" data-cat="scifi">Zombies</span>
+      <span class="m-locust pick" data-method="8" data-cat="classic">Locusts</span>
+      <span class="m-torn pick" data-method="9" data-cat="classic">Tornado</span>
+      <span class="m-quake pick" data-method="10" data-cat="classic">Earthquake</span>
+      <span class="m-volc pick" data-method="11" data-cat="classic">Volcano</span>
+      <span class="m-riot pick" data-method="12" data-cat="classic">Riots</span>
+      <span class="m-crash pick" data-method="13" data-cat="classic">Air Crash</span>
+      <span class="m-toxic pick" data-method="14" data-cat="classic">Toxic Waste</span>
+      <span class="m-iss pick" data-method="15" data-cat="classic">ISS Crash</span>
+      <span class="m-shark pick" data-method="16" data-cat="scifi">Sharknado</span>
+      <span class="m-sauron pick" data-method="17" data-cat="movie">Sauron</span>
+      <span class="m-freeze pick" data-method="18" data-cat="movie">Snowpiercer</span>
+      <span class="m-thanos pick" data-method="19" data-cat="movie">Thanos</span>
+      <span class="m-inc pick" data-method="20" data-cat="movie">Inception</span>
+      <span class="m-drag pick" data-method="21" data-cat="movie">Dragons</span>
+      <span class="m-ai pick" data-method="22" data-cat="scifi">AI Takeover</span>
+      <span class="m-bttf pick" data-method="23" data-cat="movie">Back to Future</span>
+      <span class="m-steel pick" data-method="24" data-cat="movie">Man of Steel</span>
+      <span class="m-dino pick" data-method="25" data-cat="movie">Jurassic Park</span>
+      <span class="m-satan pick" data-method="26" data-cat="movie">Satan</span>
+      <span class="m-titanic pick" data-method="27" data-cat="movie">Titanic</span>
+      <span class="m-jum pick" data-method="31" data-cat="movie">Jumanji</span>
+      <span class="m-naut pick" data-method="28" data-cat="movie">Baldur's Gate</span>
+      <span class="m-emp pick" data-method="29" data-cat="scifi">EMP</span>
+      <span class="m-war pick" data-method="30" data-cat="scifi">War</span>
+      <span class="m-ghost pick" data-method="32" data-cat="movie">Ghostbusters</span>
+      <span class="m-frozen pick" data-method="33" data-cat="movie">Frozen</span>
+      <span class="m-land pick" data-method="34" data-cat="classic">Landslide</span>
+      <span class="m-avp pick" data-method="35" data-cat="movie">Alien vs Pred</span>
+      <span class="m-mortal pick" data-method="36" data-cat="movie">Mortal Engines</span>
+      <span class="m-simp pick" data-method="37" data-cat="movie">Simpsons</span>
+      <span class="m-emu pick" data-method="38" data-cat="fun">Emu War</span>
+      <span class="m-neil pick" data-method="39" data-cat="fun">Neil the Seal</span>
+      <span class="m-kool pick" data-method="40" data-cat="fun">Kool-Aid</span>
+      <span class="m-goo pick" data-method="41" data-cat="scifi">Gray Goo</span>
+      <span class="m-mine pick" data-method="42" data-cat="fun">Mine Turtle</span>
+      <span class="m-triff pick" data-method="43" data-cat="movie">Triffids</span>
+      <span class="m-tikes pick" data-method="44" data-cat="fun">Little Tikes</span>
+      <span class="m-ion pick" data-method="45" data-cat="scifi">Ion Cannon</span>
+      <span class="m-ds pick" data-method="46" data-cat="movie">Death Star</span>
+      <span class="m-pride pick" data-method="47" data-cat="fun">LGBT Agenda</span>
+      <span class="m-joker pick" data-method="48" data-cat="movie">The Joker</span>
+      <span class="m-squad pick" data-method="49" data-cat="movie">Suicide Squad</span>
+      <span class="m-squad2 pick" data-method="51" data-cat="movie">Suicide Squad 2</span>
+      <span class="m-monkeys pick" data-method="50" data-cat="movie">12 Monkeys</span>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
   <div id="sub" class="blink">INCOMING...</div>
 </div>
 <div id="flash"></div>
+<div id="statsOverlay">
+  <div id="statsPanel">
+    <h2>DESTRUCTION STATISTICS</h2>
+    <div class="statsTotal" id="statsTotal">Total city destructions: 0</div>
+    <div class="statsTotal" id="statsUnique">Unique visitors: 0</div>
+    <div id="statsList"></div>
+    <div class="statsFooter">
+      <button id="statsCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const scene=document.getElementById('scene'),cmd=document.getElementById('cmd'),
       sub=document.getElementById('sub'),flash=document.getElementById('flash'),
       stage=document.getElementById('stage'),root=document.documentElement,
       methodBox=document.getElementById('methodBox');
+
+// ---- destruction statistics: total runs + per-method counts, stored server-side (shared across every visitor) ----
+const statsBtn=document.getElementById('statsBtn'), statsOverlay=document.getElementById('statsOverlay'),
+      statsTotal=document.getElementById('statsTotal'), statsUnique=document.getElementById('statsUnique'),
+      statsList=document.getElementById('statsList'), statsCloseBtn=document.getElementById('statsCloseBtn');
+const methodNames={};
+methodBox.querySelectorAll('.pick').forEach(el=>{ methodNames[el.getAttribute('data-method')]=el.textContent; });
+let stats={total:0, methods:{}, uniqueVisitors:0};
+const POPULAR_COUNT=12;   // how many top methods "Popular" shows
+function normalizeStats(d){ return (d && typeof d==='object') ? { total:d.total||0, methods:d.methods||{}, uniqueVisitors:d.uniqueVisitors||0 } : {total:0, methods:{}, uniqueVisitors:0}; }
+function fetchStats(){
+  return fetch(location.pathname+'?stats=get', {cache:'no-store'})
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{ stats=normalizeStats(d); })
+    .catch(()=>{});
+}
+function recordDestruction(methodId){
+  // optimistic local bump so the number feels instant; the server response is the source of truth
+  stats.total=(stats.total||0)+1;
+  stats.methods=stats.methods||{};
+  stats.methods[methodId]=(stats.methods[methodId]||0)+1;
+  fetch(location.pathname+'?stats=record', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({method:methodId})
+  }).then(r=>r.ok?r.json():null).then(d=>{ if(d) stats=normalizeStats(d); }).catch(()=>{});
+}
+function renderStats(){
+  statsTotal.textContent="Total city destructions: "+(stats.total||0);
+  statsUnique.textContent="Unique visitors: "+(stats.uniqueVisitors||0);
+  const entries=Object.keys(methodNames).map(id=>({ name:methodNames[id], count:(stats.methods&&stats.methods[id])||0 }));
+  entries.sort((a,b)=> b.count-a.count || a.name.localeCompare(b.name));
+  statsList.innerHTML=entries.map(e=>{
+    const safe=e.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div class="statsRow"><span>${safe}</span><span class="cnt">${e.count}</span></div>`;
+  }).join('');
+}
+statsBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  renderStats();                       // show cached numbers immediately
+  statsOverlay.classList.add('open');
+  fetchStats().then(renderStats);      // then refresh with the latest server totals
+});
+statsCloseBtn.addEventListener('click', (e)=>{ e.stopPropagation(); statsOverlay.classList.remove('open'); });
+statsOverlay.addEventListener('click', (e)=>{ if(e.target===statsOverlay) statsOverlay.classList.remove('open'); });
+// "Popular" is the default filter — apply it immediately (falls back to showing everything
+// until real numbers arrive), then re-apply once the server's counts have loaded
+applyPopularFilter();
+fetchStats().then(()=>{
+  const activeBtn=methodBox.querySelector('.filterBtn.active');
+  if(activeBtn && activeBtn.getAttribute('data-cat')==='popular') applyPopularFilter();
+});
 
 let COLS,ROWS,cx;
 function vpW(){ return (window.visualViewport && window.visualViewport.width) || window.innerWidth; }
@@ -597,6 +809,85 @@ function colorFor(ch,r,c,mode){
   if(mode==='parade'){                                            // the marchers
     if(ch==="o")return "#e8c090";
     return prideColors[(Math.random()*prideColors.length)|0];
+  }
+  if(mode==='joker'){                                             // the clown gang
+    if(ch==="o")return "#eafce0";                                 // white grease-paint face
+    return (Math.random()<0.5)?"#8a1ab0":"#1a9a4a";              // purple suit / green hair
+  }
+  if(mode==='jokergas'){                                          // the laughing gas
+    const rj=Math.random();
+    if(rj<0.4) return "#aaffb0";
+    if(rj<0.7) return "#5ad06a";
+    return "#8a2ab0";
+  }
+  if(mode==='batman'){                                            // the Batmobile, and Batman himself
+    if(ch==="o")return "#e0c000";                                 // headlamp / emblem glow
+    return "#1a1a20";                                             // matte black
+  }
+  if(mode==='enchantress'){                                       // the sky machine
+    const re=Math.random();
+    if(re<0.4) return "#40ffb0";
+    if(re<0.7) return "#a040e0";
+    return "#20c080";
+  }
+  if(mode==='creature'){                                          // the faceless, blackened army
+    return (Math.random()<0.5)?"#1a1a1a":"#2a0a30";
+  }
+  if(mode==='squad'){                                             // Task Force X
+    if(ch==="D")return "#e0c000";                                 // Deadshot
+    if(ch==="H")return "#ff40a0";                                 // Harley Quinn
+    if(ch==="B")return "#4080ff";                                 // Captain Boomerang
+    if(ch==="C")return "#40a040";                                 // Killer Croc
+    if(ch==="E")return "#ff6020";                                 // El Diablo
+    if(ch==="W")return "#c0c0c0";                                 // Amanda Waller
+    return "#d0d0d0";
+  }
+  if(mode==='jotunheim'){                                         // the Nazi-era lab tower
+    if(/[A-Z]/.test(ch)) return "#8aff40";
+    return "#5a6068";
+  }
+  if(mode==='starro'){                                            // the giant alien starfish
+    if(ch==="O") return "#ff2020";
+    return "#c060e0";
+  }
+  if(mode==='spore'){                                             // mind-control spores
+    return "#e080ff";
+  }
+  if(mode==='thrall'){                                            // Starro's mind-controlled army
+    return "#a040c0";
+  }
+  if(mode==='ratswarm'){                                          // Ratcatcher 2's swarm
+    return "#8a6a4a";
+  }
+  if(mode==='squad2'){                                            // Bloodsport, Peacemaker, King Shark, Ratcatcher 2, Polka-Dot Man
+    if(ch==="B")return "#4080ff";
+    if(ch==="P")return "#e0c000";
+    if(ch==="K")return "#40a0a0";
+    if(ch==="R")return "#a06040";
+    if(ch==="D")return "#ff60c0";
+    return "#d0d0d0";
+  }
+  if(mode==='decoy'){                                             // the doomed decoy team
+    if(ch==="x")return "#800000";
+    return "#ff4040";
+  }
+  if(mode==='peters'){                                            // Dr. Peters, patient zero
+    if(ch==="o")return "#c0a080";                                 // face
+    return "#4a3a2a";                                             // trench coat
+  }
+  if(mode==='virus'){                                             // the vials, and what pours from them
+    const rv=Math.random();
+    if(rv<0.4) return "#8a2ab0";
+    if(rv<0.7) return "#4a1a6a";
+    return "#c060e0";
+  }
+  if(mode==='quarantine'){                                        // hazard tape, biohazard placards, the empty cage
+    if(ch==="%")return "#ffcc00";
+    return "#5a5a5a";
+  }
+  if(mode==='cole'){                                               // James Cole, both of him
+    if(ch==="o")return "#c0a080";
+    return "#5a5a5a";
   }
   if(mode==='simpsons'){                                          // Springfield, sealed and painted up
     if(ch==="."||ch===":")return "#ffffff";                      // bright TV-glow windows
@@ -3440,6 +3731,307 @@ function prideRender(t, front){
   return {grid,mg};
 }
 
+// ---- THE JOKER: a street parade rolls out the gas canisters, and Batman is too late ----
+const jokerFloatSprite=[
+  " [O]  [O]  [O]",
+  "==============",
+  "(o)        (o)",
+];
+const batmobileSprite=[
+  " __/\\  /\\__",
+  "/___========\\",
+  "(o)       (o)",
+];
+function jokerInit(){
+  jokerMarchers=[]; jokerGasParticles=[]; jokerBystanders=[];
+  const n=Math.max(4,Math.floor(COLS/20));
+  for(let i=0;i<n;i++){ jokerBystanders.push({x:(i+0.5)/n*COLS, down:false}); }
+}
+function jokerStep(floatX, gasActive){
+  if(Math.random()<0.3 && jokerMarchers.length<8){ jokerMarchers.push({x:-3, ph:Math.random()*6}); }
+  for(const m of jokerMarchers){ m.x+=0.9; m.ph+=0.4; }
+  jokerMarchers=jokerMarchers.filter(m=>m.x<COLS+4);
+  if(gasActive && jokerT%2===0){ for(let k=0;k<2;k++){
+    jokerGasParticles.push({x:floatX-6+((Math.random()*10)|0), y:streetRow-3, vx:(Math.random()-0.5)*0.5, vy:-(0.3+Math.random()*0.4), life:34}); } }
+  for(const p of jokerGasParticles){ p.x+=p.vx; p.y+=p.vy; p.life--; }
+  jokerGasParticles=jokerGasParticles.filter(p=>p.life>0);
+}
+function jokerRender(t, floatX, batX, batFailedFlag, gasFront){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // the gas front, hazing over everything it's already swept past
+  if(gasFront>0){ for(let c=0;c<Math.min(COLS,Math.ceil(gasFront));c++){
+    for(let r=Math.max(0,streetRow-6);r<streetRow;r++){ if(Math.random()<0.35){ setCh(grid,r,c,["'",",","~"][(Math.random()*3)|0]); setMode(mg,r,c,'jokergas'); } } } }
+  // bystanders — upright until the gas front reaches them, then down and grinning
+  for(const b of jokerBystanders){ if(!b.down && b.x<gasFront) b.down=true;
+    const xi=Math.round(b.x);
+    if(b.down){ const art=(xi%2===0)?"-):":":-(";
+      for(let j=0;j<art.length;j++){ const c=xi-1+j; if(c>=0&&c<COLS){ setCh(grid,streetRow,c,art[j]); setMode(mg,streetRow,c,'jokergas'); } } }
+    else { const r=streetRow-1; for(let j=0;j<3;j++){ const c=xi-1+j; if(c>=0&&c<COLS){ setCh(grid,r,c,"\\o/"[j]); setMode(mg,r,c,'body'); } } }
+  }
+  // gas particles drifting up from the canisters
+  for(const p of jokerGasParticles){ const r=Math.round(p.y), c=Math.round(p.x); if(r>=0&&r<ROWS&&c>=0&&c<COLS && p.life>0){ setCh(grid,r,c,(p.life>18?"@":".")); setMode(mg,r,c,'jokergas'); } }
+  // the marchers, leading the way
+  for(const m of jokerMarchers){ const xi=Math.round(m.x), bob=(Math.sin(m.ph)>0)?0:1, r=streetRow-1-bob;
+    const art=(Math.floor(m.ph)%2===0)?"o/":"\\o";
+    for(let j=0;j<art.length;j++){ const c=xi+j; if(c>=0&&c<COLS&&r>=0&&r<ROWS){ setCh(grid,r,c,art[j]); setMode(mg,r,c,'joker'); } } }
+  // the Joker's float, canisters and all
+  if(floatX!==undefined){ const spr=jokerFloatSprite, left=Math.round(floatX)-spr[0].length, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'joker'); } } }
+  // the Batmobile — always arriving just a little too late
+  if(batX!==undefined){ const spr=batmobileSprite, left=Math.round(batX)-spr[0].length, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'batman'); } }
+    if(batFailedFlag) mtDrawBubble(grid, mg, left+Math.floor(spr[0].length/2), top, "HA HA HA!"); }
+  return {grid,mg};
+}
+
+// ---- SUICIDE SQUAD: the Enchantress opens her machine, the Squad fights through, Diablo burns it down ----
+function squadInit(){
+  squadCreatures=[]; squadMembers=[];
+  const n=Math.max(6,Math.floor(COLS/16));
+  for(let i=0;i<n;i++){ squadCreatures.push({x:(i+0.5)/n*COLS, turned:false}); }
+  const letters=["D","H","B","C","E","W"];   // Deadshot, Harley, Boomerang, Croc, El Diablo, Waller
+  squadMembers=letters.map((letter,i)=>({x:-3-i*4, letter}));
+}
+// citizens turn as the corruption front (the machine's reach) sweeps past them
+function squadStep(portalR){
+  for(const c of squadCreatures){ if(!c.turned && c.x<portalR) c.turned=true; }
+}
+function squadAdvance(){
+  for(const m of squadMembers){ m.x+=0.6;
+    for(const c of squadCreatures){ if(Math.abs(c.x-m.x)<2) c.turned=false; }   // fought off as the Squad passes
+  }
+}
+// permanently tears up the infrastructure under the machine — mutates cityGridArr
+function squadDemolish(r){
+  if(cityGridArr.length!==ROWS) return;
+  for(let row=0; row<streetRow; row++){ if(!cityGridArr[row]) continue; let ln=cityGridArr[row].split("");
+    for(let c=cx-r;c<=cx+r;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<0.12) ln[c]=" "; }
+    cityGridArr[row]=ln.join(""); }
+}
+function squadRender(portalR, squadOn, fireR, destroying){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(portalR>0 && !destroying) squadDemolish(Math.round(portalR*0.3));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // the swirling sky machine hanging over downtown
+  if(portalR>0){ const py=Math.floor(streetRow*0.18), hw=Math.max(1,Math.round(portalR*0.5));
+    for(let dr=-3;dr<=3;dr++){ for(let dc=-hw;dc<=hw;dc++){
+      const dist=Math.hypot(dc/hw, dr/3);
+      if(dist<=1 && Math.random()<0.5){ const rr=py+dr, cc=cx+dc; if(rr>=0&&rr<ROWS&&cc>=0&&cc<COLS){ setCh(grid,rr,cc,["@","#","~","*"][(Math.random()*4)|0]); setMode(mg,rr,cc,'enchantress'); } } } } }
+  // citizens — faceless and blackened once the corruption reaches them
+  for(const c of squadCreatures){ const xi=Math.round(c.x); if(xi<0||xi>=COLS)continue;
+    if(c.turned){ setCh(grid,streetRow-1,xi,"X"); setMode(mg,streetRow-1,xi,'creature'); }
+    else { setCh(grid,streetRow-1,xi,"o"); setMode(mg,streetRow-1,xi,'body'); } }
+  // Task Force X, cutting a path through the horde
+  if(squadOn){ for(const m of squadMembers){ const xi=Math.round(m.x); if(xi<0||xi>=COLS)continue;
+    setCh(grid,streetRow-1,xi,m.letter); setMode(mg,streetRow-1,xi,'squad'); } }
+  // El Diablo's fire, erupting from the centre
+  if(fireR>0){ const domeH=Math.min(streetRow, Math.floor(fireR*0.8));
+    for(let r=streetRow;r>=streetRow-domeH;r--){ const frac=(streetRow-r)/Math.max(1,domeH);
+      const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*fireR);
+      for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=cx+j; if(c<0||c>=COLS)continue;
+        setCh(grid,r,c,["#","@","%","^"][(Math.random()*4)|0]); setMode(mg,r,c,'dragonfire'); } } }
+  return {grid,mg};
+}
+
+// ---- SUICIDE SQUAD 2: a decoy team dies on the beach, the real team blows up Jotunheim, and Starro breaks loose ----
+const jotunheimSprite=[
+  "   |||   ",
+  "  _|_|_  ",
+  " /JOTUN\\ ",
+  "|=======|",
+  "|[#] [#]|",
+  "|=======|",
+  "|[#] [#]|",
+  "|_______|",
+];
+const starroSprite=[
+  "      \\   |   /      ",
+  "       \\  |  /       ",
+  "    ----( O )----    ",
+  "       /  |  \\       ",
+  "      /   |   \\      ",
+];
+function squad2DecoyInit(){
+  squad2Decoys=["H","F","S"].map((letter,i)=>({x:cx-4+i*4, letter, down:false}));
+}
+function squad2DecoyRender(firing){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const n=Math.max(4,Math.floor(COLS/20));
+  for(let i=0;i<n;i++){ const c=Math.round((i+0.5)/n*COLS); setCh(grid,streetRow-1,c,"@"); setMode(mg,streetRow-1,c,'war'); }
+  if(firing){ for(let k=0;k<COLS*0.1;k++){ const c=(Math.random()*COLS)|0; setCh(grid,streetRow-2,c,"-"); setMode(mg,streetRow-2,c,'warfire'); } }
+  for(const d of squad2Decoys){ const xi=Math.round(d.x); if(xi<0||xi>=COLS)continue;
+    setCh(grid,streetRow-1,xi, d.down?"x":d.letter); setMode(mg,streetRow-1,xi,'decoy'); }
+  return {grid,mg};
+}
+function squad2TowerRender(memberXs){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const tw=jotunheimSprite[0].length, tx=Math.floor(COLS*0.75)-Math.floor(tw/2), ttop=streetRow-jotunheimSprite.length+1;
+  for(let i=0;i<jotunheimSprite.length;i++){ const art=jotunheimSprite[i], r=ttop+i;
+    for(let j=0;j<art.length;j++){ const c=tx+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'jotunheim'); } }
+  const letters=["B","P","K","R","D"];
+  for(let i=0;i<memberXs.length;i++){ const xi=Math.round(memberXs[i]); if(xi<0||xi>=COLS)continue;
+    setCh(grid,streetRow-1,xi,letters[i]); setMode(mg,streetRow-1,xi,'squad2'); }
+  return {grid,mg};
+}
+// permanently gouges the blast zone — mutates cityGridArr
+function squad2Demolish(col,r){
+  if(cityGridArr.length!==ROWS) return;
+  for(let row=0; row<streetRow; row++){ if(!cityGridArr[row]) continue; let ln=cityGridArr[row].split("");
+    for(let c=col-r;c<=col+r;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<0.6) ln[c]=" "; }
+    cityGridArr[row]=ln.join(""); }
+}
+function squad2ExplodeRender(col, R){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  squad2Demolish(col, Math.round(R));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const dome=Math.min(streetRow, Math.floor(R*0.9));
+  for(let r=streetRow;r>=streetRow-dome;r--){ const frac=(streetRow-r)/Math.max(1,dome);
+    const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*R*1.1);
+    for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=col+j; if(c<0||c>=COLS)continue;
+      setCh(grid,r,c,["#","@","%","^"][(Math.random()*4)|0]); setMode(mg,r,c,'dragonfire'); } }
+  return {grid,mg};
+}
+function squad2Init(col){
+  squad2Creatures=[];
+  const n=Math.max(6,Math.floor(COLS/16));
+  for(let i=0;i<n;i++){ squad2Creatures.push({x:(i+0.5)/n*COLS, turned:false}); }
+  squad2Members=["B","P","K","R","D"].map((letter,i)=>({x:col-2+((i-2)*2), letter}));
+}
+// citizens turn into Starro's mind-controlled thralls as the spore front reaches them
+function squad2Step(domeR, col){
+  for(const c of squad2Creatures){ if(!c.turned && Math.abs(c.x-col)<domeR) c.turned=true; }
+}
+function squad2Render(col, domeR, ratR, starroAlive){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(domeR>0) squad2Demolish(col, Math.round(domeR*0.15));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // citizens — faceless mind-controlled thralls once the spores reach them
+  for(const c of squad2Creatures){ const xi=Math.round(c.x); if(xi<0||xi>=COLS)continue;
+    if(c.turned){ setCh(grid,streetRow-1,xi,"X"); setMode(mg,streetRow-1,xi,'thrall'); }
+    else { setCh(grid,streetRow-1,xi,"o"); setMode(mg,streetRow-1,xi,'body'); } }
+  // drifting spores near the edge of the spread
+  for(let k=0;k<Math.floor(domeR*0.6);k++){ const ang=Math.random()*Math.PI*2, rad=domeR*(0.6+Math.random()*0.4);
+    const c=Math.round(col+Math.cos(ang)*rad), r=Math.round(streetRow-1+Math.sin(ang)*2);
+    if(c>=0&&c<COLS&&r>=0&&r<ROWS){ setCh(grid,r,c,"*"); setMode(mg,r,c,'spore'); } }
+  // Starro himself, looming over the wreckage — shrinking as the rats devour him
+  if(starroAlive){
+    const scale=Math.max(0.3, 1-ratR/16);
+    const sw=starroSprite[0].length, sh=starroSprite.length;
+    const stop=streetRow-Math.floor(sh*scale*1.6);
+    for(let i=0;i<sh;i++){ const art=starroSprite[i]; const r=stop+Math.floor(i*scale);
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=col-Math.floor(sw/2)+Math.floor(j*scale);
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'starro'); } }
+  }
+  // the rat swarm, converging and devouring Starro from every side
+  if(ratR>0){ for(let k=0;k<COLS*0.25;k++){ const ang=Math.random()*Math.PI*2, rad=ratR+Math.random()*4;
+    const c=Math.round(col+Math.cos(ang)*rad), r=Math.round((streetRow-4)+Math.sin(ang)*3);
+    if(c>=0&&c<COLS&&r>=0&&r<ROWS){ setCh(grid,r,c,"r"); setMode(mg,r,c,'ratswarm'); } } }
+  // the real squad, still fighting at ground level
+  for(const m of squad2Members){ const xi=Math.round(m.x); if(xi<0||xi>=COLS)continue;
+    setCh(grid,streetRow-1,xi,m.letter); setMode(mg,streetRow-1,xi,'squad2'); }
+  return {grid,mg};
+}
+
+// ---- 12 MONKEYS: the zoo stunt is a red herring, Dr. Peters spreads the real virus, the city empties, animals reclaim it, and the loop closes at the airport ----
+const monkeyBeasts=[
+  ["  (VVV)   "," ( O O )> ","  <####>  ","  ||  ||  "],           // lion
+  ["  __/\u203f\u203f\\_ "," /  O    o \\","<##########>","  ||    ||  "], // elephant
+  [" ^_______ ","/> O  ###  \\","<##########>"," ||    ||  "],     // rhino
+];
+const petersSprite=[" o ","/|\\","/ \\"];
+const coleSprite=[" o ","/|\\","/ \\"];
+function monkeysZooInit(){
+  zooAnimals=[];
+  const n=5;
+  for(let i=0;i<n;i++){ zooAnimals.push({ x:-4-i*6, spr:monkeyBeasts[i%monkeyBeasts.length], spd:0.5+Math.random()*0.5 }); }
+}
+function monkeysZooStep(){
+  for(const a of zooAnimals){ a.x+=a.spd; }
+}
+function monkeysZooRender(){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // an emptied cage near the left, door hanging open — the "attack" was only ever this
+  const cage=[" .------.","|/      |","||  []  |","|________|"];
+  const ctop=streetRow-cage.length+1, cleft=2;
+  for(let i=0;i<cage.length;i++){ const art=cage[i], r=ctop+i;
+    for(let j=0;j<art.length;j++){ const c=cleft+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'quarantine'); } }
+  for(const a of zooAnimals){ const xi=Math.round(a.x), top=streetRow-a.spr.length+1;
+    for(let i=0;i<a.spr.length;i++){ const art=a.spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=xi+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'beast'); } } }
+  return {grid,mg};
+}
+function monkeysReleaseRender(px, virusR){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const top=streetRow-petersSprite.length+1, xi=Math.round(px);
+  for(let i=0;i<petersSprite.length;i++){ const art=petersSprite[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=xi+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'peters'); } }
+  if(top>=0&&top<ROWS&&xi+2<COLS){ setCh(grid,top,xi+2,"i"); setMode(mg,top,xi+2,'virus'); }
+  // the toxic mist he leaves trailing behind him
+  if(virusR>0){ for(let dr=-2;dr<=2;dr++){ for(let dc=-virusR;dc<=0;dc++){ const dist=Math.hypot(dc/Math.max(1,virusR),dr/2);
+    if(dist<=1 && Math.random()<0.4){ const r=top+1+dr, c=xi+dc; if(r>=0&&r<ROWS&&c>=0&&c<COLS){ setCh(grid,r,c,["~","'","."][(Math.random()*3)|0]); setMode(mg,r,c,'virus'); } } } } }
+  return {grid,mg};
+}
+function monkeysSpreadRender(r){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const gy=streetRow-1, aspect=2;
+  for(let row=0;row<ROWS;row++){ let ln=(grid[row]||" ".repeat(COLS)).split("");
+    for(let c=0;c<COLS;c++){
+      const dx=c-cx, dy=(row-gy)*aspect, dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>r) continue;
+      if(ln[c]==="."||ln[c]===":"){ if(Math.random()<0.7) ln[c]=" "; }
+      else if(row===streetRow && Math.random()<0.05){ ln[c]="x"; setMode(mg,row,c,'body'); }
+      else if(Math.random()<0.02){ ln[c]="%"; setMode(mg,row,c,'quarantine'); }
+    }
+    grid[row]=ln.join(""); }
+  return {grid,mg};
+}
+function monkeysEmptyRender(t){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'dead');            // the powered-down, silhouette city (reused from EMP)
+  for(let r=0;r<streetRow;r++){ let ln=grid[r].split(""); for(let c=0;c<COLS;c++){ if(ln[c]==="."||ln[c]===":") ln[c]=" "; } grid[r]=ln.join(""); }
+  // quarantine tape strung along the empty street
+  for(let c=0;c<COLS;c++){ if(c%4<2){ setCh(grid,streetRow-1,c, c%2===0?"#":"="); setMode(mg,streetRow-1,c,'quarantine'); } }
+  // biohazard placards, all that's left of the response effort
+  const nPlac=Math.max(3,Math.floor(COLS/30));
+  for(let k=0;k<nPlac;k++){ const c=Math.round((k+0.5)/nPlac*COLS); if(c>=0&&c<COLS){ setCh(grid,streetRow,c,"%"); setMode(mg,streetRow,c,'quarantine'); } }
+  // the animals, wandering freely now — the surface belongs to them
+  for(const a of zooAnimals){ const xi=Math.round(a.x), top=streetRow-a.spr.length+1;
+    for(let i=0;i<a.spr.length;i++){ const art=a.spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=xi+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'beast'); } } }
+  return {grid,mg};
+}
+function monkeysLoopRender(coleXpos, youngXpos, shotFlag){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'dead');
+  const top=streetRow-coleSprite.length+1, cxi=Math.round(coleXpos);
+  for(let i=0;i<coleSprite.length;i++){ const art=coleSprite[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=cxi+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c, shotFlag?"x":art[j]); setMode(mg,r,c,'cole'); } }
+  // his younger self, watching from across the concourse — the loop that was always closed
+  const yxi=Math.round(youngXpos);
+  for(let j=0;j<3;j++){ const c=yxi-1+j; if(c>=0&&c<COLS){ setCh(grid,streetRow-1,c,"\\o/"[j]); setMode(mg,streetRow-1,c,'body'); } }
+  if(shotFlag) mtDrawBubble(grid, mg, cxi+1, top, "he was already there.");
+  return {grid,mg};
+}
+
 // ---- BALDUR'S GATE: a mind flayer nautiloid crashes through the city ----
 // the squid-ship: bulbous fleshy body up top, curling tentacles trailing beneath
 const nautSprite=[
@@ -4338,6 +4930,10 @@ let tikesStarted=false, tikesT=0, tikesX=0, childX=0, tikesBoarded=false, tikesM
 let ionStarted=false, ionT=0, ionTx=0, ionBlastR=0;
 let dsStarted=false, dsT=0, dsBlastR=0;
 let prideStarted=false, prideT=0, prideFront=0, prideMarchers=[];
+let jokerStarted=false, jokerT=0, jokerMarchers=[], jokerGasParticles=[], jokerBystanders=[], jokerFloatX=0, batX=0, batFailed=false, jokerGasFront=0;
+let squadStarted=false, squadT=0, squadPortalR=0, squadFireR=0, squadCreatures=[], squadMembers=[];
+let monkeysStarted=false, monkeysT=0, zooAnimals=[], petersX=0, virusR=0, spreadR=0, coleX=0, youngColeX=0, coleShotFlag=false;
+let squad2Started=false, squad2T=0, squad2Decoys=[], squad2MemberXs=[], squad2Members=[], squad2Creatures=[], squad2DomeR=0, squad2RatR=0;
 const maxDmg=()=>Math.floor(COLS/2)+2;
 
 function reset(){
@@ -4393,6 +4989,10 @@ function reset(){
   ionStarted=false; ionT=0; ionTx=0; ionBlastR=0;
   dsStarted=false; dsT=0; dsBlastR=0;
   prideStarted=false; prideT=0; prideFront=0; prideMarchers=[];
+  jokerStarted=false; jokerT=0; jokerMarchers=[]; jokerGasParticles=[]; jokerBystanders=[]; jokerFloatX=0; batX=0; batFailed=false; jokerGasFront=0;
+  squadStarted=false; squadT=0; squadPortalR=0; squadFireR=0; squadCreatures=[]; squadMembers=[];
+  monkeysStarted=false; monkeysT=0; zooAnimals=[]; petersX=0; virusR=0; spreadR=0; coleX=0; youngColeX=0; coleShotFlag=false;
+  squad2Started=false; squad2T=0; squad2Decoys=[]; squad2MemberXs=[]; squad2Members=[]; squad2Creatures=[]; squad2DomeR=0; squad2RatR=0;
   scene.className=''; stage.className='';
   scene.style.textShadow="none";
   cmd.textContent="sudo rm -rf /*"; cmd.className="";
@@ -4502,12 +5102,20 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — THAT'S NO MOON"; sub.style.color="#c0ffd0"; sub.style.textShadow="0 0 8px #1a6a2a"; } }
   else if(cmdColor===47){ cmd.style.color="#ff66cc"; cmd.style.textShadow="0 0 18px #a0308a";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — START THE PARADE"; sub.style.color="#ffb0e6"; sub.style.textShadow="0 0 8px #a0308a"; } }
+  else if(cmdColor===48){ cmd.style.color="#8a2ab0"; cmd.style.textShadow="0 0 18px #3a1a4a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WHY SO SERIOUS?"; sub.style.color="#c090e0"; sub.style.textShadow="0 0 8px #3a1a4a"; } }
+  else if(cmdColor===49){ cmd.style.color="#e0c000"; cmd.style.textShadow="0 0 18px #4a1a6a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — ASSEMBLE TASK FORCE X"; sub.style.color="#ffe060"; sub.style.textShadow="0 0 8px #4a1a6a"; } }
+  else if(cmdColor===50){ cmd.style.color="#8a6a3a"; cmd.style.textShadow="0 0 18px #4a2a10";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — RELEASE THE VIRUS"; sub.style.color="#c0a060"; sub.style.textShadow="0 0 8px #4a2a10"; } }
+  else if(cmdColor===51){ cmd.style.color="#4080ff"; cmd.style.textShadow="0 0 18px #1a2a6a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — UNLEASH STARRO"; sub.style.color="#80a0ff"; sub.style.textShadow="0 0 8px #1a2a6a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%48; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%52; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
@@ -6020,6 +6628,222 @@ function loop(){
     sub.textContent="the city has never looked better. — press RESET"; sub.style.color="#ff9ad6"; sub.className="";
     prideT++;
     timer=setTimeout(loop,120);
+  }else if(phase==='joker'){
+    scene.style.textShadow="0 0 8px #8a2ab0";
+    if(!jokerStarted){ jokerStarted=true; jokerT=0; jokerInit(); jokerFloatX=-14; batX=COLS+11; batFailed=false; document.body.style.background="#06040a"; }
+    jokerFloatX+=Math.max(1,Math.floor(COLS/70));
+    if(!batFailed){ batX-=Math.max(1,Math.floor(COLS/55)); if(batX<=jokerFloatX+6) batFailed=true; }
+    jokerStep(jokerFloatX, true);
+    const {grid,mg}=jokerRender(jokerT, jokerFloatX, batX, batFailed, 0);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent= batFailed ? "BATMAN FAILS TO STOP THE PARADE" : "A STRANGE PARADE ROLLS THROUGH GOTHAM";
+    sub.style.color="#c090e0"; sub.style.textShadow="0 0 8px #3a1a4a";
+    jokerT++;
+    if(jokerFloatX<COLS+14){ timer=setTimeout(loop,70); }
+    else { phase='joker_gas'; jokerT=0; jokerGasFront=0; loop(); }
+  }else if(phase==='joker_gas'){
+    jokerGasFront=Math.min(COLS, jokerGasFront+Math.max(1,COLS/60));
+    jokerStep(jokerFloatX, false);
+    const {grid,mg}=jokerRender(jokerT, undefined, batX, true, jokerGasFront);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="THE LAUGHING GAS SPREADS ACROSS THE CITY";
+    sub.style.color="#8aff9a"; sub.style.textShadow="0 0 8px #1a6a2a";
+    jokerT++;
+    if(jokerGasFront<COLS){ timer=setTimeout(loop,70); }
+    else { phase='joker_hold'; loop(); }
+  }else if(phase==='joker_hold'){
+    stage.classList.remove('shake');
+    jokerStep(jokerFloatX, false);
+    const {grid,mg}=jokerRender(jokerT, undefined, batX, true, COLS);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="why so serious? batman failed. — press RESET"; sub.style.color="#8aff9a"; sub.className="";
+    jokerT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='squad'){
+    scene.style.textShadow="0 0 8px #a040e0";
+    if(!squadStarted){ squadStarted=true; squadT=0; squadPortalR=0; squadInit(); document.body.style.background="#08040c"; }
+    squadPortalR=Math.min(Math.floor(COLS*0.45), squadPortalR+Math.max(1,Math.floor(COLS/50)));
+    squadStep(squadPortalR);
+    const {grid,mg}=squadRender(squadPortalR, false, 0, false);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.add('shake');
+    sub.textContent="THE ENCHANTRESS OPENS HER MACHINE IN THE SKY";
+    sub.style.color="#c090ff"; sub.style.textShadow="0 0 8px #4a1a6a";
+    squadT++;
+    if(squadPortalR<Math.floor(COLS*0.45)){ timer=setTimeout(loop,70); }
+    else { phase='squad_fight'; squadT=0; loop(); }
+  }else if(phase==='squad_fight'){
+    stage.classList.add('shake');
+    squadAdvance();
+    const {grid,mg}=squadRender(squadPortalR, true, 0, false);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="TASK FORCE X FIGHTS THROUGH THE HORDE";
+    sub.style.color="#e0c000"; sub.style.textShadow="0 0 8px #6a4a00";
+    squadT++;
+    const allArrived=squadMembers.every(m=>m.x>=cx);
+    if(!allArrived){ timer=setTimeout(loop,70); }
+    else { phase='squad_diablo'; squadT=0; squadFireR=0; loop(); }
+  }else if(phase==='squad_diablo'){
+    stage.classList.add('shake');
+    squadFireR=Math.min(14, squadFireR+1.2);
+    const {grid,mg}=squadRender(squadPortalR, true, squadFireR, false);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="EL DIABLO UNLEASHES HIS FIRE";
+    sub.style.color="#ff6020"; sub.style.textShadow="0 0 10px #ff2000";
+    squadT++;
+    if(squadFireR<14){ timer=setTimeout(loop,60); }
+    else { phase='squad_destroy'; squadT=0; loop(); }
+  }else if(phase==='squad_destroy'){
+    stage.classList.add('shake');
+    squadPortalR=Math.max(0, squadPortalR-Math.max(1,Math.floor(COLS/30)));
+    const {grid,mg}=squadRender(squadPortalR, true, squadFireR, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="THE MACHINE FALLS — ENCHANTRESS IS DEFEATED";
+    sub.style.color="#c090ff"; sub.style.textShadow="0 0 8px #4a1a6a";
+    squadT++;
+    if(squadPortalR>0){ timer=setTimeout(loop,60); }
+    else { phase='squad_hold'; loop(); }
+  }else if(phase==='squad_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=squadRender(0, true, 0, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="mission complete. Task Force X heads back to prison. — press RESET"; sub.style.color="#c090ff"; sub.className="";
+    squadT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='monkeys'){
+    scene.style.textShadow="0 0 8px #8a6a3a";
+    if(!monkeysStarted){ monkeysStarted=true; monkeysT=0; monkeysZooInit(); document.body.style.background="#0a0a06"; }
+    monkeysZooStep();
+    const {grid,mg}=monkeysZooRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="THE ARMY OF THE TWELVE MONKEYS STRIKES — THE ZOO IS EMPTIED";
+    sub.style.color="#e0c080"; sub.style.textShadow="0 0 8px #6a4a10";
+    monkeysT++;
+    if(monkeysT<40){ timer=setTimeout(loop,90); }
+    else { phase='monkeys_release'; monkeysT=0; petersX=-4; virusR=0; loop(); }
+  }else if(phase==='monkeys_release'){
+    petersX=Math.min(cx, petersX+Math.max(1,Math.floor(COLS/70)));
+    if(petersX>=cx*0.3) virusR=Math.min(6, virusR+0.3);
+    const {grid,mg}=monkeysReleaseRender(petersX, Math.round(virusR));
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent = petersX<cx*0.3 ? "A LONE MAN MOVES THROUGH THE TERMINAL, CARRYING VIALS" : "IT WAS NEVER THE MONKEYS. IT WAS DR. PETERS.";
+    sub.style.color="#c060e0"; sub.style.textShadow="0 0 8px #4a1a6a";
+    monkeysT++;
+    if(!(petersX>=cx && monkeysT>30)){ timer=setTimeout(loop,80); }
+    else { phase='monkeys_spread'; monkeysT=0; spreadR=0; loop(); }
+  }else if(phase==='monkeys_spread'){
+    stage.classList.add('shake');
+    const maxR=Math.hypot(cx,streetRow*2)+6;
+    spreadR=Math.min(maxR, spreadR+Math.max(1,COLS/50));
+    const {grid,mg}=monkeysSpreadRender(spreadR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="THE VIRUS SPREADS — CITY AFTER CITY FALLS SILENT";
+    sub.style.color="#a040e0"; sub.style.textShadow="0 0 8px #4a1a6a";
+    monkeysT++;
+    if(spreadR<maxR){ timer=setTimeout(loop,60); }
+    else { phase='monkeys_empty'; monkeysT=0; loop(); }
+  }else if(phase==='monkeys_empty'){
+    stage.classList.remove('shake');
+    monkeysZooStep();
+    for(const a of zooAnimals){ if(a.x>COLS+14) a.x=-14; }
+    const {grid,mg}=monkeysEmptyRender(monkeysT);
+    scene.innerHTML=paint(grid,mg,'city');
+    document.body.style.background="#0a0a0c";
+    sub.textContent="FIVE BILLION DEAD. THE SURFACE BELONGS TO THE ANIMALS NOW";
+    sub.style.color="#8a6a3a"; sub.style.textShadow="0 0 8px #4a2a10";
+    monkeysT++;
+    if(monkeysT<50){ timer=setTimeout(loop,90); }
+    else { phase='monkeys_loop'; monkeysT=0; coleX=cx-16; youngColeX=cx+14; coleShotFlag=false; loop(); }
+  }else if(phase==='monkeys_loop'){
+    coleX=Math.min(cx, coleX+Math.max(1,Math.floor(COLS/60)));
+    const {grid,mg}=monkeysLoopRender(coleX, youngColeX, coleShotFlag);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent = coleShotFlag ? "HE WATCHED HIMSELF DIE, AND HE WAS ALREADY THERE." : "COLE RACES THROUGH THE AIRPORT TO STOP IT";
+    sub.style.color="#c0c0c0"; sub.style.textShadow="0 0 8px #4a4e54";
+    monkeysT++;
+    if(!coleShotFlag && coleX>=cx){ coleShotFlag=true; stage.classList.add('shake'); }
+    if(!(coleShotFlag && monkeysT>26)){ timer=setTimeout(loop,80); }
+    else { phase='monkeys_hold'; loop(); }
+  }else if(phase==='monkeys_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=monkeysLoopRender(coleX, youngColeX, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the outbreak was never stopped. it was only ever survived. — press RESET"; sub.style.color="#c0c0c0"; sub.className="";
+    monkeysT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='squad2_decoy'){
+    scene.style.textShadow="0 0 8px #c02020";
+    if(!squad2Started){ squad2Started=true; squad2T=0; squad2DecoyInit(); document.body.style.background="#0a0604"; }
+    const firing = squad2T>10;
+    if(firing){ for(const d of squad2Decoys){ if(!d.down && Math.random()<0.15) d.down=true; } }
+    const {grid,mg}=squad2DecoyRender(firing);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(firing) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent = firing ? "THE DECOY TEAM IS CUT DOWN ON THE BEACH" : "TASK FORCE X HITS THE BEACH AT CORTO MALTESE";
+    sub.style.color="#ff8080"; sub.style.textShadow="0 0 8px #800000";
+    squad2T++;
+    const allDown = squad2Decoys.every(d=>d.down);
+    if(!(allDown && squad2T>30)){ timer=setTimeout(loop,80); }
+    else { phase='squad2_infiltrate'; squad2T=0; squad2MemberXs=[-3,-7,-11,-15,-19]; loop(); }
+  }else if(phase==='squad2_infiltrate'){
+    const targetCol=Math.floor(COLS*0.75);
+    for(let i=0;i<squad2MemberXs.length;i++){ squad2MemberXs[i]=Math.min(targetCol-3+i, squad2MemberXs[i]+Math.max(1,Math.floor(COLS/60))); }
+    const {grid,mg}=squad2TowerRender(squad2MemberXs);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="THE REAL TEAM MOVES ON JOTUNHEIM"; sub.style.color="#e0b030"; sub.style.textShadow="0 0 8px #6a4a10";
+    squad2T++;
+    const arrived = squad2MemberXs.every((x,i)=> x>=targetCol-3+i);
+    if(!(arrived && squad2T>20)){ timer=setTimeout(loop,80); }
+    else { phase='squad2_explode'; squad2T=0; squad2DomeR=0; loop(); }
+  }else if(phase==='squad2_explode'){
+    stage.classList.add('shake');
+    const col=Math.floor(COLS*0.75);
+    squad2DomeR=Math.min(14, squad2DomeR+1.3);
+    const {grid,mg}=squad2ExplodeRender(col, squad2DomeR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="JOTUNHEIM GOES UP — AND SOMETHING BREAKS FREE"; sub.style.color="#ff8000"; sub.style.textShadow="0 0 10px #ff2000";
+    squad2T++;
+    if(squad2DomeR<14){ timer=setTimeout(loop,60); }
+    else { phase='squad2_rampage'; squad2T=0; squad2DomeR=0; squad2RatR=0; squad2Init(col); document.body.style.background="#0a0410"; loop(); }
+  }else if(phase==='squad2_rampage'){
+    stage.classList.add('shake');
+    const col=Math.floor(COLS*0.75);
+    squad2DomeR=Math.min(Math.floor(COLS*0.4), squad2DomeR+Math.max(1,Math.floor(COLS/60)));
+    squad2Step(squad2DomeR, col);
+    const {grid,mg}=squad2Render(col, squad2DomeR, 0, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="STARRO RAMPAGES — MIND-CONTROLLED THRALLS SWARM THE STREETS";
+    sub.style.color="#c060e0"; sub.style.textShadow="0 0 8px #4a1a6a";
+    squad2T++;
+    if(!(squad2DomeR>=Math.floor(COLS*0.4) && squad2T>40)){ timer=setTimeout(loop,70); }
+    else { phase='squad2_fight'; squad2T=0; squad2RatR=0; loop(); }
+  }else if(phase==='squad2_fight'){
+    stage.classList.add('shake');
+    const col=Math.floor(COLS*0.75);
+    squad2RatR=Math.min(16, squad2RatR+1);
+    const {grid,mg}=squad2Render(col, squad2DomeR, squad2RatR, squad2RatR<16);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent = squad2RatR<16 ? "RATCATCHER 2 UNLEASHES THE SWARM" : "BLOODSPORT LANDS THE KILLING BLOW";
+    sub.style.color="#8aff40"; sub.style.textShadow="0 0 8px #2a5a10";
+    squad2T++;
+    if(squad2RatR<16){ timer=setTimeout(loop,80); }
+    else { phase='squad2_hold'; squad2T=0; loop(); }
+  }else if(phase==='squad2_hold'){
+    stage.classList.remove('shake');
+    const col=Math.floor(COLS*0.75);
+    const {grid,mg}=squad2Render(col, squad2DomeR, 0, false);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="Starro is dead. the city is wrecked but standing. Waller has been blackmailed. — press RESET"; sub.style.color="#8aff40"; sub.className="";
+    squad2T++;
+    timer=setTimeout(loop,150);
   }
 }
 
@@ -6027,6 +6851,7 @@ function armDrop(){
   if(phase!=='intro')return;
   clearInterval(cycleTimer);
   clearTimeout(timer);            // cancel the pending intro frame; we restart the chain cleanly
+  recordDestruction(cmdColor);
   methodBox.style.display="none";
   if(cmdColor===1){              // BLUE -> tidal wave
     attackMode='tsunami';
@@ -6216,6 +7041,22 @@ function armDrop(){
     attackMode='pride';
     cmd.style.color="#ff66cc"; cmd.style.textShadow="0 0 20px #a0308a";
     prideStarted=false; phase='pride';
+  }else if(cmdColor===48){      // CLOWN PURPLE -> The Joker
+    attackMode='joker';
+    cmd.style.color="#8a2ab0"; cmd.style.textShadow="0 0 20px #3a1a4a";
+    jokerStarted=false; phase='joker';
+  }else if(cmdColor===49){      // TASK FORCE GOLD -> Suicide Squad
+    attackMode='squad';
+    cmd.style.color="#e0c000"; cmd.style.textShadow="0 0 20px #4a1a6a";
+    squadStarted=false; phase='squad';
+  }else if(cmdColor===50){      // KHAKI -> 12 Monkeys
+    attackMode='monkeys';
+    cmd.style.color="#8a6a3a"; cmd.style.textShadow="0 0 20px #4a2a10";
+    monkeysStarted=false; phase='monkeys';
+  }else if(cmdColor===51){      // BLOODSPORT BLUE -> Suicide Squad 2
+    attackMode='squad2';
+    cmd.style.color="#4080ff"; cmd.style.textShadow="0 0 20px #1a2a6a";
+    squad2Started=false; phase='squad2_decoy';
   }else{                        // RED -> nuke
     attackMode='nuke';
     cmd.style.color="#f00"; cmd.style.textShadow="0 0 20px #f00";
@@ -6224,6 +7065,42 @@ function armDrop(){
   loop();                        // single fresh chain for whichever attack
 }
 window.addEventListener('keydown',armDrop);
+// filter pills: narrow the method grid down to one category at a time
+function applyPopularFilter(){
+  const counts=stats.methods||{};
+  const ranked=Object.keys(methodNames)
+    .map(id=>({id, count:(counts[id])||0}))
+    .filter(e=>e.count>0)
+    .sort((a,b)=> b.count-a.count)
+    .slice(0,POPULAR_COUNT)
+    .map(e=>e.id);
+  // no usage data yet (fresh deploy) — fall back to showing everything rather than an empty grid
+  if(ranked.length===0){
+    methodBox.querySelectorAll('.pick').forEach(el=>el.classList.remove('mHidden'));
+    return;
+  }
+  const popularSet=new Set(ranked);
+  methodBox.querySelectorAll('.pick').forEach(el=>{
+    el.classList.toggle('mHidden', !popularSet.has(el.getAttribute('data-method')));
+  });
+}
+methodBox.querySelectorAll('.filterBtn').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const cat=btn.getAttribute('data-cat');
+    methodBox.querySelectorAll('.filterBtn').forEach(b=>b.classList.toggle('active', b===btn));
+    if(cat==='popular'){
+      // refresh with the latest server counts, then apply — falls back to whatever's cached meanwhile
+      applyPopularFilter();
+      fetchStats().then(()=>{ if(btn.classList.contains('active')) applyPopularFilter(); });
+      return;
+    }
+    methodBox.querySelectorAll('.pick').forEach(el=>{
+      const show = (cat==='all') || (el.getAttribute('data-cat')===cat);
+      el.classList.toggle('mHidden', !show);
+    });
+  });
+});
 // clicking / tapping a method name selects that attack and fires it
 methodBox.querySelectorAll('.pick').forEach(el=>{
   const fire=(e)=>{
@@ -6238,7 +7115,9 @@ methodBox.querySelectorAll('.pick').forEach(el=>{
 // tapping / clicking anywhere else fires whatever colour is currently showing
 function stageTap(e){
   if(e.target && e.target.closest && e.target.closest('#topBar'))return;     // reset button / version badge
+  if(e.target && e.target.closest && e.target.closest('#topBarLeft'))return; // stats button
   if(e.target && e.target.closest && e.target.closest('#methodBox'))return;   // handled above
+  if(e.target && e.target.closest && e.target.closest('#statsOverlay'))return; // stats panel
   armDrop();
 }
 document.body.addEventListener('click', stageTap);
