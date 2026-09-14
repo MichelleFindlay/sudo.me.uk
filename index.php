@@ -21,24 +21,28 @@ function fetchLatestGithubVersion($repo) {
     return ltrim($data['tag_name'], 'vV');
 }
 
-function getLatestVersion($repo, $cacheFile, $ttl) {
+function getLatestVersion($repo, $cacheFile, $ttl, $currentVersion) {
     $cached = null;
     if (is_readable($cacheFile)) {
         $cached = json_decode((string)@file_get_contents($cacheFile), true);
-        if (is_array($cached) && isset($cached['fetched_at'], $cached['version']) && (time() - $cached['fetched_at']) < $ttl) {
+        // a cache entry recorded under a different $VERSION predates this deploy — its
+        // "latest release" snapshot may be from before this version was even released,
+        // so don't trust it just because it's within the TTL
+        $sameDeploy = is_array($cached) && isset($cached['checked_version']) && $cached['checked_version'] === $currentVersion;
+        if ($sameDeploy && isset($cached['fetched_at'], $cached['version']) && (time() - $cached['fetched_at']) < $ttl) {
             return $cached['version'];
         }
     }
     $latest = fetchLatestGithubVersion($repo);
     if ($latest !== null) {
-        @file_put_contents($cacheFile, json_encode(['version' => $latest, 'fetched_at' => time()]));
+        @file_put_contents($cacheFile, json_encode(['version' => $latest, 'fetched_at' => time(), 'checked_version' => $currentVersion]));
         return $latest;
     }
     // GitHub unreachable — fall back to a stale cache rather than showing nothing
     return (is_array($cached) && isset($cached['version'])) ? $cached['version'] : null;
 }
 
-$latestVersion = getLatestVersion($GITHUB_REPO, $CACHE_FILE, $CACHE_TTL);
+$latestVersion = getLatestVersion($GITHUB_REPO, $CACHE_FILE, $CACHE_TTL, $VERSION);
 // red whenever we can't positively confirm this build matches a published release —
 // either a newer one exists, or there's no release published at all yet
 $updateAvailable = $latestVersion === null || version_compare($latestVersion, $VERSION, '>');
