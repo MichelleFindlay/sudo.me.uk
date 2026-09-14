@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.4.1
+
+### Added
+- Two new destruction methods: **Duke Nukem 3D** (an intro flight sequence, an alien shoot-down and crash landing, then a rampage through the wreckage) and **Dolly** (a non-destructive tribute — workers arrive at 9AM, clock in for a shift, and head home at 5PM, ending on "RIP Dolly Parton").
+
+### Fixed
+- Duke Nukem 3D's crash/impact sequence could throw mid-animation and silently freeze the page, because a fractional blast radius was used directly as a grid-loop bound. The loop bound is now rounded while the blast shape itself stays smooth.
+
+### Changed
+- The destruction statistics panel now lays out in two columns on desktop/tablet so the full method list fits without excess scrolling, and collapses back to a single column on phones.
+
+## v1.4.0
+
+### Added
+- A new **GTA** destruction method: a rampage that racks up a GTA-style 1-5 star wanted level over time. Escalates from a couple of slow patrol cars at 1 star, through roadblocking patrols at 2, ramming SWAT vans at 3, a circling helicopter with a spike strip at 4, up to rolling tanks and a pulsing citywide alert at 5, where it holds indefinitely.
+- A star-rating HUD badge next to the Statistics button, flashing while wanted and glowing red once pursuit is active — stays empty for every other method, since the wanted system only runs during GTA.
+
 ## v1.3.0
 
 ### Added
