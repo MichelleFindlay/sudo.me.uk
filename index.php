@@ -1,6 +1,6 @@
 <?php
 // ---- version & update check ----
-$VERSION = '1.4.0';
+$VERSION = '1.4.1';
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
 $CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
@@ -310,12 +310,13 @@ if (isset($_GET['stats'])) {
     display:none; align-items:center; justify-content:center; padding:20px; }
   #statsOverlay.open { display:flex; }
   #statsPanel { background:#0a0e14; border:1px solid #0f0; border-radius:8px; padding:18px 20px;
-    max-width:480px; width:100%; max-height:80vh; overflow-y:auto; box-shadow:0 0 24px rgba(0,255,0,.25);
+    max-width:760px; width:100%; max-height:80vh; overflow-y:auto; box-shadow:0 0 24px rgba(0,255,0,.25);
     font-family:"Courier New", monospace; color:#c7d2e0; }
   #statsPanel h2 { margin:0 0 4px; font-size:16px; color:#0f0; text-shadow:0 0 8px #0f0; letter-spacing:1px; }
   #statsPanel .statsTotal { font-size:13px; color:#9ad; margin-bottom:12px; }
+  #statsList { column-count:2; column-gap:20px; }
   #statsList .statsRow { display:flex; justify-content:space-between; gap:10px; padding:4px 0;
-    border-bottom:1px solid rgba(255,255,255,0.06); font-size:13px; }
+    border-bottom:1px solid rgba(255,255,255,0.06); font-size:13px; break-inside:avoid; -webkit-column-break-inside:avoid; }
   #statsList .statsRow .cnt { color:#0f0; font-weight:bold; min-width:2.5em; text-align:right; }
   #statsPanel .statsFooter { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
   #statsPanel button { font-family:inherit; background:#111; color:#0f0; border:1px solid #0f0;
@@ -352,6 +353,11 @@ if (isset($_GET['stats'])) {
     #wantedBox { font-size:13px; letter-spacing:2px; padding:7px 9px; min-height:36px; }
     #topBar { gap:6px; }
     #topBarLeft { gap:6px; }
+    #statsPanel { padding:14px 12px; max-height:86vh; }
+    #statsPanel h2 { font-size:13px; }
+    #statsPanel .statsTotal { font-size:12px; }
+    #statsList { column-count:1; }
+    #statsList .statsRow { font-size:12px; }
   }
   /* very narrow phones: shrink tile text a touch more */
   @media (max-width: 380px){
@@ -5389,48 +5395,6 @@ const dollyLines=[
   "Want to move ahead",
   "But the boss won't seem to let me",
   "I swear sometimes that man is out to get me",
-  "Mmm",
-  "They let you dream",
-  "Just a' watch 'em shatter",
-  "You're just a step",
-  "On the boss man's ladder",
-  "But you got dreams he'll never take away",
-  "In the same boat",
-  "With a lot of your friends",
-  "Waitin' for the day",
-  "Your ship'll come in",
-  "And the tide's gonna turn",
-  "And it's all gonna roll you away",
-  "Workin' 9 to 5",
-  "What a way to make a livin'",
-  "Barely gettin' by",
-  "It's all takin' and no givin'",
-  "They just use your mind",
-  "And you never get the credit",
-  "It's enough to drive you",
-  "Crazy if you let it",
-  "9 to 5, yeah, yes, they got you where they want you",
-  "There's a better life",
-  "And you think about it, don't you?",
-  "It's a rich man's game",
-  "No matter what they call it",
-  "And you spend your life",
-  "Putting money in his wallet",
-  "9 to 5",
-  "What a way to make a livin'",
-  "Barely gettin' by",
-  "It's all takin' and no givin'",
-  "They just use your mind",
-  "And they never give you credit",
-  "It's enough to drive you",
-  "Crazy if you let it",
-  "9 to 5, yeah, they got you where they want you",
-  "There's a better life",
-  "And you think about it, don't you?",
-  "It's a rich man's game",
-  "No matter what they call it",
-  "And you spend your life",
-  "Puttin' money in his wallet",
 ];
 function dollyInit(){
   dollyWorkers=[];
