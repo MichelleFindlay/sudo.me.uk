@@ -1,6 +1,6 @@
 <?php
 // ---- version & update check ----
-$VERSION = '1.3.0';
+$VERSION = '1.4.0';
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
 $CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
@@ -254,6 +254,10 @@ if (isset($_GET['stats'])) {
   #methodBox .m-squad { color:#e0c000; text-shadow:0 0 8px #4a1a6a; }
   #methodBox .m-squad2 { color:#4080ff; text-shadow:0 0 8px #1a2a6a; }
   #methodBox .m-monkeys { color:#8a6a3a; text-shadow:0 0 8px #4a2a10; }
+  #methodBox .m-gta { color:#ffcc00; text-shadow:0 0 8px #ff3030; }
+  #methodBox .m-sim { color:#7aca5a; text-shadow:0 0 8px #2a5a1a; }
+  #methodBox .m-duke { color:#ff8000; text-shadow:0 0 8px #ff3000; }
+  #methodBox .m-dolly { color:#ff8fc0; text-shadow:0 0 8px #a0308a; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -269,6 +273,11 @@ if (isset($_GET['stats'])) {
     50%{transform:translate(1px,-2px)} 75%{transform:translate(-1px,2px)}
     100%{transform:translate(2px,-1px)} }
   #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; }
+  /* wanted-system citywide alert: a pulsing red vignette at max heat, never intercepts clicks */
+  #wantedAlert { position:absolute; inset:0; z-index:5; pointer-events:none; opacity:0; transition:opacity .3s;
+    background:radial-gradient(ellipse at center, rgba(255,0,0,0) 55%, rgba(255,0,0,.35) 100%); }
+  #wantedAlert.on { opacity:1; animation: wantedPulse 1s ease-in-out infinite; }
+  @keyframes wantedPulse { 0%,100% { opacity:.55; } 50% { opacity:1; } }
   #topBar { position:absolute; top:max(10px, env(safe-area-inset-top)); right:max(10px, env(safe-area-inset-right)); z-index:10;
     display:flex; align-items:center; gap:8px; }
   #topBarLeft { position:absolute; top:max(10px, env(safe-area-inset-top)); left:max(10px, env(safe-area-inset-left)); z-index:10;
@@ -290,6 +299,13 @@ if (isset($_GET['stats'])) {
   #statsBtn svg { width:20px; height:20px; fill:currentColor; filter:drop-shadow(0 0 4px #0f0); }
   #statsBtn:hover { background:#0f0; color:#000; }
   #statsBtn:active { background:#0f0; color:#000; transform:scale(0.94); }
+  /* wanted-system star HUD: only shown during the GTA method; glows yellow and flashes while pursued */
+  #wantedBox { background:#111; color:#444; border:1px solid #333; font-family:"Courier New",monospace;
+    font-size:16px; letter-spacing:3px; padding:9px 12px; min-height:40px; display:none; align-items:center;
+    border-radius:5px; box-shadow:0 0 10px rgba(0,0,0,.3); opacity:0.85; transition:opacity .2s, color .2s, border-color .2s; }
+  #wantedBox.wanted-active { color:#ffd400; border-color:#ffd400; text-shadow:0 0 8px #ffd400;
+    box-shadow:0 0 14px rgba(255,212,0,.5); opacity:1; }
+  #wantedBox.wanted-pursuit { animation: blink 0.5s steps(1) infinite; }
   #statsOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:50;
     display:none; align-items:center; justify-content:center; padding:20px; }
   #statsOverlay.open { display:flex; }
@@ -333,6 +349,7 @@ if (isset($_GET['stats'])) {
     #githubBtn svg { width:18px; height:18px; }
     #statsBtn { min-height:36px; min-width:36px; padding:6px; }
     #statsBtn svg { width:18px; height:18px; }
+    #wantedBox { font-size:13px; letter-spacing:2px; padding:7px 9px; min-height:36px; }
     #topBar { gap:6px; }
     #topBarLeft { gap:6px; }
   }
@@ -355,6 +372,7 @@ if (isset($_GET['stats'])) {
   <button id="statsBtn" aria-label="View destruction statistics" title="Statistics">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16v2H2V2h2v18zm3-2h2V9H7v9zm5 0h2V4h-2v14zm5 0h2v-6h-2v6z"/></svg>
   </button>
+  <div id="wantedBox" title="Wanted level">&#9734;&#9734;&#9734;&#9734;&#9734;</div>
 </div>
 <div id="topBar">
   <a id="githubBtn" href="https://github.com/MichelleFindlay/sudo.me.uk" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub">
@@ -428,12 +446,17 @@ if (isset($_GET['stats'])) {
       <span class="m-squad pick" data-method="49" data-cat="movie">Suicide Squad</span>
       <span class="m-squad2 pick" data-method="51" data-cat="movie">Suicide Squad 2</span>
       <span class="m-monkeys pick" data-method="50" data-cat="movie">12 Monkeys</span>
+      <span class="m-gta pick" data-method="52" data-cat="movie">GTA</span>
+      <span class="m-sim pick" data-method="53" data-cat="movie">Sim City</span>
+      <span class="m-duke pick" data-method="54" data-cat="movie">Duke Nukem 3D</span>
+      <span class="m-dolly pick" data-method="55" data-cat="fun">Dolly</span>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
   <div id="sub" class="blink">INCOMING...</div>
 </div>
 <div id="flash"></div>
+<div id="wantedAlert"></div>
 <div id="statsOverlay">
   <div id="statsPanel">
     <h2>DESTRUCTION STATISTICS</h2>
@@ -450,7 +473,8 @@ if (isset($_GET['stats'])) {
 const scene=document.getElementById('scene'),cmd=document.getElementById('cmd'),
       sub=document.getElementById('sub'),flash=document.getElementById('flash'),
       stage=document.getElementById('stage'),root=document.documentElement,
-      methodBox=document.getElementById('methodBox');
+      methodBox=document.getElementById('methodBox'),
+      wantedBox=document.getElementById('wantedBox'),wantedAlert=document.getElementById('wantedAlert');
 
 // ---- destruction statistics: total runs + per-method counts, stored server-side (shared across every visitor) ----
 const statsBtn=document.getElementById('statsBtn'), statsOverlay=document.getElementById('statsOverlay'),
@@ -1222,12 +1246,51 @@ function colorFor(ch,r,c,mode){
     if(ch==="~"||ch==="\u2248")return (Math.random()<0.5)?"#1e78d0":"#2e9bd8";
     return "#2b8fd6";
   }
+  if(mode==='wanted'){                                            // wanted-system pursuers (cop cars, SWAT, heli, tanks)
+    if(ch==="*")return (Math.random()<0.5)?"#ff3030":"#3a7bff";   // light-bar flash, alternating red/blue
+    if(ch==="^")return "#e8e8e8";                                 // spike strip
+    if(ch===":")return "#ffe066";                                 // helicopter spotlight beam
+    if(ch==="P"||ch==="D"||ch==="S"||ch==="W"||ch==="A"||ch==="T"||ch==="L")return "#dfe6f0"; // lettering
+    if(ch==="o")return "#111318";                                 // wheels
+    return "#9aa4b2";                                              // hull / frame
+  }
+  if(mode==='baddie'){                                            // the GTA baddie, staying just ahead of the law
+    if(ch==="o")return "#ffcf9a";                                 // face
+    if(ch==="$")return "#ffd400";                                 // stolen cash
+    return "#202226";                                             // dark hoodie
+  }
+  if(mode==='grass'){                                             // the empty field, before the city rises
+    return (Math.random()<0.5)?"#4a9a3a":"#3a7a2a";
+  }
+  if(mode==='duke'){                                              // Duke Nukem himself (and his mirror reflection)
+    if(ch==="o")return "#f0c060";                                 // blonde hair
+    if(ch==="#")return "#c02020";                                 // gun
+    if(ch==="<"||ch===">")return "#8a8a8a";                       // gun barrel
+    if(ch==="|")return "#3a3a3a";                                 // mirror frame
+    return "#e8d8c0";                                             // skin / tank top
+  }
+  if(mode==='pigalien'){                                          // Pig Cops & Octabrains
+    if(ch==="o"||ch==="@")return "#ff5050";                       // eyes/glow
+    return "#4a9a3a";                                             // green alien hide
+  }
+  if(mode==='dolly'){                                             // the 9 to 5 crowd, and the big clock
+    if(ch==="o")return "#f0c060";                                 // blonde head
+    if(/[0-9:APM]/.test(ch))return "#ffd700";                     // the clock face, rhinestone gold
+    return "#ff8fc0";                                             // denim-pink workwear
+  }
+  if(mode==='dukefire'){                                          // muzzle flashes & explosions
+    const rdk=Math.random();
+    if(rdk<0.4) return "#ffe040";
+    if(rdk<0.7) return "#ff8000";
+    return "#ff3000";
+  }
   return "#cccccc";
 }
 
 // Build an HTML string from a char grid + a same-shape "mode grid".
 // modeGrid[r][c] gives the palette mode for that cell; falls back to base.
 function paint(grid, modeGrid, base){
+  WantedSystem.render(grid, modeGrid);
   let out="";
   for(let r=0;r<grid.length;r++){
     const row=grid[r]||"", mrow=modeGrid?modeGrid[r]:null;
@@ -4938,11 +5001,486 @@ let jokerStarted=false, jokerT=0, jokerMarchers=[], jokerGasParticles=[], jokerB
 let squadStarted=false, squadT=0, squadPortalR=0, squadFireR=0, squadCreatures=[], squadMembers=[];
 let monkeysStarted=false, monkeysT=0, zooAnimals=[], petersX=0, virusR=0, spreadR=0, coleX=0, youngColeX=0, coleShotFlag=false;
 let squad2Started=false, squad2T=0, squad2Decoys=[], squad2MemberXs=[], squad2Members=[], squad2Creatures=[], squad2DomeR=0, squad2RatR=0;
+let gtaStarted=false, gtaT=0, gtaFiveT=0;
+let simStarted=false, simT=0, simGrowCols=[], simSubPhase='grass', simHoldT=0;
+let dukeStarted=false, dukeT=0, dukeSubPhase='logos', dukeX=0, dukePigs=[], dukeBrains=[], dukeBursts=[], dukeBlastR=0,
+    dukeShipX=0, dukeShipY=0, dukeAlienX=0, dukeAlienY=0, dukeShipTargetX=0, dukeShipTargetY=0, dukeCrashR=0,
+    dukeShipStartX=0, dukeShipStartY=0;
+let dollyStarted=false, dollyT=0, dollySubPhase='arrive', dollyWorkers=[], dollyLineIdx=0, dollyLineT=0;
 const maxDmg=()=>Math.floor(COLS/2)+2;
+
+// ---- WANTED SYSTEM: GTA-style 1-5 star heat/pursuit escalation ----
+// Self-contained: flip WANTED_ENABLED to false to disable heat tracking, pursuer
+// spawning/rendering and the HUD without touching anything else in the sim.
+// Public API: WantedSystem.onDestruction(amount), .getWantedLevel(), .setWantedLevel(n),
+// .clearWanted(). Emits a 'wantedLevelChanged' CustomEvent on window whenever the star
+// count changes, detail: {level, heat}, so UI/audio can react independently of this module.
+const WANTED_ENABLED = true;
+const WANTED_MAX_STARS = 5;
+const WANTED_HEAT_PER_STAR = 100;
+const WANTED_MAX_HEAT = WANTED_HEAT_PER_STAR * WANTED_MAX_STARS;
+const WANTED_HEAT_PER_DESTRUCTION = 100;   // one full star per attack launched
+const WANTED_DECAY_GRACE_MS = 5000;        // no decay for this long after the last destruction
+const WANTED_DECAY_PER_SEC = 12;           // heat/sec lost once the grace period elapses
+
+// how many of each pursuer type should be on-screen at each star level (index = level)
+const WANTED_TIERS = [
+  {patrol:0, swat:0, heli:0, tank:0},                        // 0 - clean
+  {patrol:2, swat:0, heli:0, tank:0},                        // 1 - a couple of slow patrol cars
+  {patrol:4, swat:0, heli:0, tank:0},                        // 2 - more units, faster, roadblocks
+  {patrol:2, swat:3, heli:0, tank:0},                        // 3 - SWAT vans ram in
+  {patrol:2, swat:3, heli:1, tank:0},                        // 4 - air support + spike strips
+  {patrol:2, swat:3, heli:1, tank:2},                        // 5 - tanks roll in, citywide alert
+];
+// cruise speed in columns/sec, before any escalation multiplier
+const WANTED_SPEED = {patrol:6, swat:10, heli:7, tank:3};
+
+const patrolCarSprite=[
+  " ___*___ ",
+  "/_[PD]__\\",
+  " (o)  (o)",
+];
+const swatVanSprite=[
+  " _______ ",
+  "|__SWAT*|",
+  " (o)  (o)",
+];
+// tankSprite (5-star heavy response) and heliRotorFrames (4-star air support) are reused
+// from the WAR method's assets, defined earlier in this file.
+
+// the baddie: the reason all of the above is happening, dodging through the street
+const baddieSprite=[
+  " o ",
+  "/|\\",
+  "/ \\",
+];
+// reacts to the current star level (index 0..5), drawn above their head while on the run
+const baddieLines=[
+  "JUST GOTTA KEEP MOVING...",
+  "THEY SPOTTED ME!",
+  "ROADBLOCK AHEAD!",
+  "SWAT?! REALLY?!",
+  "IS THAT A HELICOPTER?!",
+  "NOT TODAY, COPPERS!",
+];
+// once pinned at 5 stars, cycles through these instead
+const gtaHoldLines=[
+  "THIS IS FINE.",
+  "I REGRET EVERYTHING.",
+  "SOMEBODY CALL MY LAWYER!",
+  "IS THAT A TANK?!",
+];
+function drawBaddie(grid, mg, t, text){
+  const bx=cx+Math.round(Math.sin(t*0.25)*8), bTop=streetRow-baddieSprite.length+1, bBob=(Math.sin(t*0.5)>0)?0:1;
+  for(let i=0;i<baddieSprite.length;i++){ const art=baddieSprite[i], r=bTop+i-bBob;
+    for(let j=0;j<art.length;j++){ const c=bx+j-1; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'baddie'); } }
+  const bagR=bTop-bBob, bagC=bx+2;
+  if(bagR>=0&&bagR<ROWS&&bagC>=0&&bagC<COLS){ setCh(grid,bagR,bagC,"$"); setMode(mg,bagR,bagC,'baddie'); }
+  if(text) mtDrawBubble(grid, mg, bx, bTop-bBob, text);
+}
+
+const WantedSystem = {
+  enabled: WANTED_ENABLED,
+  heat: 0, level: 0,
+  lastDestructionAt: 0, lastStepAt: 0, frame: 0, ramCooldown: 0, spikeStripX: -1,
+  pursuers: { patrol:[], swat:[], heli:[], tank:[] },
+
+  spawnUnit(type){
+    const fromLeft = Math.random()<0.5;
+    return { x: fromLeft ? -8-((Math.random()*20)|0) : COLS+8+((Math.random()*20)|0),
+             spd: WANTED_SPEED[type] * (fromLeft?1:-1),
+             y: type==='heli' ? 2+((Math.random()*3)|0) : 0,
+             stopped:false };
+  },
+  syncToTier(){
+    const tier=WANTED_TIERS[this.level];
+    for(const type of ['patrol','swat','heli','tank']){
+      const want=tier[type], have=this.pursuers[type];
+      while(have.length<want) have.push(this.spawnUnit(type));
+      if(have.length>want) this.pursuers[type]=have.slice(0,want);
+    }
+    if(this.level<4) this.spikeStripX=-1;
+    else if(this.spikeStripX<0) this.spikeStripX=Math.max(4, Math.min(COLS-10, (Math.random()*COLS)|0));
+  },
+  updateHUD(){
+    if(!wantedBox) return;
+    wantedBox.textContent="★".repeat(this.level) + "☆".repeat(WANTED_MAX_STARS-this.level);
+    wantedBox.classList.toggle('wanted-active', this.level>0);
+    wantedBox.classList.toggle('wanted-pursuit', this.level>0);
+    if(wantedAlert) wantedAlert.classList.toggle('on', this.level>=WANTED_MAX_STARS);
+  },
+  setLevel(n){
+    const clamped=Math.max(0, Math.min(WANTED_MAX_STARS, n));
+    if(clamped===this.level) return;
+    this.level=clamped;
+    this.syncToTier();
+    this.updateHUD();
+    window.dispatchEvent(new CustomEvent('wantedLevelChanged', {detail:{level:this.level, heat:this.heat}}));
+  },
+  recomputeLevel(){
+    this.setLevel(Math.min(WANTED_MAX_STARS, Math.floor(this.heat/WANTED_HEAT_PER_STAR)));
+  },
+
+  // ---- public API ----
+  onDestruction(amount){
+    if(!this.enabled) return;
+    const add=(typeof amount==='number' && amount>0) ? amount : WANTED_HEAT_PER_DESTRUCTION;
+    this.lastDestructionAt=Date.now();
+    this.heat=Math.min(WANTED_MAX_HEAT, this.heat+add);
+    this.recomputeLevel();
+  },
+  getWantedLevel(){ return this.level; },
+  setWantedLevel(n){
+    const clamped=Math.max(0, Math.min(WANTED_MAX_STARS, n|0));
+    this.heat=clamped*WANTED_HEAT_PER_STAR;
+    this.lastDestructionAt=clamped>0 ? Date.now() : 0;
+    this.recomputeLevel();
+  },
+  clearWanted(){
+    const was=this.level;
+    this.heat=0; this.lastDestructionAt=0; this.ramCooldown=0;
+    this.pursuers={ patrol:[], swat:[], heli:[], tank:[] }; this.spikeStripX=-1;
+    this.level=0;
+    this.updateHUD();
+    if(was!==0) window.dispatchEvent(new CustomEvent('wantedLevelChanged', {detail:{level:0, heat:0}}));
+  },
+
+  // ---- lifecycle hooks, called from reset()/loop()/paint() ----
+  reset(){ this.clearWanted(); this.lastStepAt=0; this.frame=0; },
+  step(){
+    if(!this.enabled) return;
+    const now=Date.now();
+    const dt=this.lastStepAt ? Math.min(0.25,(now-this.lastStepAt)/1000) : 0.05;
+    this.lastStepAt=now; this.frame++;
+    if(this.heat>0 && (now-this.lastDestructionAt)>WANTED_DECAY_GRACE_MS){
+      this.heat=Math.max(0, this.heat-WANTED_DECAY_PER_SEC*dt);
+      this.recomputeLevel();
+    }
+    if(this.level===0) return;
+    for(const car of this.pursuers.patrol){
+      if(!car.stopped){ car.x+=car.spd*dt; if(Math.abs(car.x-cx)<5) car.stopped=true; }
+    }
+    for(const van of this.pursuers.swat){
+      if(!van.stopped){ van.x+=van.spd*dt; if(Math.abs(van.x-cx)<6) van.stopped=true; }
+      else if(this.ramCooldown<=0 && Math.random()<0.03){                 // aggressive ramming AI
+        stage.classList.add('shake'); this.ramCooldown=1.2;
+        setTimeout(()=>stage.classList.remove('shake'), 160);
+      }
+    }
+    this.ramCooldown=Math.max(0, this.ramCooldown-dt);
+    for(const h of this.pursuers.heli){                                  // sweeps back and forth overhead
+      h.x+=h.spd*dt;
+      if(h.x<-10){ h.x=-10; h.spd=Math.abs(h.spd); }
+      else if(h.x>COLS+10){ h.x=COLS+10; h.spd=-Math.abs(h.spd); }
+    }
+    for(const tk of this.pursuers.tank){
+      if(!tk.stopped){ tk.x+=tk.spd*dt; if(Math.abs(tk.x-cx)<10) tk.stopped=true; }
+    }
+  },
+  render(grid, mg){
+    if(!this.enabled || this.level===0 || typeof streetRow!=='number') return;
+    const drawSprite=(spr,xi,topR)=>{
+      for(let i=0;i<spr.length;i++){ const art=spr[i], r=topR+i;
+        for(let k=0;k<art.length;k++){ const ch=art[k]; if(ch===" ")continue; const c=Math.round(xi)+k;
+          if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'wanted'); } }
+    };
+    const carTop=streetRow-patrolCarSprite.length+1;
+    for(const car of this.pursuers.patrol) drawSprite(patrolCarSprite, car.x, carTop);
+    const vanTop=streetRow-swatVanSprite.length+1;
+    for(const van of this.pursuers.swat) drawSprite(swatVanSprite, van.x, vanTop);
+    const tankTop=streetRow-tankSprite.length+1;
+    for(const tk of this.pursuers.tank) drawSprite(tankSprite, tk.x, tankTop);
+    for(const h of this.pursuers.heli){
+      const xi=Math.round(h.x), r=h.y;
+      const rotor=heliRotorFrames[this.frame%2];
+      for(let j=0;j<rotor.length;j++){ const c=xi-1+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,rotor[j]); setMode(mg,r,c,'wanted'); }
+      const body="(POL)";
+      for(let j=0;j<body.length;j++){ const c=xi-2+j; if(c<0||c>=COLS||r+1<0||r+1>=ROWS)continue; setCh(grid,r+1,c,body[j]); setMode(mg,r+1,c,'wanted'); }
+      for(let rr=r+2; rr<streetRow; rr+=2){ if(rr<0||rr>=ROWS||xi<0||xi>=COLS)continue; setCh(grid,rr,xi,":"); setMode(mg,rr,xi,'wanted'); }
+    }
+    if(this.spikeStripX>=0 && grid[streetRow]){
+      for(let k=0;k<6;k++){ const c=this.spikeStripX+k; if(c<0||c>=COLS)continue; setCh(grid,streetRow,c,"^"); setMode(mg,streetRow,c,'wanted'); }
+    }
+  },
+};
+
+// ---- SIM CITY: an empty field, then a city rises from it — before an asteroid wipes it out ----
+// reuses the standalone Asteroid method's phases/functions for the destruction half, once the
+// grown city sits in cityGridArr exactly like a normally-built one.
+function simcityGrassRender(){
+  const grid=blankGrid(ROWS);
+  const mg=modeGridFill(ROWS,COLS,'grass');
+  for(let r=streetRow-2;r<=streetRow;r++){
+    if(r<0) continue;
+    let line=grid[r].split("");
+    for(let c=0;c<COLS;c++){ if(Math.random()<0.5) line[c]=[",","'",".","`"][(Math.random()*4)|0]; }
+    grid[r]=line.join("");
+  }
+  return {grid,mg};
+}
+function simcityGrowStep(){
+  for(let c=0;c<COLS;c++){
+    if(simGrowCols[c] < streetRow && Math.random()<0.18){
+      simGrowCols[c] = Math.min(streetRow, simGrowCols[c] + 1 + ((Math.random()*2)|0));
+    }
+  }
+}
+function simcityGrowRender(){
+  const grid=blankGrid(ROWS);
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(let c=0;c<COLS;c++){
+    const revealed=simGrowCols[c];
+    if(revealed<3){                                    // grass still showing where nothing's grown yet
+      const r=streetRow-1;
+      if(r>=0 && Math.random()<0.4){ setCh(grid,r,c,[",","'","."][(Math.random()*3)|0]); setMode(mg,r,c,'grass'); }
+    }
+    for(let r=streetRow-revealed;r<=streetRow;r++){     // the building (and street), grown so far
+      if(r<0) continue;
+      const ch=cityGridArr[r] ? cityGridArr[r][c] : " ";
+      if(ch && ch!==" ") setCh(grid,r,c,ch);
+    }
+    if(revealed>0){                                     // underground arrives with its column
+      for(let r=streetRow+1;r<ROWS;r++){
+        const ch=cityGridArr[r] ? cityGridArr[r][c] : " ";
+        if(ch && ch!==" ") setCh(grid,r,c,ch);
+      }
+    }
+  }
+  return {grid,mg};
+}
+
+// ---- DUKE NUKEM 3D: the mirror one-liner, then Duke wades through an alien-infested city ----
+const dukeSprite=[
+  " o ",
+  "/#>",
+  "/ \\",
+];
+const pigcopSprite=[
+  "(o)",
+  "/#\\",
+];
+const octabrainSprite=["(@)","<#>"];
+const dukeLines=[
+  "IT'S TIME TO KICK ASS AND CHEW BUBBLEGUM...",
+  "COME GET SOME!",
+  "HAIL TO THE KING, BABY.",
+  "GROOVY.",
+  "YOUR FACE, YOUR ASS — WHAT'S THE DIFFERENCE?",
+  "LET GOD SORT 'EM OUT!",
+];
+// centered multi-line text splash (logo cards, title screen, level-start banner)
+function dukeTextRender(lines, mode){
+  const grid=blankGrid(ROWS);
+  const mg=modeGridFill(ROWS,COLS,mode||'duke');
+  const startR=Math.max(0,Math.floor(ROWS/2)-Math.floor(lines.length/2));
+  for(let i=0;i<lines.length;i++){
+    const text=lines[i], c0=cx-Math.floor(text.length/2), r=startR+i;
+    for(let j=0;j<text.length;j++){ const c=c0+j; if(c>=0&&c<COLS&&r>=0&&r<ROWS&&text[j]!==" "){ setCh(grid,r,c,text[j]); setMode(mg,r,c,mode||'duke'); } }
+  }
+  return {grid,mg};
+}
+// an original delta-wing flyer for the intro (not a reproduction of any specific game's ship)
+const dukeShipSprite=[
+  "   __^__   ",
+  " <[=====]> ",
+  "   \\___/   ",
+];
+function dukeShipRender(sx, sy, sparking){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(let i=0;i<dukeShipSprite.length;i++){ const art=dukeShipSprite[i], r=Math.round(sy)+i;
+    for(let j=0;j<art.length;j++){ const c=Math.round(sx)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue;
+      setCh(grid,r,c,art[j]); setMode(mg,r,c,'duke'); } }
+  if(sparking){ for(let k=0;k<5;k++){ const c=Math.round(sx)+((Math.random()*dukeShipSprite[0].length)|0), r=Math.round(sy)+((Math.random()*3)|0);
+    if(c>=0&&c<COLS&&r>=0&&r<ROWS){ setCh(grid,r,c,["*","#","@"][(Math.random()*3)|0]); setMode(mg,r,c,'dukefire'); } } }
+  return {grid,mg};
+}
+// a lone alien on a rooftop opens fire; the beam connects with the passing ship
+function dukeBeamRender(sx, sy, bx, by){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const steps=Math.max(4,Math.round(Math.hypot(sx-bx,sy-by)));
+  for(let s=0;s<=steps;s++){ const c=Math.round(bx+(sx-bx)*s/steps), r=Math.round(by+(sy-by)*s/steps);
+    if(c>=0&&c<COLS&&r>=0&&r<ROWS && Math.random()<0.8){ setCh(grid,r,c,["*","'","."][(Math.random()*3)|0]); setMode(mg,r,c,'pigalien'); } }
+  if(by>=0&&by<ROWS&&bx>=0&&bx<COLS){ setCh(grid,by,bx,"@"); setMode(mg,by,bx,'pigalien'); }
+  for(let i=0;i<dukeShipSprite.length;i++){ const art=dukeShipSprite[i], r=Math.round(sy)+i;
+    for(let j=0;j<art.length;j++){ const c=Math.round(sx)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue;
+      setCh(grid,r,c,art[j]); setMode(mg,r,c,'duke'); } }
+  return {grid,mg};
+}
+// the impact where the ship goes down onto a rooftop
+function dukeCrashBlastRender(cxi, cyi, R){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const Ri=Math.ceil(R);
+  for(let dr=-Ri;dr<=Ri;dr++){ for(let dc=-Ri;dc<=Ri;dc++){ const dist=Math.hypot(dc,dr*1.6);
+    if(dist>R) continue; const r=cyi+dr, c=cxi+dc; if(r<0||r>=ROWS||c<0||c>=COLS) continue;
+    if(Math.random()<0.5){ setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'dukefire'); } } }
+  return {grid,mg};
+}
+function dukeInit(){
+  dukePigs=[]; dukeBrains=[]; dukeBursts=[];
+  const n=Math.max(5,Math.floor(COLS/16));
+  for(let i=0;i<n;i++){ dukePigs.push({x:(i+0.6)/n*COLS + (Math.random()*6-3), alive:true, ph:Math.random()*6}); }
+  const m=Math.max(3,Math.floor(COLS/26));
+  for(let i=0;i<m;i++){ dukeBrains.push({x:(i+0.3)/m*COLS + (Math.random()*8-4), y:2+((Math.random()*4)|0), alive:true, ph:Math.random()*6, vy:0.1+Math.random()*0.1}); }
+}
+function dukeStep(dx){
+  for(const p of dukePigs){ p.ph+=0.4;
+    if(p.alive && Math.abs(p.x-dx)<3){ p.alive=false; dukeBursts.push({x:p.x,y:streetRow-1,life:8});
+      if(cityGridArr.length===ROWS && Math.random()<0.3){ const col=Math.round(p.x);
+        for(let r=Math.max(0,streetRow-4);r<streetRow;r++){ if(cityGridArr[r]){ let ln=cityGridArr[r].split("");
+          if(ln[col]!==" " && Math.random()<0.4) ln[col]=" "; cityGridArr[r]=ln.join(""); } } } } }
+  for(const b of dukeBrains){ b.ph+=0.3; b.y+=Math.sin(b.ph)*b.vy;
+    if(b.alive && Math.abs(b.x-dx)<4){ b.alive=false; dukeBursts.push({x:b.x,y:b.y,life:8}); } }
+  for(const b of dukeBursts){ b.life--; } dukeBursts=dukeBursts.filter(b=>b.life>0);
+}
+function dukeRender(t, dx){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(const p of dukePigs){ if(!p.alive) continue; const xi=Math.round(p.x), bob=(Math.sin(p.ph)>0)?0:1, top=streetRow-pigcopSprite.length+1-bob;
+    for(let i=0;i<pigcopSprite.length;i++){ const art=pigcopSprite[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=xi+j-1; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'pigalien'); } } }
+  for(const b of dukeBrains){ if(!b.alive) continue; const xi=Math.round(b.x), yi=Math.round(b.y);
+    for(let i=0;i<octabrainSprite.length;i++){ const art=octabrainSprite[i], r=yi+i;
+      for(let j=0;j<art.length;j++){ const c=xi+j-1; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'pigalien'); } } }
+  for(const b of dukeBursts){ const xi=Math.round(b.x), yi=Math.round(b.y);
+    for(let dj=-1;dj<=1;dj++){ const c=xi+dj; if(c>=0&&c<COLS&&yi>=0&&yi<ROWS){ setCh(grid,yi,c,["*","#","@"][(Math.random()*3)|0]); setMode(mg,yi,c,'dukefire'); } } }
+  const dtop=streetRow-dukeSprite.length+1;
+  for(let i=0;i<dukeSprite.length;i++){ const art=dukeSprite[i], r=dtop+i;
+    for(let j=0;j<art.length;j++){ const c=Math.round(dx)+j-1; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'duke'); } }
+  if(t%2===0){ const mc=Math.round(dx)+2, mr=dtop+1; if(mc>=0&&mc<COLS){ setCh(grid,mr,mc,["*","-","="][(Math.random()*3)|0]); setMode(mg,mr,mc,'dukefire'); } }
+  return {grid,mg};
+}
+// permanently craters the blast zone — mutates cityGridArr so the wreckage sticks
+function dukeDemolish(cxi, r){
+  if(cityGridArr.length!==ROWS) return;
+  for(let row=0; row<streetRow; row++){ if(!cityGridArr[row]) continue; let ln=cityGridArr[row].split("");
+    for(let c=cxi-r;c<=cxi+r;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<0.45) ln[c]=" "; }
+    cityGridArr[row]=ln.join(""); }
+}
+
+// ---- DOLLY: no destruction here — the city just clocks in, sings along, and clocks out ----
+const dollyLines=[
+  "Tumble outta bed",
+  "And I stumble to the kitchen",
+  "Pour myself a cup of ambition",
+  "And yawn and stretch and try to come to life",
+  "Jump in the shower",
+  "And the blood starts pumpin'",
+  "Out on the streets",
+  "The traffic starts jumpin'",
+  "With folks like me on the job from 9 to 5",
+  "Working 9 to 5",
+  "What a way to make a livin'",
+  "Barely gettin' by",
+  "It's all takin' and no givin'",
+  "They just use your mind",
+  "And they never give you credit",
+  "It's enough to drive you",
+  "Crazy if you let it",
+  "9 to 5, for service and devotion",
+  "You would think that I",
+  "Would deserve a fair promotion",
+  "Want to move ahead",
+  "But the boss won't seem to let me",
+  "I swear sometimes that man is out to get me",
+  "Mmm",
+  "They let you dream",
+  "Just a' watch 'em shatter",
+  "You're just a step",
+  "On the boss man's ladder",
+  "But you got dreams he'll never take away",
+  "In the same boat",
+  "With a lot of your friends",
+  "Waitin' for the day",
+  "Your ship'll come in",
+  "And the tide's gonna turn",
+  "And it's all gonna roll you away",
+  "Workin' 9 to 5",
+  "What a way to make a livin'",
+  "Barely gettin' by",
+  "It's all takin' and no givin'",
+  "They just use your mind",
+  "And you never get the credit",
+  "It's enough to drive you",
+  "Crazy if you let it",
+  "9 to 5, yeah, yes, they got you where they want you",
+  "There's a better life",
+  "And you think about it, don't you?",
+  "It's a rich man's game",
+  "No matter what they call it",
+  "And you spend your life",
+  "Putting money in his wallet",
+  "9 to 5",
+  "What a way to make a livin'",
+  "Barely gettin' by",
+  "It's all takin' and no givin'",
+  "They just use your mind",
+  "And they never give you credit",
+  "It's enough to drive you",
+  "Crazy if you let it",
+  "9 to 5, yeah, they got you where they want you",
+  "There's a better life",
+  "And you think about it, don't you?",
+  "It's a rich man's game",
+  "No matter what they call it",
+  "And you spend your life",
+  "Puttin' money in his wallet",
+];
+function dollyInit(){
+  dollyWorkers=[];
+  const n=Math.max(6,Math.floor(COLS/14));
+  for(let i=0;i<n;i++){
+    const fromLeft=Math.random()<0.5;
+    dollyWorkers.push({
+      x: fromLeft ? -((Math.random()*20)|0) : COLS+((Math.random()*20)|0),
+      homeX: (i+0.5)/n*COLS + (Math.random()*4-2),
+      spd: 0.5+Math.random()*0.5,
+      ph: Math.random()*6,
+      arrived: false,
+    });
+  }
+  dollyLineIdx=0; dollyLineT=0;
+}
+function dollyStepArrive(){
+  for(const w of dollyWorkers){
+    if(!w.arrived){
+      const dx=w.homeX-w.x;
+      if(Math.abs(dx)<1){ w.arrived=true; w.x=w.homeX; }
+      else { w.x += Math.sign(dx)*w.spd; }
+    }
+    w.ph+=0.4;
+  }
+}
+function dollyStepLeave(){
+  for(const w of dollyWorkers){ w.x += (w.homeX<COLS/2 ? -1 : 1) * (0.6+Math.random()*0.4); w.ph+=0.4; }
+}
+function dollyRender(clockLabel){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // the big clock, front and centre
+  const cC=cx-Math.floor(clockLabel.length/2);
+  for(let j=0;j<clockLabel.length;j++){ const c=cC+j; if(c>=0&&c<COLS && clockLabel[j]!==" "){ setCh(grid,1,c,clockLabel[j]); setMode(mg,1,c,'dolly'); } }
+  // the 9-to-5 crowd, clocking in and out
+  for(const w of dollyWorkers){
+    const xi=Math.round(w.x); if(xi<-3||xi>COLS+3) continue;
+    const bob=(Math.sin(w.ph)>0)?0:1, r=streetRow-1-bob;
+    const art=(Math.floor(w.ph)%2===0)?"o/":"\\o";
+    for(let j=0;j<art.length;j++){ const c=xi+j; if(c>=0&&c<COLS&&r>=0&&r<ROWS){ setCh(grid,r,c,art[j]); setMode(mg,r,c,'dolly'); } }
+  }
+  return {grid,mg};
+}
 
 function reset(){
   clearTimeout(timer); clearInterval(cycleTimer); resize();
   cityGridArr=buildCity(); spawnPlanes(); spawnRain(); spawnTrain();
+  WantedSystem.reset();
   bombRow=0; mt=0; dmg=0; phase='intro'; introT=ROWS; groundRow=6;
   waveX=0; attackMode='nuke'; waveStarted=false;
   astStarted=false; astPhase='streak'; craterR=0;
@@ -4997,6 +5535,13 @@ function reset(){
   squadStarted=false; squadT=0; squadPortalR=0; squadFireR=0; squadCreatures=[]; squadMembers=[];
   monkeysStarted=false; monkeysT=0; zooAnimals=[]; petersX=0; virusR=0; spreadR=0; coleX=0; youngColeX=0; coleShotFlag=false;
   squad2Started=false; squad2T=0; squad2Decoys=[]; squad2MemberXs=[]; squad2Members=[]; squad2Creatures=[]; squad2DomeR=0; squad2RatR=0;
+  gtaStarted=false; gtaT=0; gtaFiveT=0;
+  simStarted=false; simT=0; simGrowCols=[]; simSubPhase='grass'; simHoldT=0;
+  dukeStarted=false; dukeT=0; dukeSubPhase='logos'; dukeX=0; dukePigs=[]; dukeBrains=[]; dukeBursts=[]; dukeBlastR=0;
+  dukeShipX=0; dukeShipY=0; dukeAlienX=0; dukeAlienY=0; dukeShipTargetX=0; dukeShipTargetY=0; dukeCrashR=0;
+  dukeShipStartX=0; dukeShipStartY=0;
+  dollyStarted=false; dollyT=0; dollySubPhase='arrive'; dollyWorkers=[]; dollyLineIdx=0; dollyLineT=0;
+  wantedBox.style.display='none';   // wanted HUD only shows for the GTA method
   scene.className=''; stage.className='';
   scene.style.textShadow="none";
   cmd.textContent="sudo rm -rf /*"; cmd.className="";
@@ -5114,12 +5659,20 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — RELEASE THE VIRUS"; sub.style.color="#c0a060"; sub.style.textShadow="0 0 8px #4a2a10"; } }
   else if(cmdColor===51){ cmd.style.color="#4080ff"; cmd.style.textShadow="0 0 18px #1a2a6a";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — UNLEASH STARRO"; sub.style.color="#80a0ff"; sub.style.textShadow="0 0 8px #1a2a6a"; } }
+  else if(cmdColor===52){ cmd.style.color="#ff3030"; cmd.style.textShadow="0 0 18px #ff3030";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — GO ON THE RUN"; sub.style.color="#ff3030"; sub.style.textShadow="0 0 8px #ff3030"; } }
+  else if(cmdColor===53){ cmd.style.color="#4a9a3a"; cmd.style.textShadow="0 0 18px #2a5a1a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — GROW A CITY"; sub.style.color="#7aca5a"; sub.style.textShadow="0 0 8px #2a5a1a"; } }
+  else if(cmdColor===54){ cmd.style.color="#ff8000"; cmd.style.textShadow="0 0 18px #ff3000";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — COME GET SOME"; sub.style.color="#ff8000"; sub.style.textShadow="0 0 8px #ff3000"; } }
+  else if(cmdColor===55){ cmd.style.color="#ff8fc0"; cmd.style.textShadow="0 0 18px #a0308a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WORK 9 TO 5"; sub.style.color="#ff8fc0"; sub.style.textShadow="0 0 8px #a0308a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%52; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%56; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
@@ -5138,6 +5691,7 @@ function cityModes(g,{withRain,bombRow}={}){
 }
 
 function loop(){
+  WantedSystem.step();
   if(phase==='hold'){
     scene.style.textShadow="0 0 12px #f80";
     const g=mushroom(mt);
@@ -6848,6 +7402,229 @@ function loop(){
     sub.textContent="Starro is dead. the city is wrecked but standing. Waller has been blackmailed. — press RESET"; sub.style.color="#8aff40"; sub.className="";
     squad2T++;
     timer=setTimeout(loop,150);
+  }else if(phase==='gta'){
+    // the only method that drives the wanted system — heat/pursuers stay dormant everywhere else
+    scene.style.textShadow="0 0 10px #ff3030";
+    if(!gtaStarted){ gtaStarted=true; gtaT=0; gtaFiveT=0; WantedSystem.reset(); document.body.style.background="#05060d"; }
+    if(gtaT%30===0 && WantedSystem.getWantedLevel()<5) WantedSystem.onDestruction();   // another crime committed — slower burn than before
+    const lvl=WantedSystem.getWantedLevel();
+    stepRain();
+    const g=renderCity(null,0);
+    const mg=modeGridFill(ROWS,COLS,'city');
+    drawRain(g,mg);
+    stepTrain(); drawTrain(g,mg);
+    stepPlanes(); drawPlanes(g);
+    for(const p of planes){const xi=Math.round(p.x);for(let j=0;j<p.art.length;j++)if(p.art[j]!==" ")setMode(mg,p.y,xi+j,'plane');}
+    drawBaddie(g, mg, gtaT, baddieLines[lvl]);
+    scene.innerHTML=paint(g,mg,'city');
+    sub.textContent=["THE RAMPAGE BEGINS…","1 STAR — PATROL CARS RESPOND","2 STARS — ROADBLOCKS GOING UP","3 STARS — SWAT MOVES IN","4 STARS — AIR SUPPORT INBOUND","5 STARS — CITYWIDE ALERT"][lvl];
+    sub.style.color="#ff3030"; sub.style.textShadow="0 0 8px #ff3030";
+    if(lvl>=3) stage.classList.add('shake'); else stage.classList.remove('shake');
+    gtaT++;
+    if(lvl>=5) gtaFiveT++; else gtaFiveT=0;
+    if(gtaFiveT<40){ timer=setTimeout(loop,90); }
+    else { phase='gta_hold'; gtaT=0; gtaFiveT=0; loop(); }
+  }else if(phase==='gta_hold'){
+    stage.classList.add('shake');
+    WantedSystem.setWantedLevel(5);   // pinned at max — the chase never lets up
+    stepRain();
+    const g=renderCity(null,0);
+    const mg=modeGridFill(ROWS,COLS,'city');
+    drawRain(g,mg);
+    stepTrain(); drawTrain(g,mg);
+    drawBaddie(g, mg, gtaT, gtaHoldLines[Math.floor(gtaT/20)%gtaHoldLines.length]);
+    scene.innerHTML=paint(g,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="five stars and climbing. good luck. — press RESET"; sub.style.color="#ff3030"; sub.className="";
+    gtaT++;
+    timer=setTimeout(loop,110);
+  }else if(phase==='simcity'){
+    scene.style.textShadow="0 0 8px #4a9a3a";
+    if(!simStarted){
+      simStarted=true; simT=0; simHoldT=0; simSubPhase='grass';
+      cityGridArr=buildCity();               // establishes streetRow/layout; kept hidden by the grass field until grown
+      simGrowCols=new Array(COLS).fill(0);
+      document.body.style.background="#0a140a";
+    }
+    if(simSubPhase==='grass'){
+      const {grid,mg}=simcityGrassRender();
+      scene.innerHTML=paint(grid,mg,'city');
+      stage.classList.remove('shake');
+      sub.textContent="AN EMPTY FIELD…"; sub.style.color="#7aca5a"; sub.style.textShadow="0 0 8px #2a5a1a";
+      simT++;
+      if(simT<14){ timer=setTimeout(loop,90); }
+      else { simSubPhase='grow'; loop(); }
+    }else if(simSubPhase==='grow'){
+      const done = simGrowCols.every(h=>h>=streetRow);
+      if(!done) simcityGrowStep();
+      const {grid,mg}=simcityGrowRender();
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent = done ? "THE CITY IS COMPLETE" : "THE CITY RISES FROM THE FIELD";
+      sub.style.color="#7aca5a"; sub.style.textShadow="0 0 8px #2a5a1a";
+      simT++;
+      if(done) simHoldT++;
+      if(!(done && simHoldT>18)){ timer=setTimeout(loop,70); }
+      else { attackMode='asteroid'; astStarted=false; phase='asteroid'; loop(); }
+    }
+  }else if(phase==='duke'){
+    scene.style.textShadow="0 0 10px #ff8000";
+    if(!dukeStarted){
+      dukeStarted=true; dukeT=0; dukeSubPhase='logos'; dukeX=-4;
+      cityGridArr=buildCity();             // establishes streetRow ahead of the city sub-phases
+      dukeInit();
+      document.body.style.background="#000";
+    }
+    if(dukeSubPhase==='logos'){
+      const idx=Math.floor(dukeT/14);
+      const lines = idx===0 ? ["3 D   R E A L M S","P R E S E N T S"] : ["A P O G E E","S O F T W A R E"];
+      const {grid,mg}=dukeTextRender(lines,'duke');
+      scene.innerHTML=paint(grid,mg,'city');
+      stage.classList.remove('shake');
+      sub.textContent=""; cmd.textContent="";
+      dukeT++;
+      if(dukeT<28){ timer=setTimeout(loop,110); }
+      else { dukeSubPhase='title'; dukeT=0; loop(); }
+    }else if(dukeSubPhase==='title'){
+      const {grid,mg}=dukeTextRender(["D U K E   N U K E M   3 D","","> NEW GAME","  OPTIONS","  QUIT"],'duke');
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent=""; cmd.textContent="";
+      dukeT++;
+      if(dukeT<20){ timer=setTimeout(loop,110); }
+      else { dukeSubPhase='flight'; dukeT=0; dukeShipX=-14; dukeShipY=3; document.body.style.background="#0a0e18"; loop(); }
+    }else if(dukeSubPhase==='flight'){
+      dukeShipX+=Math.max(1,Math.floor(COLS/50));
+      const {grid,mg}=dukeShipRender(dukeShipX, dukeShipY, false);
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent="FLYING OVER THE CITY…"; sub.style.color="#ff8000"; sub.style.textShadow="0 0 8px #ff3000";
+      dukeT++;
+      if(dukeShipX < cx-6){ timer=setTimeout(loop,70); }
+      else { dukeSubPhase='shotdown'; dukeT=0; dukeAlienX=cx+8; dukeAlienY=streetRow-10; loop(); }
+    }else if(dukeSubPhase==='shotdown'){
+      dukeShipX+=0.6;
+      const {grid,mg}=dukeBeamRender(dukeShipX, dukeShipY, dukeAlienX, dukeAlienY);
+      scene.innerHTML=paint(grid,mg,'city');
+      stage.classList.add('shake');
+      sub.textContent="TAKING FIRE!"; sub.style.color="#ff3030"; sub.style.textShadow="0 0 8px #ff3000";
+      dukeT++;
+      if(dukeT<10){ timer=setTimeout(loop,80); }
+      else { dukeSubPhase='crash'; dukeT=0; dukeShipStartX=dukeShipX; dukeShipStartY=dukeShipY; dukeShipTargetX=dukeShipX; dukeShipTargetY=streetRow-1; loop(); }
+    }else if(dukeSubPhase==='crash'){
+      const CRASH_FRAMES=16;
+      const f=Math.min(1, dukeT/CRASH_FRAMES);
+      dukeShipX=dukeShipStartX+(dukeShipTargetX-dukeShipStartX)*f;
+      dukeShipY=dukeShipStartY+(dukeShipTargetY-dukeShipStartY)*f;
+      const {grid,mg}=dukeShipRender(dukeShipX, dukeShipY, true);
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent="GOING DOWN!"; sub.style.color="#ff3030"; sub.style.textShadow="0 0 8px #ff3000";
+      dukeT++;
+      if(dukeT<CRASH_FRAMES){ timer=setTimeout(loop,60); }
+      else { dukeSubPhase='impact'; dukeT=0; dukeCrashR=0; loop(); }
+    }else if(dukeSubPhase==='impact'){
+      stage.classList.add('shake');
+      dukeCrashR=Math.min(9, dukeCrashR+1.3);
+      const {grid,mg}=dukeCrashBlastRender(Math.round(dukeShipTargetX), Math.round(dukeShipTargetY), dukeCrashR);
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent="CRASH LANDING"; sub.style.color="#ff3030"; sub.style.textShadow="0 0 10px #ff3000";
+      dukeT++;
+      if(dukeCrashR<9 && dukeT<12){ timer=setTimeout(loop,60); }
+      else { dukeSubPhase='levelstart'; dukeT=0; loop(); }
+    }else if(dukeSubPhase==='levelstart'){
+      stage.classList.remove('shake');
+      const {grid,mg}=dukeTextRender(["HOLLYWOOD HOLOCAUST","","THESE ALIENS WRECKED MY RIDE —","TIME TO EVEN THE SCORE."],'duke');
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent=""; cmd.textContent="";
+      dukeT++;
+      if(dukeT<20){ timer=setTimeout(loop,110); }
+      else { dukeSubPhase='arrive'; dukeT=0; dukeX=dukeShipTargetX-10; document.body.style.background="#0a0a0a"; loop(); }
+    }else if(dukeSubPhase==='arrive'){
+      dukeX=Math.min(cx-Math.floor(COLS*0.35), dukeX+Math.max(1,Math.floor(COLS/60)));
+      dukeStep(dukeX);
+      const {grid,mg}=dukeRender(dukeT, dukeX);
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent="HAIL TO THE KING, BABY."; sub.style.color="#ff8000"; sub.style.textShadow="0 0 8px #ff3000";
+      dukeT++;
+      if(dukeX < cx-Math.floor(COLS*0.35)){ timer=setTimeout(loop,80); }
+      else { dukeSubPhase='blast'; dukeT=0; loop(); }
+    }else if(dukeSubPhase==='blast'){
+      dukeX=Math.min(COLS+4, dukeX+Math.max(1,Math.floor(COLS/70)));
+      dukeStep(dukeX);
+      const {grid,mg}=dukeRender(dukeT, dukeX);
+      scene.innerHTML=paint(grid,mg,'city');
+      if(dukeBursts.length>0) stage.classList.add('shake'); else stage.classList.remove('shake');
+      sub.textContent=dukeLines[Math.floor(dukeT/16)%dukeLines.length]; sub.style.color="#ff8000"; sub.style.textShadow="0 0 8px #ff3000";
+      dukeT++;
+      if(dukeX < COLS+4){ timer=setTimeout(loop,70); }
+      else { dukeSubPhase='final'; dukeT=0; dukeBlastR=0; loop(); }
+    }else if(dukeSubPhase==='final'){
+      stage.classList.add('shake');
+      dukeBlastR=Math.min(Math.ceil(COLS/2)+2, dukeBlastR+Math.max(1,COLS/40));
+      dukeDemolish(cx, Math.round(dukeBlastR));
+      const grid=cityGridArr.slice();
+      const mg=modeGridFill(ROWS,COLS,'city');
+      const ground=streetRow, domeH=Math.min(ground,Math.floor(dukeBlastR*0.75));
+      for(let r=ground;r>=ground-domeH;r--){ const frac=(ground-r)/Math.max(1,domeH);
+        const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*dukeBlastR*1.1);
+        for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=cx+j; if(c<0||c>=COLS)continue;
+          setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'dukefire'); } }
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent="LET GOD SORT 'EM OUT!"; sub.style.color="#ff8000"; sub.style.textShadow="0 0 10px #ff3000";
+      dukeT++;
+      if(dukeBlastR < Math.ceil(COLS/2)+2){ timer=setTimeout(loop,60); }
+      else { phase='duke_hold'; loop(); }
+    }
+  }else if(phase==='duke_hold'){
+    stage.classList.remove('shake');
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    for(let k=0;k<COLS*0.03;k++){ const c=cx+(((Math.random()*30)|0)-15), r=streetRow-((Math.random()*3)|0);
+      if(c>=0&&c<COLS&&r>=0&&r<ROWS&&Math.random()<0.5){ setCh(grid,r,c,["*","'","."][(Math.random()*3)|0]); setMode(mg,r,c,'dukefire'); } }
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="hail to the king, baby. — press RESET"; sub.style.color="#ff8000"; sub.className="";
+    timer=setTimeout(loop,150);
+  }else if(phase==='dolly'){
+    scene.style.textShadow="0 0 8px #ff8fc0";
+    if(!dollyStarted){ dollyStarted=true; dollyT=0; dollySubPhase='arrive'; dollyInit(); document.body.style.background="#100a14"; }
+    if(dollySubPhase==='arrive'){
+      dollyStepArrive();
+      const {grid,mg}=dollyRender("9:00 AM");
+      scene.innerHTML=paint(grid,mg,'city');
+      stage.classList.remove('shake');
+      dollyLineT++;
+      if(dollyLineT>11){ dollyLineT=0; dollyLineIdx=Math.min(dollyLines.length-1, dollyLineIdx+1); }
+      sub.textContent=dollyLines[dollyLineIdx]; sub.style.color="#ff8fc0"; sub.style.textShadow="0 0 8px #a0308a";
+      dollyT++;
+      const allArrived=dollyWorkers.every(w=>w.arrived);
+      if(!allArrived){ timer=setTimeout(loop,80); }
+      else { dollySubPhase='work'; dollyT=0; loop(); }
+    }else if(dollySubPhase==='work'){
+      for(const w of dollyWorkers) w.ph+=0.3;
+      const {grid,mg}=dollyRender("WORKING 9 TO 5");
+      scene.innerHTML=paint(grid,mg,'city');
+      dollyLineT++;
+      if(dollyLineT>11){ dollyLineT=0; dollyLineIdx=Math.min(dollyLines.length-1, dollyLineIdx+1); }
+      sub.textContent=dollyLines[dollyLineIdx]; sub.style.color="#ff8fc0"; sub.style.textShadow="0 0 8px #a0308a";
+      dollyT++;
+      if(dollyLineIdx<dollyLines.length-1){ timer=setTimeout(loop,80); }
+      else { dollySubPhase='leave'; dollyT=0; loop(); }
+    }else if(dollySubPhase==='leave'){
+      dollyStepLeave();
+      const {grid,mg}=dollyRender("5:00 PM");
+      scene.innerHTML=paint(grid,mg,'city');
+      sub.textContent="QUITTIN' TIME!"; sub.style.color="#ff8fc0"; sub.style.textShadow="0 0 8px #a0308a";
+      dollyT++;
+      const allGone=dollyWorkers.every(w=> w.x<-6 || w.x>COLS+6);
+      if(!(allGone && dollyT>10)){ timer=setTimeout(loop,70); }
+      else { phase='dolly_hold'; loop(); }
+    }
+  }else if(phase==='dolly_hold'){
+    stage.classList.remove('shake');
+    const grid=(cityGridArr.length===ROWS?cityGridArr:buildCity()).slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="RIP Dolly Parton. — press RESET"; sub.style.color="#ff8fc0"; sub.className="";
+    timer=setTimeout(loop,200);
   }
 }
 
@@ -7061,6 +7838,23 @@ function armDrop(){
     attackMode='squad2';
     cmd.style.color="#4080ff"; cmd.style.textShadow="0 0 20px #1a2a6a";
     squad2Started=false; phase='squad2_decoy';
+  }else if(cmdColor===52){      // POLICE RED -> GTA (the only method that drives the wanted system)
+    attackMode='gta';
+    cmd.style.color="#ff3030"; cmd.style.textShadow="0 0 20px #ff3030";
+    gtaStarted=false; phase='gta';
+    wantedBox.style.display='flex';
+  }else if(cmdColor===53){      // GRASS GREEN -> Sim City (build from a field, then an asteroid ends it)
+    attackMode='simcity';
+    cmd.style.color="#4a9a3a"; cmd.style.textShadow="0 0 20px #2a5a1a";
+    simStarted=false; phase='simcity';
+  }else if(cmdColor===54){      // DUKE ORANGE -> Duke Nukem 3D
+    attackMode='duke';
+    cmd.style.color="#ff8000"; cmd.style.textShadow="0 0 20px #ff3000";
+    dukeStarted=false; phase='duke';
+  }else if(cmdColor===55){      // DOLLY PINK -> 9 to 5
+    attackMode='dolly';
+    cmd.style.color="#ff8fc0"; cmd.style.textShadow="0 0 20px #a0308a";
+    dollyStarted=false; phase='dolly';
   }else{                        // RED -> nuke
     attackMode='nuke';
     cmd.style.color="#f00"; cmd.style.textShadow="0 0 20px #f00";

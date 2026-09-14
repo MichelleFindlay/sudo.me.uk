@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.0
+
+### Added
+- A new **GTA** destruction method: a rampage that racks up a GTA-style 1-5 star wanted level over time. Escalates from a couple of slow patrol cars at 1 star, through roadblocking patrols at 2, ramming SWAT vans at 3, a circling helicopter with a spike strip at 4, up to rolling tanks and a pulsing citywide alert at 5, where it holds indefinitely.
+- A star-rating HUD badge next to the Statistics button, flashing while wanted and glowing red once pursuit is active — stays empty for every other method, since the wanted system only runs during GTA.
+- `WantedSystem` module with a small public API (`onDestruction`, `getWantedLevel`, `setWantedLevel`, `clearWanted`) and a `wantedLevelChanged` event so other code can react to star changes; the whole feature can be switched off with one flag.
+
 ## v1.3.0
 
 ### Added
