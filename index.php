@@ -1,6 +1,6 @@
 <?php
 // ---- version & update check ----
-$VERSION = '1.4.1';
+$VERSION = '1.4.6';
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
 $CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
@@ -194,7 +194,7 @@ if (isset($_GET['stats'])) {
   #methodBox .pick.mHidden { display:none; }
   #methodBox .pick { cursor:pointer; padding:7px 6px; border-radius:5px; transition:transform .1s;
     white-space:nowrap; text-align:center; overflow:hidden; text-overflow:ellipsis;
-    border:1px solid rgba(255,255,255,0.06); }
+    border:1px solid rgba(255,255,255,0.06); text-decoration:none; }
   #methodBox .pick:hover { transform:scale(1.08); filter:brightness(1.4); text-decoration:underline; }
   #methodBox .pick:active { transform:scale(0.94); filter:brightness(1.6); }
   #methodBox .m-sep { color:#5a6472; margin:0 6px; }
@@ -258,6 +258,16 @@ if (isset($_GET['stats'])) {
   #methodBox .m-sim { color:#7aca5a; text-shadow:0 0 8px #2a5a1a; }
   #methodBox .m-duke { color:#ff8000; text-shadow:0 0 8px #ff3000; }
   #methodBox .m-dolly { color:#ff8fc0; text-shadow:0 0 8px #a0308a; }
+  #methodBox .m-curry { color:#e0203a; text-shadow:0 0 8px #ffd700; }
+  #methodBox .m-wicked { background:linear-gradient(90deg,#1fae5a 50%,#ff6ec7 50%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    color:#1fae5a; text-shadow:0 0 8px #0a5a2a; }
+  #methodBox .m-ltt { color:#ff7b00; text-shadow:0 0 8px #cc5c00; }
+  #methodBox .m-tusk { color:#d0d4d8; text-shadow:0 0 8px #2a6a9a; }
+  #methodBox .m-fart { color:#a0d040; text-shadow:0 0 8px #5a7a1a; }
+  #methodBox .m-rubber { color:#3a3a3a; text-shadow:0 0 8px #8a2ab0; }
+  #methodBox .m-tomato { color:#e0201a; text-shadow:0 0 8px #2a6a1a; }
+  #methodBox .m-cocainebear { color:#a85a2a; text-shadow:0 0 8px #c81810; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -299,6 +309,24 @@ if (isset($_GET['stats'])) {
   #statsBtn svg { width:20px; height:20px; fill:currentColor; filter:drop-shadow(0 0 4px #0f0); }
   #statsBtn:hover { background:#0f0; color:#000; }
   #statsBtn:active { background:#0f0; color:#000; transform:scale(0.94); }
+  /* share button: bottom-right corner, opens a small menu that pops upward */
+  #shareBox { position:absolute; bottom:max(10px, env(safe-area-inset-bottom)); right:max(10px, env(safe-area-inset-right)); z-index:15;
+    display:flex; flex-direction:column-reverse; align-items:flex-end; gap:8px; }
+  #shareBtn { background:#111; color:#0f0; border:1px solid #0f0;
+    min-height:44px; min-width:44px; padding:10px; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 10px rgba(0,255,0,.3); border-radius:50%; touch-action:manipulation; cursor:pointer; }
+  #shareBtn svg { width:20px; height:20px; fill:currentColor; filter:drop-shadow(0 0 4px #0f0); }
+  #shareBtn:hover { background:#0f0; color:#000; }
+  #shareBtn:active { background:#0f0; color:#000; transform:scale(0.94); }
+  #shareMenu { display:flex; flex-direction:column; gap:6px; background:rgba(10,14,22,0.92); border:1px solid #0f0;
+    border-radius:8px; padding:8px; box-shadow:0 0 14px rgba(0,255,0,.25); }
+  #shareMenu.hidden { display:none; }
+  #shareMenu button { font-family:"Courier New", monospace; background:#111; color:#0f0; border:1px solid #0f0;
+    border-radius:5px; padding:8px 12px; cursor:pointer; font-size:12px; white-space:nowrap; touch-action:manipulation; }
+  #shareMenu button:hover { background:#0f0; color:#000; }
+  #shareToast { position:absolute; bottom:56px; right:0; background:#0f0; color:#000; font-size:11px; font-weight:bold;
+    padding:6px 10px; border-radius:5px; opacity:0; pointer-events:none; transition:opacity .25s; white-space:nowrap; }
+  #shareToast.show { opacity:1; }
   /* wanted-system star HUD: only shown during the GTA method; glows yellow and flashes while pursued */
   #wantedBox { background:#111; color:#444; border:1px solid #333; font-family:"Courier New",monospace;
     font-size:16px; letter-spacing:3px; padding:9px 12px; min-height:40px; display:none; align-items:center;
@@ -322,12 +350,12 @@ if (isset($_GET['stats'])) {
   #statsPanel button { font-family:inherit; background:#111; color:#0f0; border:1px solid #0f0;
     border-radius:5px; padding:6px 12px; cursor:pointer; font-size:12px; touch-action:manipulation; }
   #statsPanel button:hover { background:#0f0; color:#000; }
-  #resetBtn {
+  #resetBtn, #randomBtn {
     background:#111; color:#0f0; border:1px solid #0f0; font-family:"Courier New",monospace;
     font-size:14px; padding:10px 16px; min-height:40px; cursor:pointer; text-shadow:0 0 6px #0f0;
     box-shadow:0 0 10px rgba(0,255,0,.3); border-radius:5px; touch-action:manipulation; }
-  #resetBtn:hover { background:#0f0; color:#000; }
-  #resetBtn:active { background:#0f0; color:#000; transform:scale(0.94); }
+  #resetBtn:hover, #randomBtn:hover { background:#0f0; color:#000; }
+  #resetBtn:active, #randomBtn:active { background:#0f0; color:#000; transform:scale(0.94); }
   #cmd, #sub { text-align:center; padding-left:8px; padding-right:8px; word-break:break-word; }
   #stage { padding-bottom:env(safe-area-inset-bottom); }
 
@@ -344,7 +372,7 @@ if (isset($_GET['stats'])) {
     #methodBox .mbTitle { font-size:10px; letter-spacing:1px; margin-bottom:4px; }
     #cmd { font-size:clamp(20px,6.5vw,34px); letter-spacing:1px; padding:5px 0; }
     #sub { font-size:11px; padding-bottom:6px; }
-    #resetBtn { font-size:12px; padding:8px 11px; min-height:36px; }
+    #resetBtn, #randomBtn { font-size:12px; padding:8px 11px; min-height:36px; }
     #versionBox { font-size:12px; padding:8px 10px; min-height:36px; }
     #githubBtn { min-height:36px; min-width:36px; padding:6px; }
     #githubBtn svg { width:18px; height:18px; }
@@ -386,6 +414,7 @@ if (isset($_GET['stats'])) {
   </a>
   <div id="versionBox"<?php if ($updateAvailable): ?> class="update-needed" title="<?= htmlspecialchars($updateTitle) ?>"<?php endif; ?>><?= $isDevBuild ? 'DEV' : 'v'.htmlspecialchars($VERSION) ?></div>
   <button id="resetBtn">&#8635; RESET</button>
+  <button id="randomBtn" aria-label="Random destruction" title="Random destruction">&#127921; RANDOM</button>
 </div>
 <div id="stage">
   <pre id="scene"></pre>
@@ -400,62 +429,70 @@ if (isset($_GET['stats'])) {
       <button class="filterBtn" data-cat="fun">Whimsical</button>
     </div>
     <div class="mbList">
-      <span class="m-nuke pick" data-method="0" data-cat="classic">Nuclear Bomb</span>
-      <span class="m-wave pick" data-method="1" data-cat="classic">Tsunami</span>
-      <span class="m-ast pick" data-method="2" data-cat="classic">Asteroid</span>
-      <span class="m-gz pick" data-method="3" data-cat="scifi">Godzilla</span>
-      <span class="m-nap pick" data-method="4" data-cat="classic">Napalm</span>
-      <span class="m-sun pick" data-method="5" data-cat="scifi">The Sun</span>
-      <span class="m-alien pick" data-method="6" data-cat="scifi">Aliens</span>
-      <span class="m-zombie pick" data-method="7" data-cat="scifi">Zombies</span>
-      <span class="m-locust pick" data-method="8" data-cat="classic">Locusts</span>
-      <span class="m-torn pick" data-method="9" data-cat="classic">Tornado</span>
-      <span class="m-quake pick" data-method="10" data-cat="classic">Earthquake</span>
-      <span class="m-volc pick" data-method="11" data-cat="classic">Volcano</span>
-      <span class="m-riot pick" data-method="12" data-cat="classic">Riots</span>
-      <span class="m-crash pick" data-method="13" data-cat="classic">Air Crash</span>
-      <span class="m-toxic pick" data-method="14" data-cat="classic">Toxic Waste</span>
-      <span class="m-iss pick" data-method="15" data-cat="classic">ISS Crash</span>
-      <span class="m-shark pick" data-method="16" data-cat="scifi">Sharknado</span>
-      <span class="m-sauron pick" data-method="17" data-cat="movie">Sauron</span>
-      <span class="m-freeze pick" data-method="18" data-cat="movie">Snowpiercer</span>
-      <span class="m-thanos pick" data-method="19" data-cat="movie">Thanos</span>
-      <span class="m-inc pick" data-method="20" data-cat="movie">Inception</span>
-      <span class="m-drag pick" data-method="21" data-cat="movie">Dragons</span>
-      <span class="m-ai pick" data-method="22" data-cat="scifi">AI Takeover</span>
-      <span class="m-bttf pick" data-method="23" data-cat="movie">Back to Future</span>
-      <span class="m-steel pick" data-method="24" data-cat="movie">Man of Steel</span>
-      <span class="m-dino pick" data-method="25" data-cat="movie">Jurassic Park</span>
-      <span class="m-satan pick" data-method="26" data-cat="movie">Satan</span>
-      <span class="m-titanic pick" data-method="27" data-cat="movie">Titanic</span>
-      <span class="m-jum pick" data-method="31" data-cat="movie">Jumanji</span>
-      <span class="m-naut pick" data-method="28" data-cat="movie">Baldur's Gate</span>
-      <span class="m-emp pick" data-method="29" data-cat="scifi">EMP</span>
-      <span class="m-war pick" data-method="30" data-cat="scifi">War</span>
-      <span class="m-ghost pick" data-method="32" data-cat="movie">Ghostbusters</span>
-      <span class="m-frozen pick" data-method="33" data-cat="movie">Frozen</span>
-      <span class="m-land pick" data-method="34" data-cat="classic">Landslide</span>
-      <span class="m-avp pick" data-method="35" data-cat="movie">Alien vs Pred</span>
-      <span class="m-mortal pick" data-method="36" data-cat="movie">Mortal Engines</span>
-      <span class="m-simp pick" data-method="37" data-cat="movie">Simpsons</span>
-      <span class="m-emu pick" data-method="38" data-cat="fun">Emu War</span>
-      <span class="m-neil pick" data-method="39" data-cat="fun">Neil the Seal</span>
-      <span class="m-kool pick" data-method="40" data-cat="fun">Kool-Aid</span>
-      <span class="m-goo pick" data-method="41" data-cat="scifi">Gray Goo</span>
-      <span class="m-mine pick" data-method="42" data-cat="fun">Mine Turtle</span>
-      <span class="m-triff pick" data-method="43" data-cat="movie">Triffids</span>
-      <span class="m-tikes pick" data-method="44" data-cat="fun">Little Tikes</span>
-      <span class="m-ion pick" data-method="45" data-cat="scifi">Ion Cannon</span>
-      <span class="m-ds pick" data-method="46" data-cat="movie">Death Star</span>
-      <span class="m-pride pick" data-method="47" data-cat="fun">LGBT Agenda</span>
-      <span class="m-joker pick" data-method="48" data-cat="movie">The Joker</span>
-      <span class="m-squad pick" data-method="49" data-cat="movie">Suicide Squad</span>
-      <span class="m-squad2 pick" data-method="51" data-cat="movie">Suicide Squad 2</span>
-      <span class="m-monkeys pick" data-method="50" data-cat="movie">12 Monkeys</span>
-      <span class="m-gta pick" data-method="52" data-cat="movie">GTA</span>
-      <span class="m-sim pick" data-method="53" data-cat="movie">Sim City</span>
-      <span class="m-duke pick" data-method="54" data-cat="movie">Duke Nukem 3D</span>
-      <span class="m-dolly pick" data-method="55" data-cat="fun">Dolly</span>
+      <a href="?m=0" class="m-nuke pick" data-method="0" data-cat="classic">Nuclear Bomb</a>
+      <a href="?m=1" class="m-wave pick" data-method="1" data-cat="classic">Tsunami</a>
+      <a href="?m=2" class="m-ast pick" data-method="2" data-cat="classic">Asteroid</a>
+      <a href="?m=3" class="m-gz pick" data-method="3" data-cat="scifi">Godzilla</a>
+      <a href="?m=4" class="m-nap pick" data-method="4" data-cat="classic">Napalm</a>
+      <a href="?m=5" class="m-sun pick" data-method="5" data-cat="scifi">The Sun</a>
+      <a href="?m=6" class="m-alien pick" data-method="6" data-cat="scifi">Aliens</a>
+      <a href="?m=7" class="m-zombie pick" data-method="7" data-cat="scifi">Zombies</a>
+      <a href="?m=8" class="m-locust pick" data-method="8" data-cat="classic">Locusts</a>
+      <a href="?m=9" class="m-torn pick" data-method="9" data-cat="classic">Tornado</a>
+      <a href="?m=10" class="m-quake pick" data-method="10" data-cat="classic">Earthquake</a>
+      <a href="?m=11" class="m-volc pick" data-method="11" data-cat="classic">Volcano</a>
+      <a href="?m=12" class="m-riot pick" data-method="12" data-cat="classic">Riots</a>
+      <a href="?m=13" class="m-crash pick" data-method="13" data-cat="classic">Air Crash</a>
+      <a href="?m=14" class="m-toxic pick" data-method="14" data-cat="classic">Toxic Waste</a>
+      <a href="?m=15" class="m-iss pick" data-method="15" data-cat="classic">ISS Crash</a>
+      <a href="?m=16" class="m-shark pick" data-method="16" data-cat="scifi">Sharknado</a>
+      <a href="?m=17" class="m-sauron pick" data-method="17" data-cat="movie">Sauron</a>
+      <a href="?m=18" class="m-freeze pick" data-method="18" data-cat="movie">Snowpiercer</a>
+      <a href="?m=19" class="m-thanos pick" data-method="19" data-cat="movie">Thanos</a>
+      <a href="?m=20" class="m-inc pick" data-method="20" data-cat="movie">Inception</a>
+      <a href="?m=21" class="m-drag pick" data-method="21" data-cat="movie">Dragons</a>
+      <a href="?m=22" class="m-ai pick" data-method="22" data-cat="scifi">AI Takeover</a>
+      <a href="?m=23" class="m-bttf pick" data-method="23" data-cat="movie">Back to Future</a>
+      <a href="?m=24" class="m-steel pick" data-method="24" data-cat="movie">Man of Steel</a>
+      <a href="?m=25" class="m-dino pick" data-method="25" data-cat="movie">Jurassic Park</a>
+      <a href="?m=26" class="m-satan pick" data-method="26" data-cat="movie">Satan</a>
+      <a href="?m=27" class="m-titanic pick" data-method="27" data-cat="movie">Titanic</a>
+      <a href="?m=31" class="m-jum pick" data-method="31" data-cat="movie">Jumanji</a>
+      <a href="?m=28" class="m-naut pick" data-method="28" data-cat="movie">Baldur's Gate</a>
+      <a href="?m=29" class="m-emp pick" data-method="29" data-cat="scifi">EMP</a>
+      <a href="?m=30" class="m-war pick" data-method="30" data-cat="scifi">War</a>
+      <a href="?m=32" class="m-ghost pick" data-method="32" data-cat="movie">Ghostbusters</a>
+      <a href="?m=33" class="m-frozen pick" data-method="33" data-cat="movie">Frozen</a>
+      <a href="?m=34" class="m-land pick" data-method="34" data-cat="classic">Landslide</a>
+      <a href="?m=35" class="m-avp pick" data-method="35" data-cat="movie">Alien vs Pred</a>
+      <a href="?m=36" class="m-mortal pick" data-method="36" data-cat="movie">Mortal Engines</a>
+      <a href="?m=37" class="m-simp pick" data-method="37" data-cat="movie">Simpsons</a>
+      <a href="?m=38" class="m-emu pick" data-method="38" data-cat="fun">Emu War</a>
+      <a href="?m=39" class="m-neil pick" data-method="39" data-cat="fun">Neil the Seal</a>
+      <a href="?m=40" class="m-kool pick" data-method="40" data-cat="fun">Kool-Aid</a>
+      <a href="?m=41" class="m-goo pick" data-method="41" data-cat="scifi">Gray Goo</a>
+      <a href="?m=42" class="m-mine pick" data-method="42" data-cat="fun">Mine Turtle</a>
+      <a href="?m=43" class="m-triff pick" data-method="43" data-cat="movie">Triffids</a>
+      <a href="?m=44" class="m-tikes pick" data-method="44" data-cat="fun">Little Tikes</a>
+      <a href="?m=45" class="m-ion pick" data-method="45" data-cat="scifi">Ion Cannon</a>
+      <a href="?m=46" class="m-ds pick" data-method="46" data-cat="movie">Death Star</a>
+      <a href="?m=47" class="m-pride pick" data-method="47" data-cat="fun">LGBT Agenda</a>
+      <a href="?m=48" class="m-joker pick" data-method="48" data-cat="movie">The Joker</a>
+      <a href="?m=49" class="m-squad pick" data-method="49" data-cat="movie">Suicide Squad</a>
+      <a href="?m=51" class="m-squad2 pick" data-method="51" data-cat="movie">Suicide Squad 2</a>
+      <a href="?m=50" class="m-monkeys pick" data-method="50" data-cat="movie">12 Monkeys</a>
+      <a href="?m=52" class="m-gta pick" data-method="52" data-cat="movie">GTA</a>
+      <a href="?m=53" class="m-sim pick" data-method="53" data-cat="movie">Sim City</a>
+      <a href="?m=54" class="m-duke pick" data-method="54" data-cat="movie">Duke Nukem 3D</a>
+      <a href="?m=55" class="m-dolly pick" data-method="55" data-cat="fun">Dolly</a>
+      <a href="?m=56" class="m-curry pick" data-method="56" data-cat="movie">Tim Curry</a>
+      <a href="?m=57" class="m-wicked pick" data-method="57" data-cat="movie">Wicked</a>
+      <a href="?m=58" class="m-ltt pick" data-method="58" data-cat="movie">LTT</a>
+      <a href="?m=59" class="m-tusk pick" data-method="59" data-cat="movie">Melon Tusk</a>
+      <a href="?m=60" class="m-fart pick" data-method="60" data-cat="fun">Fart</a>
+      <a href="?m=61" class="m-rubber pick" data-method="61" data-cat="movie">Rubber</a>
+      <a href="?m=62" class="m-tomato pick" data-method="62" data-cat="movie">Tomatoes</a>
+      <a href="?m=63" class="m-cocainebear pick" data-method="63" data-cat="movie">Cocaine Bear</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -463,6 +500,16 @@ if (isset($_GET['stats'])) {
 </div>
 <div id="flash"></div>
 <div id="wantedAlert"></div>
+<div id="shareBox">
+  <button id="shareBtn" aria-label="Share" title="Share">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+  </button>
+  <div id="shareMenu" class="hidden">
+    <button id="shareCurrentBtn">Share this destruction</button>
+    <button id="shareSiteBtn">Share the site</button>
+  </div>
+  <div id="shareToast"></div>
+</div>
 <div id="statsOverlay">
   <div id="statsPanel">
     <h2>DESTRUCTION STATISTICS</h2>
@@ -488,6 +535,20 @@ const statsBtn=document.getElementById('statsBtn'), statsOverlay=document.getEle
       statsList=document.getElementById('statsList'), statsCloseBtn=document.getElementById('statsCloseBtn');
 const methodNames={};
 methodBox.querySelectorAll('.pick').forEach(el=>{ methodNames[el.getAttribute('data-method')]=el.textContent; });
+// direct-call links: ?m=<method id> launches that method immediately on load, skipping the picker
+let pendingLaunchMethod=null;
+(function(){
+  try{
+    const params=new URLSearchParams(location.search);
+    const m=params.get('m');
+    if(m!==null && methodNames.hasOwnProperty(m)) pendingLaunchMethod=parseInt(m,10);
+  }catch(e){}
+})();
+let currentMethodId=null;
+function getShareableURL(methodId){
+  const base=location.origin+location.pathname;
+  return (methodId!==undefined && methodId!==null) ? base+'?m='+methodId : base;
+}
 let stats={total:0, methods:{}, uniqueVisitors:0};
 const POPULAR_COUNT=12;   // how many top methods "Popular" shows
 function normalizeStats(d){ return (d && typeof d==='object') ? { total:d.total||0, methods:d.methods||{}, uniqueVisitors:d.uniqueVisitors||0 } : {total:0, methods:{}, uniqueVisitors:0}; }
@@ -1283,6 +1344,176 @@ function colorFor(ch,r,c,mode){
     if(ch==="o")return "#f0c060";                                 // blonde head
     if(/[0-9:APM]/.test(ch))return "#ffd700";                     // the clock face, rhinestone gold
     return "#ff8fc0";                                             // denim-pink workwear
+  }
+  if(mode==='curryfrank'){                                        // Frank-N-Furter: sequins and fishnets
+    if(ch==="o")return "#f0c8a0";                                 // face
+    if(ch==="="||ch==="~")return "#000000";                       // fishnets
+    return "#e0203a";                                             // corset red
+  }
+  if(mode==='currypenny'){                                        // the clown with the red balloon
+    if(ch==="o")return "#fff0f0";                                 // greasepaint white face
+    if(ch==="^"||ch==="V")return "#ff2020";                       // painted grin
+    if(ch==="@")return "#ff2020";                                 // the balloon
+    return "#e8a800";                                             // ruff / pompoms, sickly gold
+  }
+  if(mode==='currydark'){                                         // the horned Lord of Darkness, looming
+    if(ch==="o"||ch==="O")return "#ff3010";                       // burning eyes
+    if(ch==="Y"||ch==="V"||ch==="\\"||ch==="/")return "#8a1010";  // horns
+    return "#1a0808";                                             // charcoal hide
+  }
+  if(mode==='currywads'){                                         // Wadsworth, and the wrench
+    if(ch==="o")return "#e8d0b0";                                 // face
+    if(ch==="T"||ch==="/")return "#909090";                       // the wrench
+    return "#1a1a1e";                                             // butler's tails
+  }
+  if(mode==='currylechuck'){                                      // LeChuck, ghost pirate
+    if(ch==="o"||ch==="O")return "#c0ffd0";                       // hollow eyes
+    return "#2aa060";                                             // spectral green
+  }
+  if(mode==='curryconcierge'){                                    // the suspicious hotel concierge
+    if(ch==="o")return "#e8d0b0";                                 // face
+    if(ch==="$")return "#ffd700";                                 // bellhop gold trim
+    return "#7a1a2a";                                             // hotel-maroon uniform
+  }
+  if(mode==='currywarp'){                                         // the dance floor gives way
+    const rcw=Math.random();
+    if(rcw<0.34) return "#ff2050";
+    if(rcw<0.67) return "#ffd700";
+    return "#40e0ff";
+  }
+  if(mode==='emerald'){                                           // the Emerald City
+    if(ch==="."||ch===":")return "#eaffea";                       // sparkling windows
+    if(ch==="|")return "#0a5a2a";                                 // deep emerald walls
+    return "#1fae5a";                                             // emerald green
+  }
+  if(mode==='witch'){                                             // the Wicked Witch of the West
+    if(ch==="O"||ch==="o")return "#7ad020";                       // green skin
+    if(ch==="/"||ch==="\\")return "#1a1a1a";                      // pointed hat
+    if(ch==="="||ch==="#"||ch===">")return "#5a3a1a";             // broomstick
+    if(ch==="~")return "#8a6a2a";                                 // broom bristles
+    return "#1a1a1a";                                             // black robes
+  }
+  if(mode==='flyingmonkey'){                                      // the flying monkeys, in pursuit
+    if(ch==="o")return "#c0a060";                                 // face
+    if(ch==="^"||ch==="-")return "#8a6a3a";                       // wings
+    return "#6a4a2a";                                             // fur
+  }
+  if(mode==='glindabubble'){                                      // Glinda, watching from her bubble
+    if(ch==="o")return "#f0c060";                                 // golden hair
+    if(ch==="."||ch==="'"||ch==="-")return "#ffc0e8";             // the pink bubble
+    return "#ffe0f4";
+  }
+  if(mode==='ltttower'){                                          // the Linus Media Group skyline
+    if(/[A-Za-z]/.test(ch)) return "#fff2e0";                     // tower signage
+    if(ch==="."||ch===":") return "#ffb347";                      // lit windows, LTT orange
+    return "#8a5a20";                                             // steel & orange trim
+  }
+  if(mode==='lttgpu'){                                            // the priceless prototype GPU
+    if(ch==="=") return "#ffae42";
+    return "#3a2a10";
+  }
+  if(mode==='lttflood'){                                          // the watercooling leak
+    return (Math.random()<0.5)?"#2a9ad0":"#5ad0e0";
+  }
+  if(mode==='lttdata'){                                           // DATA LOSS, spreading through the racks
+    if(/[A-Z ]/.test(ch)) return "#ff3030";
+    return "#4a4a4a";
+  }
+  if(mode==='lttperson'){                                         // Linus, Anthony, Jake
+    if(ch==="o") return "#e8c090";
+    return "#ff7b00";                                             // LTT orange
+  }
+  if(mode==='lttsponsor'){                                        // the ad-read save: rubble frozen in golden light
+    return (Math.random()<0.5)?"#ffd700":"#ff9a2a";
+  }
+  if(mode==='tuskstar'){                                          // the star field in orbit
+    return (Math.random()<0.5)?"#ffffff":"#a0c0ff";
+  }
+  if(mode==='tuskearth'){                                         // the curve of the Earth below
+    return (Math.random()<0.5)?"#2a6a9a":"#3a9a6a";
+  }
+  if(mode==='tuskroadster'){                                      // the Roadster, Optimus strapped in
+    if(ch==="Y")return "#d0e0ff";                                 // the frozen waving arm
+    if(ch==="o")return "#1a1a1a";                                 // wheels
+    return "#c81020";                                             // cherry-red chassis
+  }
+  if(mode==='tuskflame'){                                         // reentry / impact flame
+    const rf=Math.random();
+    return rf<0.4?"#ffe040":(rf<0.7?"#ff8000":"#ff3000");
+  }
+  if(mode==='tuskoptimus'){                                       // Optimus, undamaged and unbothered
+    if(ch==="O"||ch==="o")return "#40c0ff";                       // glowing blue eyes
+    return "#c0c4c8";                                             // brushed steel
+  }
+  if(mode==='tuskcyber'){                                         // the Cybertruck, appeared from nowhere
+    if(ch==="o")return "#1a1a1a";
+    return "#b8bcc0";                                             // stainless steel
+  }
+  if(mode==='tuskperson'){                                        // Melon Tusk: hard hat, hi-vis, mug
+    if(ch==="^")return "#ffd400";                                 // hard hat
+    if(ch==="o")return "#e8c090";                                 // face
+    return "#ff7a1a";                                             // hi-vis vest
+  }
+  if(mode==='tuskreporter'){                                      // the shell-shocked reporter
+    if(ch==="o")return "#e8c090";
+    return "#7a8290";
+  }
+  if(mode==='tuskember'){                                         // embers drifting over the ruins
+    return (Math.random()<0.5)?"#ff9a3a":"#ffd070";
+  }
+  if(mode==='fartperson'){                                        // the performer, mic in hand
+    if(ch==="o")return "#e8c090";                                 // face
+    if(ch==="q")return "#1a1a1a";                                 // the microphone
+    if(ch==="*")return "#eaffea";                                 // the cough
+    return "#7a5aa0";                                             // stage outfit
+  }
+  if(mode==='fartstage'){                                         // the stage and the two big speakers
+    if(ch==="#")return "#1a1a1a";                                 // speaker cones
+    return "#5a5a62";                                             // rig, grey steel
+  }
+  if(mode==='fartcrowd'){                                         // the crowd, watching (then recoiling)
+    return "#8a9ab0";
+  }
+  if(mode==='fartwave'){                                          // the sound wave rolling outward
+    return (Math.random()<0.5)?"#c8f050":"#a0d040";
+  }
+  if(mode==='fartbroken'){                                        // shattered glass, everywhere
+    return (Math.random()<0.5)?"#eaf6ff":"#a8c8d8";
+  }
+  if(mode==='rubbertire'){                                        // Robert, a telepathic car tire
+    if(ch==="o"||ch==="O")return "#1a1a1a";                       // hubcap
+    return "#2a2a2a";                                             // black rubber
+  }
+  if(mode==='rubberperson'){                                      // an unsuspecting bystander
+    if(ch==="o")return "#e8c090";                                 // face
+    return "#5a6a8a";                                             // clothes
+  }
+  if(mode==='rubberbeam'){                                        // the telepathic focus
+    return (Math.random()<0.5)?"#c060ff":"#8a2ab0";
+  }
+  if(mode==='rubberburst'){                                       // heads exploding — no further explanation
+    const rr=Math.random();
+    if(rr<0.4) return "#ff3030";
+    if(rr<0.7) return "#e8c090";
+    return "#8a1010";
+  }
+  if(mode==='tomato'){                                            // a giant killer tomato
+    if(ch===","||ch==="^"||ch===".")return "#2a6a1a";             // stem & leaf
+    return (Math.random()<0.5)?"#e0201a":"#ff3020";               // glossy red skin
+  }
+  if(mode==='tomatosplat'){                                       // squashed — nothing left but pulp
+    return (Math.random()<0.5)?"#c81810":"#8a1010";
+  }
+  if(mode==='cocainebear'){                                       // a very large, extremely motivated bear
+    if(ch==="*")return (Math.random()<0.5)?"#ff2020":"#ffffff";  // manic, dilated eyes
+    if(ch==="^"||ch==="o")return "#1a1008";                       // ears / normal eyes
+    return "#5a3a1a";                                             // brown fur
+  }
+  if(mode==='cocainebag'){                                        // the duffel bags, mid-air or landed
+    return "#3a3a30";
+  }
+  if(mode==='cocainegore'){                                       // mauled — the bear does not share
+    return (Math.random()<0.5)?"#8a1010":"#c81810";
   }
   if(mode==='dukefire'){                                          // muzzle flashes & explosions
     const rdk=Math.random();
@@ -5013,6 +5244,19 @@ let dukeStarted=false, dukeT=0, dukeSubPhase='logos', dukeX=0, dukePigs=[], duke
     dukeShipX=0, dukeShipY=0, dukeAlienX=0, dukeAlienY=0, dukeShipTargetX=0, dukeShipTargetY=0, dukeCrashR=0,
     dukeShipStartX=0, dukeShipStartY=0;
 let dollyStarted=false, dollyT=0, dollySubPhase='arrive', dollyWorkers=[], dollyLineIdx=0, dollyLineT=0;
+let curryStarted=false, curryT=0, curryIdx=0, curryWarpT=0, curryWarpDone=0;
+let wickedStarted=false, wickedT=0, wickedFront=0, wickedWitch=null, wickedMonkeys=[], wickedDmgCols=[], wickedDmg=0,
+    wickedGlindaX=0, wickedGlindaY=0, wickedMeltT=0;
+let lttStarted=false, lttT=0, lttSubPhase='intro', lttGpuX=0, lttGpuY=0, lttGpuVX=0, lttGpuVY=0, lttGpuBounces=0,
+    lttFloodR=0, lttDataR=0, lttSpireAngle=0, lttSponsorT=0, lttRubble=[], lttDistrictBackup=null;
+let tuskStarted=false, tuskT=0, tuskCarX=0, tuskCarY=0, tuskLineIdx=0, tuskLineT=0,
+    tuskDiveStartX=0, tuskDiveStartY=0, tuskDiveT=0, tuskArmLost=false, tuskCraterX=0,
+    tuskBlastR=0, tuskEmbers=[], tuskCyberX=0, tuskTuskX=0, tuskReporterX=0,
+    tuskArrivalLineIdx=0, tuskArrivalLineT=0, tuskEndLineIdx=0, tuskEndLineT=0;
+let fartStarted=false, fartT=0, fartPersonX=0, fartWaveR=0, fartCrowd=[];
+let rubberStarted=false, rubberT=0, rubberTireX=0, rubberPeople=[], rubberTargetIdx=0, rubberFocusT=0, rubberSubPhase='approach';
+let tomatoStarted=false, tomatoT=0, tomatoes=[], tomatoPeople=[], tomatoSoldiers=[], tomatoBullets=[], tomatoDmg=0;
+let cbStarted=false, cbT=0, cbSubPhase='drop', cbPlaneX=0, cbBags=[], cbBearX=0, cbHigh=false, cbPeople=[], cbDmg=0, cbBearDir=1;
 const maxDmg=()=>Math.floor(COLS/2)+2;
 
 // ---- WANTED SYSTEM: GTA-style 1-5 star heat/pursuit escalation ----
@@ -5441,8 +5685,768 @@ function dollyRender(clockLabel){
   return {grid,mg};
 }
 
+// ---- TIM CURRY: a victory lap through his best-known roles, ending in the Time Warp ----
+const curryFrankSprite=[" .--."," (o  o)"," |==|","/|##|\\"," |  |"," () ()"];
+const curryPennySprite=[" .--."," (o  o)"," |^^|","/|##|\\"," |  |"];
+const curryDarkSprite=["  \\  |  /","   \\ | /","  ( O )","   \\_/","  /|###|\\"];
+const curryWadsSprite=[" .--."," (o  o)"," |##|","/|##|\\"," |  |"];
+const curryLechuckSprite=["  ,--."," ( o  o )","  |~~~~|"," (|####|)","  |    |"];
+const curryConciergeSprite=[" .--."," (o  o)"," |##|","/|##|\\"," |  |"];
+const curryVignettes=[
+  {sprite:curryFrankSprite, mode:'curryfrank', label:"FRANK-N-FURTER", sub:"DON'T DREAM IT, BE IT."},
+  {sprite:curryPennySprite, mode:'currypenny', label:"PENNYWISE", sub:"THEY ALL FLOAT."},
+  {sprite:curryDarkSprite, mode:'currydark', label:"THE LORD OF DARKNESS", sub:"THE NIGHT CREATURES STIR."},
+  {sprite:curryWadsSprite, mode:'currywads', label:"WADSWORTH", sub:"THE BUTLER DID IT — WITH THE WRENCH."},
+  {sprite:curryLechuckSprite, mode:'currylechuck', label:"LECHUCK", sub:"A GHOST PIRATE RISES FROM THE SEA."},
+  {sprite:curryConciergeSprite, mode:'curryconcierge', label:"THE CONCIERGE", sub:"HE'S SEEN SOME THINGS TONIGHT."},
+];
+function curryVignetteRender(v, t){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const spr=v.sprite;
+  if(v.mode==='currydark'){
+    // looms huge over the whole skyline, near the top of the screen
+    const top=1, left=cx-Math.floor(spr[0].length/2);
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,v.mode); } }
+  } else {
+    const top=streetRow-spr.length+1, left=cx-Math.floor(spr[0].length/2)+Math.round(Math.sin(t*0.15)*6);
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,v.mode); } }
+    if(v.mode==='currypenny'){
+      // the red balloon, bobbing alongside
+      const bc=left+spr[0].length+1, br=top-3;
+      if(bc>=0&&bc<COLS&&br>=0&&br<ROWS){ setCh(grid,br,bc,"@"); setMode(mg,br,bc,'currypenny'); }
+      if(bc>=0&&bc<COLS&&br+1>=0&&br+1<ROWS){ setCh(grid,br+1,bc,"|"); setMode(mg,br+1,bc,'currypenny'); }
+    }
+  }
+  return {grid,mg};
+}
+function curryWarpRender(t, collapseRate){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(collapseRate>0) collapseCity(collapseRate);
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  // a flashing dance-floor under it all
+  for(let c=0;c<COLS;c++){ if((c+Math.floor(t/4))%4===0){ setCh(grid,streetRow,c, (Math.floor(t/8)%2===0)?"#":"@"); setMode(mg,streetRow,c,'currywarp'); } }
+  return {grid,mg};
+}
+
+// ---- WICKED: the city turns emerald, and the flying monkeys give chase over the rooftops ----
+const witchSprite=[" /\\","(O)","=#>~~~"];
+const flyingMonkeySprite=["^-^","(o)","/|\\"];
+const glindaBubbleSprite=[" .--. ","( o  )"," '--' "];
+function wickedEmeraldRender(front){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(let c=0;c<Math.min(COLS,Math.ceil(front));c++){
+    for(let r=0;r<streetRow;r++){ if(grid[r] && grid[r][c]!==" ") setMode(mg,r,c,'emerald'); }
+  }
+  return {grid,mg};
+}
+function wickedChaseInit(){
+  wickedWitch={x:-8, y:4, dir:1, trail:[]};
+  wickedMonkeys=[];
+  for(let i=0;i<4;i++){ wickedMonkeys.push({x:-8, y:4, lag:6+i*4}); }
+  wickedDmgCols=new Array(COLS).fill(0);
+  wickedGlindaX=Math.floor(COLS*0.85); wickedGlindaY=3;
+  wickedDmg=0;
+}
+function wickedChaseStep(t){
+  wickedWitch.x+=wickedWitch.dir*2.2;
+  wickedWitch.y=4+Math.sin(t*0.15)*3;
+  if(wickedWitch.x>COLS+6) wickedWitch.dir=-1;
+  if(wickedWitch.x<-6) wickedWitch.dir=1;
+  wickedWitch.trail.push({x:wickedWitch.x, y:wickedWitch.y});
+  if(wickedWitch.trail.length>70) wickedWitch.trail.shift();
+  const xi=Math.round(wickedWitch.x);
+  for(let dj=-3;dj<=3;dj++){ const c=xi+dj; if(c>=0&&c<COLS) wickedDmgCols[c]=Math.min(1, wickedDmgCols[c]+0.3); }
+  for(const m of wickedMonkeys){
+    const idx=Math.max(0, wickedWitch.trail.length-1-m.lag);
+    const p=wickedWitch.trail[idx];
+    if(p){ m.x=p.x; m.y=p.y+(Math.random()<0.5?-1:1);
+      const mxi=Math.round(m.x); for(let dj=-2;dj<=2;dj++){ const c=mxi+dj; if(c>=0&&c<COLS) wickedDmgCols[c]=Math.min(1, wickedDmgCols[c]+0.2); }
+    }
+  }
+  let dmgCount=0; for(let c=0;c<COLS;c++) if(wickedDmgCols[c]>0.4) dmgCount++;
+  wickedDmg=dmgCount;
+}
+function wickedChaseRender(){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  for(let c=0;c<COLS;c++){ if(wickedDmgCols[c]>0.3){
+    for(let r=0;r<streetRow;r++){ if(cityGridArr[r] && cityGridArr[r][c] && cityGridArr[r][c]!==" " && Math.random()<wickedDmgCols[c]*0.2){ let ln=cityGridArr[r].split(""); ln[c]=" "; cityGridArr[r]=ln.join(""); } } } }
+  collapseCity(0.3);
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'emerald');
+  { let g=grid[streetRow].split(""); for(let c=0;c<COLS;c++){ if(wickedDmgCols[c]>0.5 && Math.random()<0.4) g[c]=[".",",","_"][(Math.random()*3)|0]; } grid[streetRow]=g.join(""); }
+  // Glinda, serene in her bubble, watching it all unfold
+  { const gb=glindaBubbleSprite;
+    for(let i=0;i<gb.length;i++){ const art=gb[i], r=wickedGlindaY+i;
+      for(let j=0;j<art.length;j++){ const c=wickedGlindaX+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'glindabubble'); } } }
+  // the flying monkeys, in pursuit
+  for(const m of wickedMonkeys){
+    const xi=Math.round(m.x), yi=Math.round(m.y);
+    for(let i=0;i<flyingMonkeySprite.length;i++){ const art=flyingMonkeySprite[i], r=yi+i;
+      for(let j=0;j<art.length;j++){ const c=xi+j-1; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'flyingmonkey'); } }
+  }
+  // the witch herself, streaking overhead
+  { const xi=Math.round(wickedWitch.x), yi=Math.round(wickedWitch.y);
+    let spr=witchSprite; if(wickedWitch.dir<0) spr=spr.map(s=>s.split("").reverse().join(""));
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=yi+i;
+      for(let j=0;j<art.length;j++){ const c=xi+j-1; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'witch'); } } }
+  return {grid,mg};
+}
+function wickedMeltRender(t){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'emerald');
+  { const gb=glindaBubbleSprite;
+    for(let i=0;i<gb.length;i++){ const art=gb[i], r=wickedGlindaY+i;
+      for(let j=0;j<art.length;j++){ const c=wickedGlindaX+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'glindabubble'); } } }
+  // the witch, shrinking away to nothing on the street below
+  const xi=cx, yi=streetRow-2;
+  for(let k=0;k<Math.min(3, t);k++){ const c=xi+k-1, r=yi; if(c>=0&&c<COLS){ setCh(grid,r,c,(Math.random()<0.5?"~":".")); setMode(mg,r,c,'witch'); } }
+  if(t<3){ setCh(grid,yi,xi,"O"); setMode(mg,yi,xi,'witch'); }
+  return {grid,mg};
+}
+
+// ---- LTT: a routine GPU review goes wrong, and Linus saves it with a sponsor read ----
+const linusHoldSprite=[" o ","(#)","/ \\"];       // holding the prototype aloft, triumphant
+const linusPanicSprite=["\\o/","/#\\","/ \\"];    // "OH NO."
+const linusCalmSprite=[" o ","/|\\","/ \\"];       // mid-sponsor-read, unbothered
+const gpuSprite=["[======]","[ GPU  ]"];
+const wanTowerSprite=[
+  "   ___   ",
+  "  | W |  ",
+  "  | A |  ",
+  "  | N |  ",
+  "  |###|  ",
+  "  |###|  ",
+  " _|###|_ ",
+];
+const screwdriverSpireSprite=[
+  "   --D   ",
+  "    |    ",
+  "   /|\\   ",
+  "  /|||\\  ",
+  "  |||||  ",
+  "  |||||  ",
+];
+const watercoolTowerSprite=[
+  " _________ ",
+  "|~ ~ ~ ~ ~|",
+  "|[] [] []|",
+  "|~~~~~~~~|",
+  "|[] [] []|",
+  "|~~~~~~~~|",
+  "|________|",
+];
+const storageServerSprite=[
+  " __________ ",
+  "|##########|",
+  "|[#][#][#]|",
+  "|##########|",
+  "|[#][#][#]|",
+  "|##########|",
+  "|[#][#][#]|",
+  "|__________|",
+];
+function lttPositions(){
+  return {
+    wanX: Math.floor(COLS*0.18),
+    spireX: Math.floor(COLS*0.38),
+    coolX: Math.floor(COLS*0.55),
+    serverX: Math.floor(COLS*0.74),
+  };
+}
+// draws the whole LMG skyline; opts: floodLevel/dataLevel (0..1), spireAngle (deg, topples as it grows), glow (the sponsor save)
+function drawLMGSkyline(grid, mg, opts){
+  opts=opts||{};
+  const pos=lttPositions();
+  const floodLevel=opts.floodLevel||0, dataLevel=opts.dataLevel||0, spireAngle=opts.spireAngle||0, glow=!!opts.glow;
+  const tmode=glow?'lttsponsor':'ltttower';
+
+  // the WAN Show Tower — stands proud throughout
+  { const spr=wanTowerSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=pos.wanX+j-4;
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,tmode); } } }
+
+  // the Screwdriver Spire — spins loose and topples as spireAngle grows, rights itself when it's saved
+  { const spr=screwdriverSpireSprite, sh=spr.length, sw=spr[0].length;
+    const phi=spireAngle*Math.PI/180, cosP=Math.cos(phi), sinP=Math.sin(phi);
+    for(let i=0;i<sh;i++){ const art=spr[i];
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue;
+        const X=j-Math.floor(sw/2), Y=-(sh-1-i);
+        const Xr=X*cosP-Y*sinP, Yr=X*sinP+Y*cosP;
+        const c=Math.round(pos.spireX+Xr), r=Math.round(streetRow+Yr);
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,tmode); } } }
+
+  // the watercooled high-rise — leaks and floods the block, recedes once it's saved
+  { const spr=watercoolTowerSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=pos.coolX+j-5;
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,tmode); } }
+    if(floodLevel>0){ const poolW=Math.round(10*floodLevel);
+      for(let dc=-poolW;dc<=poolW;dc++){ const c=pos.coolX+dc; if(c<0||c>=COLS)continue;
+        setCh(grid,streetRow,c,(Math.random()<0.5?"~":"\u2248")); setMode(mg,streetRow,c,'lttflood'); } }
+  }
+
+  // the Petabyte Storage Server — sheds panels as dataLevel grows, DATA LOSS spreading
+  { const spr=storageServerSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=pos.serverX+j-6;
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue;
+        if(dataLevel>0 && Math.random()<dataLevel*0.4) continue;
+        setCh(grid,r,c,ch); setMode(mg,r,c,tmode); } }
+    if(dataLevel>0.15){ const msg="DATA LOSS"; const mc=pos.serverX-Math.floor(msg.length/2);
+      for(let j=0;j<msg.length;j++){ const c=mc+j; if(c>=0&&c<COLS){ setCh(grid,top-1,c,msg[j]); setMode(mg,top-1,c,'lttdata'); } } }
+  }
+  return pos;
+}
+// the prototype GPU falls in slow motion, bouncing off ledges before it craters the street
+function lttGpuInit(){
+  const pos=lttPositions();
+  lttGpuX=pos.wanX; lttGpuY=Math.max(1, streetRow-Math.floor(streetRow*0.9));
+  lttGpuVX=0.35; lttGpuVY=0.2; lttGpuBounces=0;
+}
+function lttGpuStep(){
+  lttGpuVY+=0.35;
+  lttGpuY+=lttGpuVY*0.3;
+  lttGpuX+=lttGpuVX;
+  const ledges=[streetRow-Math.floor(streetRow*0.6), streetRow-Math.floor(streetRow*0.35), streetRow-Math.floor(streetRow*0.12)];
+  for(let i=lttGpuBounces;i<ledges.length;i++){
+    if(lttGpuY>=ledges[i]){ lttGpuY=ledges[i]; lttGpuVY=-Math.abs(lttGpuVY)*0.5; lttGpuBounces=i+1;
+      stage.classList.add('shake'); setTimeout(()=>stage.classList.remove('shake'),120); break; }
+  }
+  if(lttGpuY>=streetRow){ lttGpuY=streetRow; return true; }
+  return false;
+}
+// contained, one-district damage: the chaos never spreads to the whole city
+function lttDemolishDistrict(left, right, rate){
+  if(cityGridArr.length!==ROWS) return;
+  for(let r=0;r<streetRow;r++){ if(!cityGridArr[r]) continue; let ln=cityGridArr[r].split("");
+    for(let c=left;c<=right;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<rate) ln[c]=" "; }
+    cityGridArr[r]=ln.join(""); }
+}
+// the sponsor read undoes the damage — the district is saved exactly as it stood before the drop
+function lttSaveDistrict(left, right){
+  lttDistrictBackup=cityGridArr.map(row=> row ? row.slice(left,right+1) : "");
+}
+function lttRestoreDistrict(left, right){
+  if(!lttDistrictBackup) return;
+  for(let r=0;r<cityGridArr.length;r++){
+    if(!cityGridArr[r]) continue;
+    const seg=lttDistrictBackup[r]||"";
+    let ln=cityGridArr[r].split("");
+    for(let k=0;k<seg.length;k++){ const c=left+k; if(c>=0&&c<COLS) ln[c]=seg[k]; }
+    cityGridArr[r]=ln.join("");
+  }
+}
+
+// ---- MELON TUSK: an Optimus-piloted Roadster deorbits itself, and a tech titan spins the fallout ----
+const roadsterSprite=[
+  "  Y  ",
+  " /=\\ ",
+  "o___o",
+];
+const roadsterDamagedSprite=[
+  "     ",
+  " /#\\ ",
+  "o___o",
+];
+const optimusStandSprite=[
+  " (O) ",
+  "/[#]\\",
+  " / \\ ",
+];
+const optimusWaveSprite=[
+  " (O)b",
+  "/[#]\\",
+  " / \\ ",
+];
+const cyberTruckSprite=[
+  "   ______ ",
+  "  /     /|",
+  " /_____/ |",
+  "|  CT   | ",
+  "o_______o ",
+];
+const tuskPersonSprite=[
+  " ^ ",
+  "(o)",
+  "/|\\",
+  "/ \\",
+];
+const tuskMugSprite=[
+  " ^  b",
+  "(o) |",
+  "/|\\  ",
+  "/ \\  ",
+];
+const reporterSprite=[
+  " o ",
+  "/|\\",
+  "/ \\",
+];
+const missionLines1=[
+  "MISSION CONTROL: TELEMETRY LOOKS GOOD. ORBIT STABLE. BATTERY AT 98%.",
+  "OPTIMUS: BATTERY... AT NINETY-EIGHT PERCENT. DEORBIT SEQUENCE... ENGAGED.",
+  "MISSION CONTROL: WAIT — WE DIDN'T SEND THAT COMMAND—",
+];
+const missionLines2=[
+  "OPTIMUS: LANDING SITE ACQUIRED. POPULATION DENSITY: HIGH. THIS IS... ACCEPTABLE.",
+  "MISSION CONTROL: ABORT! ABORT! THERE ARE PEOPLE DOWN THERE—",
+  "OPTIMUS: ABORT... NOT RECOGNIZED.",
+];
+const arrivalLines=[
+  "REPORTER: MR. TUSK — THE ROBOT — THE CAR — THE CITY'S ON FIRE — WHAT HAPPENED?!",
+  "MELON TUSK: IT PERFORMED AN UNSCHEDULED RAPID UNPLANNED ENERGETIC LANDING. THE FIRE WAS ACTUALLY JUST EXCESS THERMAL ENERGY BEING SAFELY VENTED INTO THE SURROUNDING METROPOLITAN AREA. THIS IS COMPLETELY NOMINAL, AND HONESTLY A HUGE WIN FOR THE PROGRAM.",
+  "REPORTER: ...A WIN?",
+  "MELON TUSK: MASSIVE WIN. WE GATHERED INCREDIBLE DATA. VERSION TWO WILL VENT THERMAL ENERGY INTO APPROXIMATELY FORTY PERCENT FEWER CITY BLOCKS. PROBABLY. Q3.",
+];
+const arrivalHolds=[50,170,40,170];
+const endLines=[
+  "MELON TUSK: GOOD LANDING.",
+  "OPTIMUS: NOMINAL.",
+];
+function tuskStarfield(grid, mg){
+  for(let k=0;k<COLS*0.2;k++){ const c=(Math.random()*COLS)|0, r=(Math.random()*Math.floor(ROWS*0.7))|0;
+    if(grid[r] && grid[r][c]===" "){ setCh(grid,r,c,(Math.random()<0.5?"*":".")); setMode(mg,r,c,'tuskstar'); } }
+}
+function tuskEarthCurve(grid, mg){
+  const baseRow=ROWS-3;
+  for(let c=0;c<COLS;c++){ const dip=Math.floor(Math.sin((c/COLS)*Math.PI)*3);
+    for(let r=baseRow+dip;r<ROWS;r++){ if(r<0||r>=ROWS)continue; setCh(grid,r,c,(Math.random()<0.5?"~":"#")); setMode(mg,r,c,'tuskearth'); } }
+}
+function tuskDiveInit(){
+  tuskDiveStartX=cx-Math.floor(COLS*0.15); tuskDiveStartY=2;
+  tuskCarX=tuskDiveStartX; tuskCarY=tuskDiveStartY;
+  tuskDiveT=0; tuskArmLost=false;
+  tuskCraterX=cx+Math.floor(COLS*0.05);
+}
+function tuskDiveStep(){
+  tuskDiveT++;
+  const totalDive=Math.max(8, Math.floor(ROWS*0.6));
+  const f=Math.min(1, tuskDiveT/totalDive);
+  const fe=f*f;
+  tuskCarX=Math.round(tuskDiveStartX + (tuskCraterX-tuskDiveStartX)*fe);
+  tuskCarY=Math.round(tuskDiveStartY + (streetRow-tuskDiveStartY)*fe);
+  if(f>0.5) tuskArmLost=true;
+  return f>=1;
+}
+function tuskReenterRender(){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(let t=1;t<=10;t++){ const tx=Math.round(tuskCarX-t*0.4), ty=Math.round(tuskCarY-t*0.9);
+    if(ty>=0&&ty<ROWS&&tx>=0&&tx<COLS&&Math.random()<0.7){ setCh(grid,ty,tx,["#","*","'","@"][(Math.random()*4)|0]); setMode(mg,ty,tx,'tuskflame'); } }
+  const spr=tuskArmLost?roadsterDamagedSprite:roadsterSprite;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=Math.round(tuskCarY)+i;
+    for(let j=0;j<art.length;j++){ const c=Math.round(tuskCarX)+j-2; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tuskroadster'); } }
+  return {grid,mg};
+}
+function tuskDemolish(cxi, r){
+  if(cityGridArr.length!==ROWS) return;
+  for(let row=0; row<streetRow; row++){ if(!cityGridArr[row]) continue; let ln=cityGridArr[row].split("");
+    for(let c=cxi-r;c<=cxi+r;c++){ if(c<0||c>=COLS)continue; if(ln[c]!==" " && Math.random()<0.55) ln[c]=" "; }
+    cityGridArr[row]=ln.join(""); }
+  if(cityGridArr[streetRow]){ let g=cityGridArr[streetRow].split("");
+    for(let c=cxi-r;c<=cxi+r;c++){ if(c>=0&&c<COLS&&Math.random()<0.5) g[c]=["#","%","."][(Math.random()*3)|0]; }
+    cityGridArr[streetRow]=g.join(""); }
+}
+function tuskImpactRender(cxi, R){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(R>0) tuskDemolish(cxi, Math.round(R));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const ground=streetRow, domeH=Math.min(ground, Math.floor(R*0.75));
+  for(let r=ground;r>=ground-domeH;r--){ const frac=(ground-r)/Math.max(1,domeH);
+    const w=Math.floor(Math.sqrt(Math.max(0,1-frac*frac))*R*1.1);
+    for(let j=-w;j<=w;j++){ if(Math.random()<0.15) continue; const c=cxi+j; if(c<0||c>=COLS)continue;
+      setCh(grid,r,c,["#","@","%","*"][(Math.random()*4)|0]); setMode(mg,r,c,'tuskflame'); } }
+  // a hot-dog cart, launched skyward in slow motion
+  { const hcX=cxi+Math.round(R*0.6), hcY=Math.max(1, ground-Math.round(R*0.9));
+    if(hcY>=0 && hcY<ROWS && hcX>=0 && hcX<COLS){ setCh(grid,hcY,hcX,"@"); setMode(mg,hcY,hcX,'tuskflame');
+      if(hcX+1<COLS){ setCh(grid,hcY,hcX+1,"="); setMode(mg,hcY,hcX+1,'tuskflame'); } } }
+  return {grid,mg};
+}
+function tuskRiseRender(cxi){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(let k=0;k<COLS*0.06;k++){ const c=cxi+(((Math.random()*20)|0)-10), r=streetRow-((Math.random()*4)|0);
+    if(c>=0&&c<COLS&&r>=0&&r<ROWS&&Math.random()<0.5){ setCh(grid,r,c,["'",".","*"][(Math.random()*3)|0]); setMode(mg,r,c,'tuskflame'); } }
+  const spr=optimusStandSprite, top=streetRow-spr.length+1;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const c=cxi+j-2; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tuskoptimus'); } }
+  return {grid,mg};
+}
+function tuskArrivalRender(cxi, cyberX, tuskX, repX){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(let k=0;k<COLS*0.05;k++){ const c=(Math.random()*COLS)|0, r=streetRow-((Math.random()*Math.floor(streetRow*0.5))|0);
+    if(Math.random()<0.4){ setCh(grid,r,c,["'",".","*"][(Math.random()*3)|0]); setMode(mg,r,c,'tuskflame'); } }
+  { const spr=optimusStandSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=cxi+j-2; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tuskoptimus'); } } }
+  { const spr=cyberTruckSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=Math.round(cyberX)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tuskcyber'); } } }
+  { const spr=tuskPersonSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=Math.round(tuskX)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tuskperson'); } } }
+  { const spr=reporterSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=Math.round(repX)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tuskreporter'); } } }
+  return {grid,mg};
+}
+function tuskEmbersInit(){
+  tuskEmbers=[];
+  for(let i=0;i<Math.floor(COLS*0.15);i++){ tuskEmbers.push({x:Math.random()*COLS, y:Math.random()*Math.floor(streetRow*0.6), vy:0.15+Math.random()*0.2}); }
+}
+function tuskEmbersStep(){
+  for(const p of tuskEmbers){ p.y+=p.vy; if(p.y>streetRow){ p.y=0; p.x=Math.random()*COLS; } }
+}
+function tuskEndRender(cxi, tuskX, embers){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  { const spr=optimusWaveSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=cxi+j-2; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tuskoptimus'); } } }
+  { const spr=tuskMugSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const c=Math.round(tuskX)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'tuskperson'); } } }
+  if(embers){ for(const p of tuskEmbers){ const r=Math.round(p.y), c=Math.round(p.x); if(r>=0&&r<ROWS&&c>=0&&c<COLS){ setCh(grid,r,c,(Math.random()<0.5?"'":".")); setMode(mg,r,c,'tuskember'); } } }
+  return {grid,mg};
+}
+
+// ---- FART: a performer clears their throat, turns around, and a sound wave shatters every window ----
+const fartStageSprite=[
+  "_________________",
+  "|_______________|",
+];
+const fartSpeakerSprite=[
+  " ____ ",
+  "[####]",
+  "[####]",
+  "[####]",
+  "[####]",
+  "|_||_|",
+];
+const fartPersonFrontSprite=[
+  " q ",
+  " o ",
+  "/|\\",
+  "/ \\",
+];
+const fartPersonCoughSprite=[
+  "*q*",
+  " o ",
+  "/|\\",
+  "/ \\",
+];
+const fartPersonBackSprite=[
+  " o ",
+  "/|\\",
+  "/q\\",
+  "/ \\",
+];
+function fartCrowdInit(){
+  fartCrowd=[];
+  const n=Math.max(10, Math.floor(COLS*0.5));
+  for(let i=0;i<n;i++){ fartCrowd.push({x:(i+0.5)/n*COLS + (Math.random()*2-1)}); }
+}
+function fartDrawScene(grid, mg, opts){
+  opts=opts||{};
+  const personPose=opts.pose||'front';
+  const px=opts.personX!==undefined?opts.personX:cx;
+  const fled=!!opts.fled;
+  const spkL=cx-Math.floor(COLS*0.18), spkR=cx+Math.floor(COLS*0.18);
+  for(const sx of [spkL,spkR]){
+    const spr=fartSpeakerSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=sx+j-3;
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'fartstage'); } }
+  }
+  { const spr=fartStageSprite, top=streetRow-spr.length+1;
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=cx+j-Math.floor(spr[0].length/2);
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'fartstage'); } }
+  }
+  for(const p of fartCrowd){ const xi=Math.round(p.x); if(xi<0||xi>=COLS) continue;
+    setCh(grid,streetRow-1,xi, fled?"!":"o"); setMode(mg,streetRow-1,xi,'fartcrowd'); }
+  const spr = personPose==='back' ? fartPersonBackSprite : (personPose==='cough' ? fartPersonCoughSprite : fartPersonFrontSprite);
+  const top=streetRow-spr.length;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=Math.round(px)+j-1;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'fartperson'); } }
+  if(opts.bubble) mtDrawBubble(grid, mg, Math.round(px), top, opts.bubble);
+  return {grid,mg};
+}
+// permanently shatters windows (not the buildings themselves) within reach — mutates cityGridArr
+function fartBreakWindows(cxi, radius){
+  if(cityGridArr.length!==ROWS) return;
+  for(let r=0;r<streetRow;r++){ if(!cityGridArr[r]) continue; let ln=cityGridArr[r].split("");
+    for(let c=cxi-radius;c<=cxi+radius;c++){ if(c<0||c>=COLS)continue;
+      if((ln[c]==="."||ln[c]===":") && Math.random()<0.8) ln[c]="%"; }
+    cityGridArr[r]=ln.join(""); }
+}
+// broken-window glass gets its own colour regardless of when it was shattered
+function fartMarkBroken(grid, mg){
+  for(let r=0;r<ROWS;r++){ const row=grid[r]; if(!row) continue;
+    for(let c=0;c<COLS;c++){ if(row[c]==="%") setMode(mg,r,c,'fartbroken'); } }
+}
+function fartWaveRender(px, R){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  if(R>0) fartBreakWindows(Math.round(px), Math.round(R));
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  fartDrawScene(grid, mg, {pose:'back', personX:px, fled:true, bubble:"*PPPPFFFFFT*"});
+  const waveRow=streetRow-4;
+  for(const dir of [-1,1]){
+    const c=Math.round(px)+dir*R;
+    for(let dr=-2;dr<=2;dr++){ const r=waveRow+dr; if(r<0||r>=ROWS||c<0||c>=COLS)continue;
+      setCh(grid,r,c, dir>0?")":"("); setMode(mg,r,c,'fartwave'); }
+  }
+  for(const dir of [-1,1]){
+    const c=Math.round(px)+dir*Math.max(0,R-4);
+    for(let dr=-1;dr<=1;dr++){ const r=waveRow+dr; if(r<0||r>=ROWS||c<0||c>=COLS)continue;
+      if(Math.random()<0.5){ setCh(grid,r,c, dir>0?"}":"{"); setMode(mg,r,c,'fartwave'); } }
+  }
+  fartMarkBroken(grid, mg);
+  return {grid,mg};
+}
+
+// ---- RUBBER: a telepathic car tire named Robert rolls around making heads explode ----
+const rubberTireSpriteA=[
+  " .--. ",
+  "|(||)|",
+  " '--' ",
+];
+const rubberTireSpriteB=[
+  " .--. ",
+  "|(==)|",
+  " '--' ",
+];
+const rubberPersonSprite=[" o ","/|\\","/ \\"];
+function rubberPeopleInit(){
+  rubberPeople=[];
+  const n=Math.max(6, Math.floor(COLS/16));
+  for(let i=0;i<n;i++){ rubberPeople.push({x:(i+0.5)/n*COLS + (Math.random()*4-2), state:'idle', burstT:0}); }
+}
+function rubberDrawTire(grid, mg, x, spin){
+  const spr = spin ? rubberTireSpriteA : rubberTireSpriteB;
+  const top = streetRow-spr.length+1;
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=Math.round(x)+j-3;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'rubbertire'); } }
+}
+function rubberDrawPerson(grid, mg, p){
+  if(p.state==='gone'){
+    const c=Math.round(p.x); if(c>=0&&c<COLS){ setCh(grid,streetRow,c, Math.random()<0.5?".":","); setMode(mg,streetRow,c,'rubberburst'); }
+    return;
+  }
+  if(p.state==='exploding'){
+    const xi=Math.round(p.x), yi=streetRow-2;
+    for(let dr=-2;dr<=1;dr++){ for(let dc=-2;dc<=2;dc++){ const r=yi+dr, c=xi+dc; if(r<0||r>=ROWS||c<0||c>=COLS)continue;
+      if(Math.random()<0.6){ setCh(grid,r,c, ["*","#","%","@"][(Math.random()*4)|0]); setMode(mg,r,c,'rubberburst'); } } }
+    return;
+  }
+  const spr=rubberPersonSprite, top=streetRow-spr.length+1, xi=Math.round(p.x);
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=xi+j-1;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'rubberperson'); } }
+}
+function rubberDrawBeam(grid, mg, tireX, personX){
+  const tx=Math.round(tireX), px=Math.round(personX), r=streetRow-2;
+  const steps=Math.max(3, Math.abs(px-tx));
+  for(let s=0;s<=steps;s++){ const c=Math.round(tx+(px-tx)*s/steps);
+    if(c<0||c>=COLS||r<0||r>=ROWS)continue;
+    if(Math.random()<0.7){ setCh(grid,r,c, (Math.random()<0.5?"~":"*")); setMode(mg,r,c,'rubberbeam'); }
+  }
+}
+function rubberRender(tireX, spin, people, focusIdx, beamOn){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(const p of people){ rubberDrawPerson(grid,mg,p); }
+  if(beamOn && focusIdx>=0 && focusIdx<people.length){ rubberDrawBeam(grid,mg,tireX,people[focusIdx].x); }
+  rubberDrawTire(grid,mg,tireX,spin);
+  return {grid,mg};
+}
+
+// ---- TOMATOES: Attack of the Killer Tomatoes — they roll in, and nothing stops them ----
+const tomatoSprite=[
+  "  ,^.  ",
+  " @@@@@ ",
+  "@@@@@@@",
+  "@@@@@@@",
+  " @@@@@ ",
+];
+const tomatoPersonSprite=[" o ","/|\\","/ \\"];
+const tomatoSoldierSprite=[" @","/|\\","/ \\"];
+function tomatoPeopleInit(){
+  tomatoPeople=[];
+  const n=Math.max(8, Math.floor(COLS/14));
+  for(let i=0;i<n;i++){ tomatoPeople.push({x:(i+0.5)/n*COLS + (Math.random()*4-2), state:'idle'}); }
+}
+function tomatoSoldiersInit(){
+  tomatoSoldiers=[];
+  const n=Math.max(3, Math.floor(COLS/24));
+  for(let i=0;i<n;i++){ tomatoSoldiers.push({x:(i+0.5)/n*COLS}); }
+}
+function tomatoSpawn(){
+  const fromLeft=Math.random()<0.5;
+  tomatoes.push({ x: fromLeft?-8:COLS+8, dir: fromLeft?1:-1, spd:0.6+Math.random()*0.9, ph:Math.random()*6 });
+}
+function tomatoStep(t){
+  if(t%14===0 && tomatoes.length<6) tomatoSpawn();
+  for(const tm of tomatoes){
+    tm.x+=tm.spd*tm.dir; tm.ph+=0.4;
+    const xi=Math.round(tm.x);
+    // squashes any idle bystander it rolls over
+    for(const p of tomatoPeople){ if(p.state==='idle' && Math.abs(p.x-xi)<4){ p.state='squashed'; } }
+    // crushes buildings as it rolls through — mutates cityGridArr, a contained swath around it
+    if(cityGridArr.length===ROWS){
+      for(let r=0;r<streetRow;r++){ if(!cityGridArr[r]) continue; let ln=cityGridArr[r].split("");
+        for(let c=xi-3;c<=xi+3;c++){ if(c>=0&&c<COLS&&ln[c]!==" "&&Math.random()<0.1) ln[c]=" "; }
+        cityGridArr[r]=ln.join(""); }
+    }
+  }
+  tomatoes=tomatoes.filter(tm=>tm.x>-12 && tm.x<COLS+12);
+  // the soldiers open fire — it does absolutely nothing
+  for(const s of tomatoSoldiers){ if(t%7===0 && tomatoes.length){
+    let nearest=tomatoes[0]; for(const tm of tomatoes){ if(Math.abs(tm.x-s.x)<Math.abs(nearest.x-s.x)) nearest=tm; }
+    tomatoBullets.push({x:s.x, dir: nearest.x>s.x?1:-1});
+  } }
+  for(const b of tomatoBullets) b.x+=b.dir*3;
+  tomatoBullets=tomatoBullets.filter(b=>b.x>-2 && b.x<COLS+2);
+  tomatoDmg = tomatoPeople.filter(p=>p.state==='squashed').length;
+}
+function tomatoRender(){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  const fireRow=streetRow-2;
+  for(const b of tomatoBullets){ const c=Math.round(b.x); if(c>=0&&c<COLS){ setCh(grid,fireRow,c,"-"); setMode(mg,fireRow,c,'warfire'); } }
+  for(const s of tomatoSoldiers){ const xi=Math.round(s.x), top=streetRow-tomatoSoldierSprite.length+1;
+    for(let i=0;i<tomatoSoldierSprite.length;i++){ const art=tomatoSoldierSprite[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=xi+j-1;
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'war'); } } }
+  for(const p of tomatoPeople){
+    if(p.state==='squashed'){ const c=Math.round(p.x); if(c>=0&&c<COLS){ setCh(grid,streetRow,c, Math.random()<0.5?"@":"#"); setMode(mg,streetRow,c,'tomatosplat'); } continue; }
+    const spr=tomatoPersonSprite, top=streetRow-spr.length+1, xi=Math.round(p.x);
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=xi+j-1;
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'rubberperson'); } } }
+  for(const tm of tomatoes){
+    const spr=tomatoSprite, bob=(Math.sin(tm.ph)>0)?0:1, top=streetRow-spr.length+1-bob, xi=Math.round(tm.x);
+    for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+      for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=xi+j-3;
+        if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'tomato'); } }
+  }
+  return {grid,mg};
+}
+
+// ---- COCAINE BEAR: same plot, wrong setting — a smuggler's plane, some duffel bags, one bear ----
+const cocaineBearSprite=[
+  " ^   ^ ",
+  "(o   o)",
+  " \\ - / ",
+  "/|   |\\",
+];
+const cocaineBearHighSprite=[
+  " ^   ^ ",
+  "(*   *)",
+  " \\ w / ",
+  "/|   |\\",
+];
+function cbPeopleInit(){
+  cbPeople=[];
+  const n=Math.max(8, Math.floor(COLS/14));
+  for(let i=0;i<n;i++){ cbPeople.push({x:(i+0.5)/n*COLS + (Math.random()*4-2), state:'idle'}); }
+}
+function cbInitBags(){
+  cbBags=[];
+  const n=3+((Math.random()*2)|0);
+  for(let i=0;i<n;i++){ cbBags.push({ x: COLS*(0.15+0.7*Math.random()), y:1, triggered:false, landed:false, eaten:false }); }
+}
+function cbDrawBag(grid, mg, bag){
+  if(bag.eaten) return;
+  const c=Math.round(bag.x), r=Math.round(bag.y);
+  if(c<0||c>=COLS||r<0||r>=ROWS) return;
+  setCh(grid,r,c,"%"); setMode(mg,r,c,'cocainebag');
+}
+function cbDrawBear(grid, mg, x, high, wobble){
+  const spr = high ? cocaineBearHighSprite : cocaineBearSprite;
+  const top = streetRow-spr.length+1-(wobble||0);
+  const xi=Math.round(x);
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=xi+j-3;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'cocainebear'); } }
+}
+function cbDrawPerson(grid, mg, p){
+  if(p.state==='mauled'){ const c=Math.round(p.x); if(c>=0&&c<COLS){ setCh(grid,streetRow,c, Math.random()<0.5?"@":"#"); setMode(mg,streetRow,c,'cocainegore'); } return; }
+  const spr=rubberPersonSprite, top=streetRow-spr.length+1, xi=Math.round(p.x);
+  for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=xi+j-1;
+      if(c<0||c>=COLS||r<0||r>=ROWS)continue; setCh(grid,r,c,ch); setMode(mg,r,c,'rubberperson'); } }
+}
+function cbStep(t){
+  if(cbSubPhase==='drop'){
+    cbPlaneX += Math.max(1, COLS/45);
+    for(const bag of cbBags){
+      if(!bag.triggered && cbPlaneX>=bag.x){ bag.triggered=true; bag.y=3; }
+      if(bag.triggered && !bag.landed){ bag.y += 1.4; if(bag.y>=streetRow){ bag.y=streetRow; bag.landed=true; } }
+    }
+    if(cbPlaneX>COLS+14 && cbBags.every(b=>b.landed)){ cbSubPhase='find'; cbBearX=-6; }
+  } else if(cbSubPhase==='find'){
+    let target=null, bestD=Infinity;
+    for(const bag of cbBags){ if(bag.eaten) continue; const d=Math.abs(bag.x-cbBearX); if(d<bestD){ bestD=d; target=bag; } }
+    if(target){
+      const diff=target.x-cbBearX;
+      cbBearX += Math.sign(diff)*Math.min(Math.abs(diff), Math.max(1, COLS/70));
+      if(Math.abs(target.x-cbBearX)<3){ target.eaten=true; cbHigh=true; cbSubPhase='rampage'; cbBearDir=Math.random()<0.5?-1:1; }
+    } else { cbHigh=true; cbSubPhase='rampage'; }
+  } else if(cbSubPhase==='rampage'){
+    if(Math.random()<0.06) cbBearDir*=-1;
+    const spd=1.6+Math.random()*1.8;
+    cbBearX += spd*cbBearDir;
+    if(cbBearX<4){ cbBearDir=1; } if(cbBearX>COLS-4){ cbBearDir=-1; }
+    const xi=Math.round(cbBearX);
+    for(const p of cbPeople){ if(p.state==='idle' && Math.abs(p.x-xi)<4){ p.state='mauled'; } }
+    if(cityGridArr.length===ROWS){
+      for(let r=0;r<streetRow;r++){ if(!cityGridArr[r]) continue; let ln=cityGridArr[r].split("");
+        for(let c=xi-3;c<=xi+3;c++){ if(c>=0&&c<COLS&&ln[c]!==" "&&Math.random()<0.08) ln[c]=" "; }
+        cityGridArr[r]=ln.join(""); }
+    }
+    cbDmg = cbPeople.filter(p=>p.state==='mauled').length;
+  }
+}
+function cbRender(subPhase, wobble){
+  if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+  const grid=cityGridArr.slice();
+  const mg=modeGridFill(ROWS,COLS,'city');
+  for(const p of cbPeople){ cbDrawPerson(grid,mg,p); }
+  for(const bag of cbBags){ cbDrawBag(grid,mg,bag); }
+  if(subPhase==='drop'){
+    const art=planeR[0];
+    const xi=Math.round(cbPlaneX);
+    for(let j=0;j<art.length;j++){ const ch=art[j]; if(ch===" ")continue; const c=xi+j;
+      if(c<0||c>=COLS)continue; setCh(grid,3,c,ch); setMode(mg,3,c,'plane'); }
+  }
+  if(cbBearX>-20){ cbDrawBear(grid, mg, cbBearX, cbHigh, wobble); }
+  return {grid,mg};
+}
+
 function reset(){
   clearTimeout(timer); clearInterval(cycleTimer); resize();
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
   cityGridArr=buildCity(); spawnPlanes(); spawnRain(); spawnTrain();
   WantedSystem.reset();
   bombRow=0; mt=0; dmg=0; phase='intro'; introT=ROWS; groundRow=6;
@@ -5505,6 +6509,19 @@ function reset(){
   dukeShipX=0; dukeShipY=0; dukeAlienX=0; dukeAlienY=0; dukeShipTargetX=0; dukeShipTargetY=0; dukeCrashR=0;
   dukeShipStartX=0; dukeShipStartY=0;
   dollyStarted=false; dollyT=0; dollySubPhase='arrive'; dollyWorkers=[]; dollyLineIdx=0; dollyLineT=0;
+  curryStarted=false; curryT=0; curryIdx=0; curryWarpT=0; curryWarpDone=0;
+  wickedStarted=false; wickedT=0; wickedFront=0; wickedWitch=null; wickedMonkeys=[]; wickedDmgCols=[]; wickedDmg=0;
+  wickedGlindaX=0; wickedGlindaY=0; wickedMeltT=0;
+  lttStarted=false; lttT=0; lttSubPhase='intro'; lttGpuX=0; lttGpuY=0; lttGpuVX=0; lttGpuVY=0; lttGpuBounces=0;
+  lttFloodR=0; lttDataR=0; lttSpireAngle=0; lttSponsorT=0; lttRubble=[]; lttDistrictBackup=null;
+  tuskStarted=false; tuskT=0; tuskCarX=0; tuskCarY=0; tuskLineIdx=0; tuskLineT=0;
+  tuskDiveStartX=0; tuskDiveStartY=0; tuskDiveT=0; tuskArmLost=false; tuskCraterX=0;
+  tuskBlastR=0; tuskEmbers=[]; tuskCyberX=0; tuskTuskX=0; tuskReporterX=0;
+  tuskArrivalLineIdx=0; tuskArrivalLineT=0; tuskEndLineIdx=0; tuskEndLineT=0;
+  fartStarted=false; fartT=0; fartPersonX=0; fartWaveR=0; fartCrowd=[];
+  rubberStarted=false; rubberT=0; rubberTireX=0; rubberPeople=[]; rubberTargetIdx=0; rubberFocusT=0; rubberSubPhase='approach';
+  tomatoStarted=false; tomatoT=0; tomatoes=[]; tomatoPeople=[]; tomatoSoldiers=[]; tomatoBullets=[]; tomatoDmg=0;
+  cbStarted=false; cbT=0; cbSubPhase='drop'; cbPlaneX=0; cbBags=[]; cbBearX=0; cbHigh=false; cbPeople=[]; cbDmg=0; cbBearDir=1;
   wantedBox.style.display='none';   // wanted HUD only shows for the GTA method
   scene.className=''; stage.className='';
   scene.style.textShadow="none";
@@ -5631,12 +6648,28 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — COME GET SOME"; sub.style.color="#ff8000"; sub.style.textShadow="0 0 8px #ff3000"; } }
   else if(cmdColor===55){ cmd.style.color="#ff8fc0"; cmd.style.textShadow="0 0 18px #a0308a";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WORK 9 TO 5"; sub.style.color="#ff8fc0"; sub.style.textShadow="0 0 8px #a0308a"; } }
+  else if(cmdColor===56){ cmd.style.color="#e0203a"; cmd.style.textShadow="0 0 18px #ffd700";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DO THE TIME WARP"; sub.style.color="#e0203a"; sub.style.textShadow="0 0 8px #ffd700"; } }
+  else if(cmdColor===57){ cmd.style.color="#1fae5a"; cmd.style.textShadow="0 0 18px #0a5a2a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SEND OUT THE FLYING MONKEYS"; sub.style.color="#1fae5a"; sub.style.textShadow="0 0 8px #0a5a2a"; } }
+  else if(cmdColor===58){ cmd.style.color="#ff7b00"; cmd.style.textShadow="0 0 18px #cc5c00";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE GPU"; sub.style.color="#ff7b00"; sub.style.textShadow="0 0 8px #cc5c00"; } }
+  else if(cmdColor===59){ cmd.style.color="#d0d4d8"; cmd.style.textShadow="0 0 18px #2a6a9a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DEORBIT THE ROADSTER"; sub.style.color="#d0d4d8"; sub.style.textShadow="0 0 8px #2a6a9a"; } }
+  else if(cmdColor===60){ cmd.style.color="#a0d040"; cmd.style.textShadow="0 0 18px #5a7a1a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — TAKE THE STAGE"; sub.style.color="#a0d040"; sub.style.textShadow="0 0 8px #5a7a1a"; } }
+  else if(cmdColor===61){ cmd.style.color="#3a3a3a"; cmd.style.textShadow="0 0 18px #8a2ab0";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — ROLL OUT ROBERT"; sub.style.color="#3a3a3a"; sub.style.textShadow="0 0 8px #8a2ab0"; } }
+  else if(cmdColor===62){ cmd.style.color="#e0201a"; cmd.style.textShadow="0 0 18px #2a6a1a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — RUN FROM THE TOMATOES"; sub.style.color="#e0201a"; sub.style.textShadow="0 0 8px #2a6a1a"; } }
+  else if(cmdColor===63){ cmd.style.color="#6a4a2a"; cmd.style.textShadow="0 0 18px #e8d8c0";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — FEED THE BEAR"; sub.style.color="#6a4a2a"; sub.style.textShadow="0 0 8px #e8d8c0"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%56; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%64; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
@@ -7589,6 +8622,417 @@ function loop(){
     cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
     sub.textContent="RIP Dolly Parton. — press RESET"; sub.style.color="#ff8fc0"; sub.className="";
     timer=setTimeout(loop,200);
+  }else if(phase==='curry'){
+    scene.style.textShadow="0 0 10px #ffd700";
+    if(!curryStarted){ curryStarted=true; curryT=0; curryIdx=0; document.body.style.background="#0a0410"; }
+    if(curryIdx>=curryVignettes.length){ phase='curry_warp'; curryT=0; curryWarpT=0; curryWarpDone=0; loop(); return; }
+    const v=curryVignettes[curryIdx];
+    const {grid,mg}=curryVignetteRender(v, curryT);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent=v.label+" — "+v.sub; sub.style.color="#ffd700"; sub.style.textShadow="0 0 8px #e0203a";
+    curryT++;
+    if(curryT<34){ timer=setTimeout(loop,80); }
+    else { curryIdx++; curryT=0; loop(); }
+  }else if(phase==='curry_warp'){
+    stage.classList.add('shake');
+    curryWarpT++;
+    const dancing = curryWarpT<28;
+    const {grid,mg}=curryWarpRender(curryWarpT, dancing?0:0.4);
+    let outGrid=grid;
+    if(dancing){
+      const off=(Math.floor(curryWarpT/4)%2===0) ? -2 : 2;
+      outGrid=grid.map(row=>{ const n=row.length; const o=((off%n)+n)%n; return o===0?row:(row.slice(n-o)+row.slice(0,n-o)); });
+    }
+    scene.innerHTML=paint(outGrid,mg,'city');
+    sub.textContent = dancing ? "THE CITY DOES THE TIME WARP" : "…AND THE BUILDINGS GIVE WAY";
+    sub.style.color="#ffd700"; sub.style.textShadow="0 0 10px #e0203a";
+    if(!dancing) curryWarpDone++;
+    if(dancing || curryWarpDone<40){ timer=setTimeout(loop,70); }
+    else { phase='curry_hold'; loop(); }
+  }else if(phase==='curry_hold'){
+    stage.classList.remove('shake');
+    const grid=(cityGridArr.length===ROWS?cityGridArr:buildCity()).slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the dance floor has closed. RIP Tim Curry — press RESET"; sub.style.color="#ffd700"; sub.className="";
+    timer=setTimeout(loop,200);
+  }else if(phase==='wicked'){
+    scene.style.textShadow="0 0 10px #1fae5a";
+    if(!wickedStarted){ wickedStarted=true; wickedT=0; wickedFront=0; document.body.style.background="#02140a"; }
+    wickedFront=Math.min(COLS, wickedFront+Math.max(1,COLS/60));
+    const {grid,mg}=wickedEmeraldRender(wickedFront);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="THE CITY TURNS EMERALD GREEN"; sub.style.color="#1fae5a"; sub.style.textShadow="0 0 8px #0a5a2a";
+    wickedT++;
+    if(wickedFront<COLS){ timer=setTimeout(loop,60); }
+    else { phase='wicked_chase'; wickedT=0; wickedChaseInit(); loop(); }
+  }else if(phase==='wicked_chase'){
+    wickedChaseStep(wickedT);
+    const {grid,mg}=wickedChaseRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.add('shake');
+    sub.textContent=["THE WITCH TAKES TO THE SKIES","THE FLYING MONKEYS GIVE CHASE","SHE WON'T GET AWAY THAT EASILY","GLINDA WATCHES FROM HER BUBBLE, UNBOTHERED"][Math.floor(wickedT/16)%4];
+    sub.style.color="#1fae5a"; sub.style.textShadow="0 0 8px #0a5a2a";
+    wickedT++;
+    if(!(wickedDmg>=COLS*0.55 && wickedT>40)){ timer=setTimeout(loop,60); }
+    else { phase='wicked_melt'; wickedMeltT=0; loop(); }
+  }else if(phase==='wicked_melt'){
+    stage.classList.remove('shake');
+    const {grid,mg}=wickedMeltRender(wickedMeltT);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="I'M MELTING!"; sub.style.color="#7ad020"; sub.style.textShadow="0 0 10px #1fae5a";
+    wickedMeltT++;
+    if(wickedMeltT<12){ timer=setTimeout(loop,90); }
+    else { phase='wicked_hold'; loop(); }
+  }else if(phase==='wicked_hold'){
+    stage.classList.remove('shake');
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'emerald');
+    { const gb=glindaBubbleSprite;
+      for(let i=0;i<gb.length;i++){ const art=gb[i], r=wickedGlindaY+i;
+        for(let j=0;j<art.length;j++){ const c=wickedGlindaX+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'glindabubble'); } } }
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the monkeys stand down. Glinda floats serenely on. — press RESET"; sub.style.color="#1fae5a"; sub.className="";
+    timer=setTimeout(loop,200);
+  }else if(phase==='ltt'){
+    scene.style.textShadow="0 0 10px #ff7b00";
+    if(!lttStarted){ lttStarted=true; lttT=0; lttSubPhase='intro';
+      if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+      document.body.style.background="#100a04"; }
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    const pos=drawLMGSkyline(grid,mg,{});
+    { const spr=linusHoldSprite, top=streetRow-wanTowerSprite.length-spr.length, left=pos.wanX-1;
+      for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+        for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'lttperson'); } }
+      mtDrawBubble(grid,mg,left+1,top,"THIS IS THE FASTEST GPU WE'VE EVER TESTED."); }
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="LINUS MEDIA GROUP METROPOLIS"; sub.style.color="#ff7b00"; sub.style.textShadow="0 0 8px #cc5c00";
+    lttT++;
+    if(lttT<26){ timer=setTimeout(loop,90); }
+    else { lttGpuInit(); phase='ltt_drop'; lttT=0; loop(); }
+  }else if(phase==='ltt_drop'){
+    scene.style.textShadow="0 0 10px #ff7b00";
+    const landed=lttGpuStep();
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    const pos=drawLMGSkyline(grid,mg,{});
+    { const spr=linusPanicSprite, top=streetRow-wanTowerSprite.length-spr.length, left=pos.wanX-1;
+      for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+        for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'lttperson'); } }
+      mtDrawBubble(grid,mg,left+1,top,"OH NO."); }
+    for(let i=0;i<gpuSprite.length;i++){ const art=gpuSprite[i], r=Math.round(lttGpuY)+i;
+      for(let j=0;j<art.length;j++){ const c=Math.round(lttGpuX)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'lttgpu'); } }
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="THE PROTOTYPE SLIPS… IN GLORIOUS SLOW MOTION"; sub.style.color="#ff7b00"; sub.style.textShadow="0 0 8px #cc5c00";
+    lttT++;
+    if(!landed){ timer=setTimeout(loop,70); }
+    else {
+      const districtLeft=Math.floor(COLS*0.12), districtRight=Math.floor(COLS*0.82);
+      lttSaveDistrict(districtLeft,districtRight);
+      phase='ltt_chaos'; lttT=0; lttFloodR=0; lttDataR=0; lttSpireAngle=0; loop();
+    }
+  }else if(phase==='ltt_chaos'){
+    scene.style.textShadow="0 0 12px #ff3000";
+    stage.classList.add('shake');
+    const districtLeft=Math.floor(COLS*0.12), districtRight=Math.floor(COLS*0.82);
+    lttFloodR=Math.min(1, lttFloodR+0.03);
+    lttDataR=Math.min(1, lttDataR+0.025);
+    lttSpireAngle=Math.min(70, lttSpireAngle+2.2);
+    lttDemolishDistrict(districtLeft, districtRight, 0.02);
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    drawLMGSkyline(grid,mg,{floodLevel:lttFloodR, dataLevel:lttDataR, spireAngle:lttSpireAngle});
+    { const cx0=Math.round(lttGpuX); for(let dj=-3;dj<=3;dj++){ const c=cx0+dj; if(c>=0&&c<COLS && Math.random()<0.6){ setCh(grid,streetRow,c,["#","@","."][(Math.random()*3)|0]); setMode(mg,streetRow,c,'lttgpu'); } } }
+    { const ax=Math.floor(COLS*0.3), jx=Math.floor(COLS*0.62);
+      setCh(grid,streetRow-1,ax,"A"); setMode(mg,streetRow-1,ax,'lttperson');
+      setCh(grid,streetRow-1,jx,"J"); setMode(mg,streetRow-1,jx,'lttperson');
+      mtDrawBubble(grid,mg,jx,streetRow-1,"WE'RE LOSING THE B-ROLL!"); }
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent = lttDataR<0.5 ? "THE WATERCOOLING LOOP GIVES OUT" : "DATA LOSS SPREADS THROUGH THE RACKS";
+    sub.style.color="#ff5a1a"; sub.style.textShadow="0 0 8px #ff2a00";
+    lttT++;
+    if(!(lttFloodR>=1 && lttDataR>=1 && lttSpireAngle>=70 && lttT>40)){ timer=setTimeout(loop,70); }
+    else {
+      lttRubble=[]; for(let k=0;k<40;k++){ lttRubble.push({x:districtLeft+Math.random()*(districtRight-districtLeft), y:streetRow-1-Math.random()*Math.floor(streetRow*0.6), ch:["#","@","%","*"][(Math.random()*4)|0]}); }
+      phase='ltt_sponsor'; lttT=0; lttSponsorT=0; loop();
+    }
+  }else if(phase==='ltt_sponsor'){
+    scene.style.textShadow="0 0 14px #ffd700";
+    stage.classList.remove('shake');
+    const districtLeft=Math.floor(COLS*0.12), districtRight=Math.floor(COLS*0.82);
+    const wasComplete = lttSponsorT>=1;
+    lttSponsorT=Math.min(1, lttSponsorT+0.03);
+    if(lttSponsorT>=1 && !wasComplete){ lttRestoreDistrict(districtLeft,districtRight); }
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    const spireAngleNow = 70*(1-lttSponsorT), floodNow = 1-lttSponsorT, dataNow = 1-lttSponsorT;
+    const pos=drawLMGSkyline(grid,mg,{floodLevel:floodNow, dataLevel:dataNow, spireAngle:spireAngleNow, glow:true});
+    if(lttSponsorT<1){ for(const p of lttRubble){ const r=Math.round(p.y), c=Math.round(p.x); if(r>=0&&r<ROWS&&c>=0&&c<COLS){ setCh(grid,r,c,p.ch); setMode(mg,r,c,'lttsponsor'); } } }
+    { const spr=linusCalmSprite, top=streetRow-wanTowerSprite.length-spr.length, left=pos.wanX-1;
+      for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+        for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'lttperson'); } }
+      mtDrawBubble(grid,mg,left+1,top,"...AND THAT'S WHY YOU SHOULD CHECK OUT TODAY'S SPONSOR."); }
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="THE AD READ IS SO SMOOTH IT HOLDS THE CITY TOGETHER"; sub.style.color="#ffd700"; sub.style.textShadow="0 0 10px #ff9a2a";
+    lttT++;
+    if(lttSponsorT<1 || lttT<20){ timer=setTimeout(loop,70); }
+    else { phase='ltt_hold'; loop(); }
+  }else if(phase==='ltt_hold'){
+    stage.classList.remove('shake');
+    const grid=(cityGridArr.length===ROWS?cityGridArr:buildCity()).slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    const pos=drawLMGSkyline(grid,mg,{});
+    { const spr=linusCalmSprite, top=streetRow-wanTowerSprite.length-spr.length, left=pos.wanX-1;
+      for(let i=0;i<spr.length;i++){ const art=spr[i], r=top+i;
+        for(let j=0;j<art.length;j++){ const c=left+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'lttperson'); } }
+      setCh(grid,top-1,left+1,"T"); setMode(mg,top-1,left+1,'lttperson'); }
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the water bottle is still sold out. — press RESET"; sub.style.color="#ff7b00"; sub.className="";
+    timer=setTimeout(loop,200);
+  }else if(phase==='tusk'){
+    scene.style.textShadow="0 0 10px #a0c0ff";
+    if(!tuskStarted){ tuskStarted=true; tuskT=0; tuskLineIdx=0; tuskLineT=0; tuskCarX=-8; tuskCarY=3; document.body.style.background="#000"; }
+    const grid=blankGrid(ROWS);
+    const mg=modeGridFill(ROWS,COLS,'tuskstar');
+    tuskStarfield(grid,mg);
+    tuskEarthCurve(grid,mg);
+    tuskCarX+=0.4;
+    { const art=roadsterSprite;
+      for(let i=0;i<art.length;i++){ const row=art[i], r=Math.round(tuskCarY)+i;
+        for(let j=0;j<row.length;j++){ const c=Math.round(tuskCarX)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(row[j]===" ")continue; setCh(grid,r,c,row[j]); setMode(mg,r,c,'tuskroadster'); } } }
+    scene.innerHTML=paint(grid,mg,'tuskstar');
+    stage.classList.remove('shake');
+    tuskLineT++;
+    if(tuskLineT>40 && tuskLineIdx<missionLines1.length-1){ tuskLineT=0; tuskLineIdx++; }
+    sub.textContent=missionLines1[tuskLineIdx]; sub.style.color="#a0c0ff"; sub.style.textShadow="0 0 8px #2a6a9a";
+    tuskT++;
+    if(!(tuskLineIdx>=missionLines1.length-1 && tuskLineT>40)){ timer=setTimeout(loop,90); }
+    else {
+      phase='tusk_reenter'; tuskT=0; tuskLineIdx=0; tuskLineT=0;
+      document.body.style.background="#140806";
+      tuskDiveInit(); loop();
+    }
+  }else if(phase==='tusk_reenter'){
+    scene.style.textShadow="0 0 12px #ff6a00";
+    const done=tuskDiveStep();
+    const {grid,mg}=tuskReenterRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.add('shake');
+    tuskLineT++;
+    if(tuskLineT>35 && tuskLineIdx<missionLines2.length-1){ tuskLineT=0; tuskLineIdx++; }
+    sub.textContent=missionLines2[tuskLineIdx]; sub.style.color="#ff8c1a"; sub.style.textShadow="0 0 8px #ff6a00";
+    tuskT++;
+    if(!done){ timer=setTimeout(loop,60); }
+    else { phase='tusk_flash'; loop(); }
+  }else if(phase==='tusk_flash'){
+    flash.style.transition="opacity 0.02s"; flash.style.opacity=1;
+    document.body.style.background="#fff"; scene.innerHTML=""; sub.textContent="* IMPACT *";
+    stage.classList.add('shake');
+    tuskBlastR=2;
+    timer=setTimeout(()=>{ flash.style.transition="opacity 1.5s"; flash.style.opacity=0; document.body.style.background="#140806"; phase='tusk_impact'; loop(); }, 200);
+  }else if(phase==='tusk_impact'){
+    scene.style.textShadow="0 0 14px #ff6a00";
+    stage.classList.add('shake');
+    const {grid,mg}=tuskImpactRender(tuskCraterX, tuskBlastR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="A CONCUSSIVE BOOM ROLLS OUTWARD, BLOCK BY BLOCK"; sub.style.color="#ff8c1a"; sub.style.textShadow="0 0 8px #ff6a00";
+    tuskBlastR+=Math.max(1, COLS/45);
+    if(tuskBlastR < Math.floor(COLS*0.35)){ timer=setTimeout(loop,60); }
+    else { phase='tusk_rise'; tuskT=0; loop(); }
+  }else if(phase==='tusk_rise'){
+    stage.classList.remove('shake');
+    const {grid,mg}=tuskRiseRender(tuskCraterX);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="OPTIMUS: LANDING... COMPLETE. DEVIATION FROM TARGET: ZERO METERS. EXCELLENT."; sub.style.color="#40c0ff"; sub.style.textShadow="0 0 8px #2a6a9a";
+    tuskT++;
+    if(tuskT<30){ timer=setTimeout(loop,90); }
+    else {
+      phase='tusk_arrival'; tuskT=0; tuskArrivalLineIdx=0; tuskArrivalLineT=0;
+      tuskCyberX=tuskCraterX+8; tuskTuskX=tuskCyberX+2; tuskReporterX=COLS+6;
+      loop();
+    }
+  }else if(phase==='tusk_arrival'){
+    scene.style.textShadow="0 0 8px #ff7a1a";
+    if(tuskReporterX>tuskTuskX+6) tuskReporterX-=Math.max(1,Math.floor(COLS/60));
+    const {grid,mg}=tuskArrivalRender(tuskCraterX, tuskCyberX, tuskTuskX, tuskReporterX);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    tuskArrivalLineT++;
+    if(tuskArrivalLineT>arrivalHolds[tuskArrivalLineIdx] && tuskArrivalLineIdx<arrivalLines.length-1){ tuskArrivalLineT=0; tuskArrivalLineIdx++; }
+    sub.textContent=arrivalLines[tuskArrivalLineIdx]; sub.style.color="#ff9a3a"; sub.style.textShadow="0 0 8px #b04010";
+    tuskT++;
+    if(!(tuskArrivalLineIdx>=arrivalLines.length-1 && tuskArrivalLineT>arrivalHolds[arrivalLines.length-1])){ timer=setTimeout(loop,80); }
+    else { phase='tusk_end'; tuskT=0; tuskEndLineIdx=0; tuskEndLineT=0; tuskEmbersInit(); loop(); }
+  }else if(phase==='tusk_end'){
+    scene.style.textShadow="0 0 10px #ff9a3a";
+    stage.classList.remove('shake');
+    tuskEmbersStep();
+    const {grid,mg}=tuskEndRender(tuskCraterX, tuskTuskX, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    tuskEndLineT++;
+    if(tuskEndLineT>40 && tuskEndLineIdx<endLines.length-1){ tuskEndLineT=0; tuskEndLineIdx++; }
+    sub.textContent=endLines[tuskEndLineIdx]; sub.style.color="#ffd070"; sub.style.textShadow="0 0 8px #ff9a3a";
+    tuskT++;
+    if(!(tuskEndLineIdx>=endLines.length-1 && tuskEndLineT>40)){ timer=setTimeout(loop,90); }
+    else { phase='tusk_hold'; loop(); }
+  }else if(phase==='tusk_hold'){
+    stage.classList.remove('shake');
+    tuskEmbersStep();
+    const {grid,mg}=tuskEndRender(tuskCraterX, tuskTuskX, true);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="NOMINAL — coming Q3. terms and conditions apply. do not stand in venting zone. — press RESET"; sub.style.color="#ffd070"; sub.className="";
+    timer=setTimeout(loop,200);
+  }else if(phase==='fart'){
+    scene.style.textShadow="0 0 10px #a0d040";
+    if(!fartStarted){ fartStarted=true; fartT=0; fartPersonX=-6; fartCrowdInit();
+      if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+      document.body.style.background="#0a0e04"; }
+    fartPersonX=Math.min(cx, fartPersonX+Math.max(1,Math.floor(COLS/70)));
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    fartDrawScene(grid, mg, {pose:'front', personX:fartPersonX, fled:false});
+    fartMarkBroken(grid, mg);
+    scene.innerHTML=paint(grid,mg,'city');
+    stage.classList.remove('shake');
+    sub.textContent="A LONE PERFORMER TAKES THE STAGE"; sub.style.color="#a0d040"; sub.style.textShadow="0 0 8px #5a7a1a";
+    fartT++;
+    if(fartPersonX<cx){ timer=setTimeout(loop,80); }
+    else { phase='fart_cough'; fartT=0; loop(); }
+  }else if(phase==='fart_cough'){
+    scene.style.textShadow="0 0 10px #a0d040";
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    fartDrawScene(grid, mg, {pose:'cough', personX:fartPersonX, fled:false, bubble:"*COUGH*"});
+    fartMarkBroken(grid, mg);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="*COUGH* — THEY LOWER THE MIC"; sub.style.color="#a0d040"; sub.style.textShadow="0 0 8px #5a7a1a";
+    fartT++;
+    if(fartT<16){ timer=setTimeout(loop,90); }
+    else { phase='fart_turn'; fartT=0; loop(); }
+  }else if(phase==='fart_turn'){
+    scene.style.textShadow="0 0 10px #a0d040";
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    fartDrawScene(grid, mg, {pose:'back', personX:fartPersonX, fled:false});
+    fartMarkBroken(grid, mg);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="THEY TURN AROUND..."; sub.style.color="#a0d040"; sub.style.textShadow="0 0 8px #5a7a1a";
+    fartT++;
+    if(fartT<16){ timer=setTimeout(loop,90); }
+    else { phase='fart_blast'; fartT=0; fartWaveR=0; loop(); }
+  }else if(phase==='fart_blast'){
+    scene.style.textShadow="0 0 12px #c8f050";
+    stage.classList.add('shake');
+    fartWaveR+=Math.max(1, COLS/50);
+    const {grid,mg}=fartWaveRender(fartPersonX, fartWaveR);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent="A SOUND WAVE ROLLS OUT ACROSS THE CITY"; sub.style.color="#c8f050"; sub.style.textShadow="0 0 10px #5a7a1a";
+    fartT++;
+    if(fartWaveR < Math.ceil(COLS/2)+2){ timer=setTimeout(loop,60); }
+    else { phase='fart_hold'; loop(); }
+  }else if(phase==='fart_hold'){
+    stage.classList.remove('shake');
+    const grid=cityGridArr.slice();
+    const mg=modeGridFill(ROWS,COLS,'city');
+    fartDrawScene(grid, mg, {pose:'back', personX:fartPersonX, fled:true});
+    fartMarkBroken(grid, mg);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="That really blew everybody away. — press RESET"; sub.style.color="#a0d040"; sub.className="";
+    timer=setTimeout(loop,200);
+  }else if(phase==='rubber'){
+    scene.style.textShadow="0 0 10px #3a3a3a";
+    if(!rubberStarted){ rubberStarted=true; rubberT=0; rubberTireX=-6; rubberPeopleInit(); rubberTargetIdx=0; rubberFocusT=0; rubberSubPhase='approach';
+      if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+      document.body.style.background="#0a0a0a"; }
+    if(rubberTargetIdx>=rubberPeople.length){ phase='rubber_hold'; loop(); return; }
+    const target=rubberPeople[rubberTargetIdx];
+    let beamOn=false;
+    stage.classList.remove('shake');
+    if(rubberSubPhase==='approach'){
+      const stopX=target.x-7, diff=stopX-rubberTireX;
+      if(Math.abs(diff)>1){ rubberTireX += Math.sign(diff)*Math.min(Math.abs(diff), Math.max(1,COLS/60)); }
+      else { rubberSubPhase='focus'; rubberFocusT=0; }
+    } else if(rubberSubPhase==='focus'){
+      beamOn=true; stage.classList.add('shake');
+      rubberFocusT++;
+      if(rubberFocusT>18){ target.state='exploding'; target.burstT=0; rubberSubPhase='explode'; }
+    } else if(rubberSubPhase==='explode'){
+      stage.classList.add('shake');
+      target.burstT++;
+      if(target.burstT>10){ target.state='gone'; rubberTargetIdx++; rubberSubPhase='approach'; rubberFocusT=0; }
+    }
+    const spin=Math.floor(rubberT/2)%2===0;
+    const {grid,mg}=rubberRender(rubberTireX, spin, rubberPeople, rubberTargetIdx, beamOn);
+    scene.innerHTML=paint(grid,mg,'city');
+    sub.textContent = rubberSubPhase==='focus' ? "ROBERT FOCUSES..." : (rubberSubPhase==='explode' ? "BOOM." : "A TIRE ROLLS THROUGH TOWN");
+    sub.style.color="#8a2ab0"; sub.style.textShadow="0 0 8px #3a1a4a";
+    rubberT++;
+    timer=setTimeout(loop,70);
+  }else if(phase==='rubber_hold'){
+    stage.classList.remove('shake');
+    const {grid,mg}=rubberRender(rubberTireX, false, rubberPeople, -1, false);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="no further explanation is offered. — press RESET"; sub.style.color="#8a2ab0"; sub.className="";
+    timer=setTimeout(loop,200);
+  }else if(phase==='tomato'){
+    scene.style.textShadow="0 0 10px #e0201a";
+    if(!tomatoStarted){ tomatoStarted=true; tomatoT=0; tomatoes=[]; tomatoBullets=[]; tomatoPeopleInit(); tomatoSoldiersInit(); tomatoDmg=0;
+      if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+      document.body.style.background="#0e0805"; }
+    tomatoStep(tomatoT);
+    const {grid,mg}=tomatoRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    if(tomatoes.length>1) stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent = tomatoT<20 ? "ATTACK OF THE KILLER TOMATOES" : (tomatoDmg<tomatoPeople.length*0.5 ? "THEY JUST KEEP ROLLING IN" : "GUNFIRE DOES NOTHING — THEY'RE TOMATOES");
+    sub.style.color="#e0201a"; sub.style.textShadow="0 0 8px #2a6a1a";
+    tomatoT++;
+    if(!(tomatoDmg>=tomatoPeople.length*0.8 && tomatoT>70)){ timer=setTimeout(loop,80); }
+    else { phase='tomato_hold'; loop(); }
+  }else if(phase==='tomato_hold'){
+    stage.classList.remove('shake');
+    tomatoStep(tomatoT);
+    const {grid,mg}=tomatoRender();
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the streets run red. send... more tomatoes. — press RESET"; sub.style.color="#e0201a"; sub.className="";
+    tomatoT++;
+    timer=setTimeout(loop,150);
+  }else if(phase==='cocainebear'){
+    scene.style.textShadow="0 0 10px #6a4a2a";
+    if(!cbStarted){ cbStarted=true; cbT=0; cbSubPhase='drop'; cbPlaneX=-14; cbHigh=false; cbBearX=-30; cbBearDir=1; cbInitBags(); cbPeopleInit(); cbDmg=0;
+      if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
+      document.body.style.background="#0a0805"; }
+    cbStep(cbT);
+    const wobble = cbSubPhase==='rampage' ? (Math.sin(cbT*0.6)>0?1:0) : 0;
+    const {grid,mg}=cbRender(cbSubPhase, wobble);
+    scene.innerHTML=paint(grid,mg,'city');
+    if(cbSubPhase==='rampage') stage.classList.add('shake'); else stage.classList.remove('shake');
+    sub.textContent = cbSubPhase==='drop' ? "A SMUGGLER'S PLANE DROPS ITS CARGO"
+                     : cbSubPhase==='find' ? "SOMETHING IN THE CITY HAS FOUND THE COCAINE"
+                     : "THE BEAR DID A LOT OF COCAINE";
+    sub.style.color="#e8d8c0"; sub.style.textShadow="0 0 8px #6a4a2a";
+    cbT++;
+    if(!(cbSubPhase==='rampage' && (cbDmg>=cbPeople.length*0.75 || cbT>140))){ timer=setTimeout(loop,70); }
+    else { phase='cocainebear_hold'; loop(); }
+  }else if(phase==='cocainebear_hold'){
+    stage.classList.remove('shake');
+    cbStep(cbT);
+    const {grid,mg}=cbRender('rampage', 0);
+    scene.innerHTML=paint(grid,mg,'city');
+    cmd.textContent="$ _"; cmd.style.color="#0f0"; cmd.style.textShadow="0 0 14px #0f0";
+    sub.textContent="the bear is fine. everyone else is not. — press RESET"; sub.style.color="#e8d8c0"; sub.className="";
+    cbT++;
+    timer=setTimeout(loop,150);
   }
 }
 
@@ -7597,6 +9041,8 @@ function armDrop(){
   clearInterval(cycleTimer);
   clearTimeout(timer);            // cancel the pending intro frame; we restart the chain cleanly
   recordDestruction(cmdColor);
+  currentMethodId=cmdColor;
+  try{ history.replaceState(null,'',getShareableURL(currentMethodId)); }catch(e){}
   methodBox.style.display="none";
   if(cmdColor===1){              // BLUE -> tidal wave
     attackMode='tsunami';
@@ -7819,6 +9265,38 @@ function armDrop(){
     attackMode='dolly';
     cmd.style.color="#ff8fc0"; cmd.style.textShadow="0 0 20px #a0308a";
     dollyStarted=false; phase='dolly';
+  }else if(cmdColor===56){      // CURRY RED/GOLD -> Tim Curry
+    attackMode='curry';
+    cmd.style.color="#e0203a"; cmd.style.textShadow="0 0 20px #ffd700";
+    curryStarted=false; phase='curry';
+  }else if(cmdColor===57){      // EMERALD GREEN -> Wicked
+    attackMode='wicked';
+    cmd.style.color="#1fae5a"; cmd.style.textShadow="0 0 20px #0a5a2a";
+    wickedStarted=false; phase='wicked';
+  }else if(cmdColor===58){      // LTT ORANGE -> Linus Tech Tips
+    attackMode='ltt';
+    cmd.style.color="#ff7b00"; cmd.style.textShadow="0 0 20px #cc5c00";
+    lttStarted=false; phase='ltt';
+  }else if(cmdColor===59){      // ROCKET STEEL -> Melon Tusk
+    attackMode='tusk';
+    cmd.style.color="#d0d4d8"; cmd.style.textShadow="0 0 20px #2a6a9a";
+    tuskStarted=false; phase='tusk';
+  }else if(cmdColor===60){      // GAS GREEN -> Fart
+    attackMode='fart';
+    cmd.style.color="#a0d040"; cmd.style.textShadow="0 0 20px #5a7a1a";
+    fartStarted=false; phase='fart';
+  }else if(cmdColor===61){      // TIRE BLACK -> Rubber
+    attackMode='rubber';
+    cmd.style.color="#3a3a3a"; cmd.style.textShadow="0 0 20px #8a2ab0";
+    rubberStarted=false; phase='rubber';
+  }else if(cmdColor===62){      // TOMATO RED -> Tomatoes
+    attackMode='tomato';
+    cmd.style.color="#e0201a"; cmd.style.textShadow="0 0 20px #2a6a1a";
+    tomatoStarted=false; phase='tomato';
+  }else if(cmdColor===63){      // BEAR BROWN -> Cocaine Bear
+    attackMode='cocainebear';
+    cmd.style.color="#6a4a2a"; cmd.style.textShadow="0 0 20px #e8d8c0";
+    cbStarted=false; phase='cocainebear';
   }else{                        // RED -> nuke
     attackMode='nuke';
     cmd.style.color="#f00"; cmd.style.textShadow="0 0 20px #f00";
@@ -7880,6 +9358,7 @@ function stageTap(e){
   if(e.target && e.target.closest && e.target.closest('#topBarLeft'))return; // stats button
   if(e.target && e.target.closest && e.target.closest('#methodBox'))return;   // handled above
   if(e.target && e.target.closest && e.target.closest('#statsOverlay'))return; // stats panel
+  if(e.target && e.target.closest && e.target.closest('#shareBox'))return;   // share button/menu
   armDrop();
 }
 document.body.addEventListener('click', stageTap);
@@ -7887,7 +9366,51 @@ document.body.addEventListener('click', stageTap);
 scene.addEventListener('touchend', (e)=>{ e.preventDefault(); stageTap(e); }, {passive:false});
 const rb=document.getElementById('resetBtn');
 rb.addEventListener('click', reset);
+const randomBtn=document.getElementById('randomBtn');
+randomBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  reset();
+  const ids=Object.keys(methodNames);
+  cmdColor=parseInt(ids[(Math.random()*ids.length)|0],10);
+  paintCmd2();
+  armDrop();
+});
+
+// ---- share button: share the currently-shown/running method, or the bare site ----
+const shareBtn=document.getElementById('shareBtn'), shareMenu=document.getElementById('shareMenu'),
+      shareCurrentBtn=document.getElementById('shareCurrentBtn'), shareSiteBtn=document.getElementById('shareSiteBtn'),
+      shareToast=document.getElementById('shareToast');
+function showShareToast(msg){
+  shareToast.textContent=msg; shareToast.classList.add('show');
+  clearTimeout(showShareToast._t);
+  showShareToast._t=setTimeout(()=>shareToast.classList.remove('show'), 1800);
+}
+function doShare(url, title){
+  if(navigator.share){
+    navigator.share({title, url}).catch(()=>{});
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>showShareToast('Link copied!')).catch(()=>{ window.prompt('Copy this link:', url); });
+  } else {
+    window.prompt('Copy this link:', url);
+  }
+}
+shareBtn.addEventListener('click', (e)=>{ e.stopPropagation(); shareMenu.classList.toggle('hidden'); });
+shareCurrentBtn.addEventListener('click', (e)=>{
+  e.stopPropagation(); shareMenu.classList.add('hidden');
+  const name=methodNames[cmdColor]||'this destruction';
+  doShare(getShareableURL(cmdColor), 'sudo.me.uk — '+name);
+});
+shareSiteBtn.addEventListener('click', (e)=>{
+  e.stopPropagation(); shareMenu.classList.add('hidden');
+  doShare(getShareableURL(), 'sudo.me.uk');
+});
+document.body.addEventListener('click', ()=>{ shareMenu.classList.add('hidden'); });
 reset();
+if(pendingLaunchMethod!==null){
+  cmdColor=pendingLaunchMethod;
+  paintCmd2();
+  armDrop();
+}
 </script>
 </body>
 </html>

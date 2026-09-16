@@ -1,5 +1,36 @@
 # Changelog
 
+## v1.4.6
+
+### Added
+- A 🎱 RANDOM button next to RESET, in the top bar — resets the city and immediately launches a randomly-picked destruction method, matching RESET's styling.
+
+## v1.4.5
+
+### Added
+- Four new destruction methods: **Fart** (a performer clears their throat, turns around, and a sound wave shatters windows across the city), **Rubber** (Robert, a telepathic car tire, rolls through town making heads explode with no further explanation offered), **Tomatoes** (Attack of the Killer Tomatoes — soldiers open fire, and it does absolutely nothing), and **Cocaine Bear** (a smuggler's plane drops its cargo, and whatever finds it first goes on a rampage).
+- Every destruction method now has a real, directly-linkable URL (`?m=<id>`) — visiting the site with a method's URL launches that method immediately, skipping the picker. Clicking a method tile updates the address bar to match, and RESET clears it back to the bare site URL.
+- A new floating share button in the bottom-right corner, offering to share either the currently-shown/running destruction or the bare site link, via the Web Share API with a clipboard-copy and prompt-dialog fallback.
+
+### Fixed
+- Cocaine Bear's dropped duffel bags could sail past their trigger point without ever falling, because the trigger only fired inside a narrow window the plane could skip over on wide screens — it now triggers as soon as the plane reaches or passes the bag.
+- Cocaine Bear's rampage phase could oscillate forever hunting for a bag, because its approach step wasn't clamped to the remaining distance — the classic overshoot-and-reverse loop. The step is now clamped so it can't overshoot.
+
+### Changed
+- The Cocaine Bear menu tile's glow changed from a grey/cream text-shadow to a red one, for better contrast against its brown text.
+
+## v1.4.4
+
+### Added
+- Four new destruction methods: **Tim Curry** (a victory lap through six of his best-known roles — Frank-N-Furter, Pennywise, the Lord of Darkness, Wadsworth, LeChuck, and the Concierge — ending in a building-toppling Time Warp), **Wicked** (the city sweeps to Emerald City green as flying monkeys chase the Wicked Witch across the sky, with Glinda watching serenely from her bubble), **LTT** (a routine GPU review goes wrong — the prototype drops from the WAN Show Tower, triggers a watercooling flood and a DATA LOSS meltdown, and gets spun into "a huge win" by a sponsor read that visibly holds the city together), and **Melon Tusk** (an Optimus-piloted Roadster self-deorbits into downtown, and a tech titan spins the resulting inferno as "nominal" from beside a Cybertruck that appeared from nowhere).
+
+### Fixed
+- Wicked's flying-monkey chase sequence could take an impractically long time to reach its damage threshold, because damage was only applied to a single column per frame — widened to a damage radius around each actor and lowered the completion threshold.
+- Melon Tusk's dialogue sequences could hang indefinitely on the last line, because the line-advance timer kept resetting to zero even after the final line was reached — the reset is now gated on there being a next line to advance to.
+
+### Changed
+- The Wicked menu tile now renders in a split green/pink gradient instead of a solid colour.
+
 ## v1.4.1
 
 ### Added
