@@ -2275,6 +2275,9 @@ randomBtn.addEventListener('click', (e)=>{
   cmdColor=parseInt(ids[(Math.random()*ids.length)|0],10);
   paintCmd2();
   armDrop();
+  // RANDOM's pick isn't a deliberate, shareable choice — keep it out of the address
+  // bar so refreshing the page lands back on the picker, not whatever it last rolled.
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
 });
 
 // ---- share button: share the currently-shown/running method, or the bare site ----
