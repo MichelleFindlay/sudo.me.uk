@@ -8,7 +8,7 @@ A stupid little ASCII terminal simulator that destroys a procedurally generated 
 
 You land on a fake terminal running `sudo rm -rf /*`, pick a "method" from a grid of scenarios (or hit the 🎱 RANDOM button to let it choose for you), and watch a fully animated, character-grid rendering of a city get wiped out in that style — screen shake, rain, fire, smoke, the works — ending on a "the city is gone — press RESET" hold screen.
 
-No backend logic, no database, no point. Just a single self-contained page that renders everything as plain text.
+No backend logic, no database, no point. Just a page that renders everything as plain text.
 
 ## Methods
 
@@ -24,13 +24,15 @@ Whimsical extras — the Great Emu War (the army loses), Neil the Seal (bashes e
 
 Everything is rendered as monospace text — a shared procedural city generator builds a skyline, a character-grid painter colors each cell per "mode," and a state machine of animation phases drives each scenario frame by frame. No canvas, no images, no sprites — just strings and `setTimeout`.
 
+Each of the 64 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 64 methods' worth of code up front.
+
 Every method also has a real, shareable URL (`?m=<id>`) that launches it directly, and a share button in the bottom-right corner lets you share either the current destruction or the bare site link.
 
 The page is served as PHP (`index.php`) purely so it can do a lightweight server-side check against this repo's [GitHub releases](https://github.com/MichelleFindlay/sudo.me.uk/releases) — the version badge in the top bar turns red with a tooltip if the live build doesn't match a published release.
 
 ## Running locally
 
-It's a single PHP file with no dependencies.
+It's a PHP file plus a `js/methods/` directory of per-method scripts — no build step, no dependencies.
 
 ```bash
 php -S localhost:8000
