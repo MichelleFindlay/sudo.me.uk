@@ -53,6 +53,15 @@ $updateTitle = $latestVersion === null
 $isDevBuild = $latestVersion !== null && version_compare($VERSION, $latestVersion, '>');
 $displayVersion = $isDevBuild ? 'DEV' : $VERSION;
 
+// cache-busting query string for the lazy-loaded js/methods/*.js files: the newest mtime
+// across all of them, so a CDN (which has no way to know a method file changed underneath
+// an unchanged URL) is forced to fetch fresh content the moment any of them is edited,
+// without needing a full $VERSION bump just to see a fix.
+$JS_ASSET_VERSION = 0;
+foreach (glob(__DIR__ . '/js/methods/*.js') ?: [] as $methodFile) {
+    $JS_ASSET_VERSION = max($JS_ASSET_VERSION, (int)@filemtime($methodFile));
+}
+
 // ---- server-side destruction statistics (shared across every visitor) ----
 // stored as a small JSON file under a dot-directory next to this script; a .htaccess
 // alongside it denies direct HTTP access on Apache. Not a database — this is a one-file
@@ -268,6 +277,10 @@ if (isset($_GET['stats'])) {
   #methodBox .m-rubber { color:#3a3a3a; text-shadow:0 0 8px #8a2ab0; }
   #methodBox .m-tomato { color:#e0201a; text-shadow:0 0 8px #2a6a1a; }
   #methodBox .m-cocainebear { color:#a85a2a; text-shadow:0 0 8px #c81810; }
+  #methodBox .m-catsdogs { color:#e0a458; text-shadow:0 0 8px #8a5a2a; }
+  #methodBox .m-lube { color:#7fe0e8; text-shadow:0 0 8px #1a6a70; }
+  #methodBox .m-who { color:#3a9ad0; text-shadow:0 0 8px #1a5a8a; }
+  #methodBox .m-sd { color:#c89050; text-shadow:0 0 8px #6a3a18; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -493,6 +506,10 @@ if (isset($_GET['stats'])) {
       <a href="?m=61" class="m-rubber pick" data-method="61" data-cat="movie">Rubber</a>
       <a href="?m=62" class="m-tomato pick" data-method="62" data-cat="movie">Tomatoes</a>
       <a href="?m=63" class="m-cocainebear pick" data-method="63" data-cat="movie">Cocaine Bear</a>
+      <a href="?m=64" class="m-catsdogs pick" data-method="64" data-cat="fun">Cats and Dogs</a>
+      <a href="?m=65" class="m-lube pick" data-method="65" data-cat="fun">Lube</a>
+      <a href="?m=66" class="m-who pick" data-method="66" data-cat="movie">Doctor Who</a>
+      <a href="?m=67" class="m-sd pick" data-method="67" data-cat="fun">Sports Direct</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1514,6 +1531,54 @@ function colorFor(ch,r,c,mode){
   if(mode==='cocainegore'){                                       // mauled — the bear does not share
     return (Math.random()<0.5)?"#8a1010":"#c81810";
   }
+  if(mode==='catsdogsfall'){                                      // cats and dogs, still airborne
+    if(ch==="C")return "#e8b04a";                                 // cat silhouette, ginger
+    if(ch==="D")return "#a9744a";                                 // dog silhouette, brown
+    return "#dfe0e2";                                             // little motion-tail
+  }
+  if(mode==='catsdogs'){                                          // cats and dogs, landed and milling about
+    if(ch==="c")return "#e8b04a";                                 // cat
+    if(ch==="d")return "#a9744a";                                 // dog
+    return "#c9a06e";
+  }
+  if(mode==='lubeshine'){                                         // glossy highlight glints on everything, slicked up
+    return (Math.random()<0.5)?"#eafcff":"#9ee8f0";
+  }
+  if(mode==='who'){                                               // the array of Doctor Who baddies
+    if(ch==="D")return "#c9a227";                                 // Dalek, bronze/gold
+    if(ch==="C")return "#b0b8c0";                                 // Cyberman, silver
+    if(ch==="A")return "#8a9aa0";                                 // Weeping Angel, stone grey
+    return "#8a8a8a";
+  }
+  if(mode==='whodoctor'){                                         // the Doctor
+    return "#3a6ea8";
+  }
+  if(mode==='whobeam'){                                           // the sonic screwdriver
+    return (Math.random()<0.5)?"#8ad4ff":"#eaffff";
+  }
+  if(mode==='tardis'){                                            // the TARDIS, materializing
+    if(ch==="*")return "#ffe060";                                 // beacon light
+    if(ch==="P"||ch==="O"||ch==="L")return "#eaf2ff";             // POLICE BOX signage
+    return "#1a3a8a";                                             // police-box blue
+  }
+  if(mode==='tardismaterialize'){                                 // dust motes swirling as it forms
+    return (Math.random()<0.5)?"#8ad4ff":"#eaffff";
+  }
+  if(mode==='sdmug'){                                             // the Sports Direct mug — white ceramic body
+    return "#eef0f2";
+  }
+  if(mode==='sdmugblue'){                                         // "SPORT", in the mug's blue
+    return "#2a4fd0";
+  }
+  if(mode==='sdmugred'){                                          // "DIRECT", in the mug's red
+    return "#e0201a";
+  }
+  if(mode==='coffee'){                                            // the coffee flood
+    if(ch==="#"||ch==="@")return "#c89050";                       // foaming crema crest
+    if(ch==="*"||ch==="°")return "#e8c890";                  // splashed cream flecks
+    if(ch==="~"||ch==="≈")return (Math.random()<0.5)?"#4a2810":"#6a3a18";
+    return "#5a3018";
+  }
   if(mode==='dukefire'){                                          // muzzle flashes & explosions
     const rdk=Math.random();
     if(rdk<0.4) return "#ffe040";
@@ -1946,16 +2011,21 @@ const METHOD_FILES = {
   60: 'fart.js',
   61: 'rubber.js',
   62: 'tomatoes.js',
-  63: 'cocainebear.js'
+  63: 'cocainebear.js',
+  64: 'catsanddogs.js',
+  65: 'lube.js',
+  66: 'doctorwho.js',
+  67: 'sportsdirect.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
   for(const pname of def.phaseNames) phaseHandlers[pname] = def.loopFn;
 }
+const JS_ASSET_VERSION = <?= (int)$JS_ASSET_VERSION ?>;
 function loadMethodScript(file, cb){
   if(loadedMethodFiles.has(file)){ cb(); return; }
   const s = document.createElement('script');
-  s.src = 'js/methods/' + file;
+  s.src = 'js/methods/' + file + '?v=' + JS_ASSET_VERSION;
   s.onload = () => { loadedMethodFiles.add(file); cb(); };
   document.head.appendChild(s);
 }
@@ -2147,12 +2217,20 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — RUN FROM THE TOMATOES"; sub.style.color="#e0201a"; sub.style.textShadow="0 0 8px #2a6a1a"; } }
   else if(cmdColor===63){ cmd.style.color="#6a4a2a"; cmd.style.textShadow="0 0 18px #e8d8c0";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — FEED THE BEAR"; sub.style.color="#6a4a2a"; sub.style.textShadow="0 0 8px #e8d8c0"; } }
+  else if(cmdColor===64){ cmd.style.color="#e0a458"; cmd.style.textShadow="0 0 18px #8a5a2a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LET IT RAIN CATS AND DOGS"; sub.style.color="#e0a458"; sub.style.textShadow="0 0 8px #8a5a2a"; } }
+  else if(cmdColor===65){ cmd.style.color="#7fe0e8"; cmd.style.textShadow="0 0 18px #1a6a70";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SLICK EVERYTHING UP"; sub.style.color="#7fe0e8"; sub.style.textShadow="0 0 8px #1a6a70"; } }
+  else if(cmdColor===66){ cmd.style.color="#3a9ad0"; cmd.style.textShadow="0 0 18px #1a5a8a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — EXTERMINATE!"; sub.style.color="#3a9ad0"; sub.style.textShadow="0 0 8px #1a5a8a"; } }
+  else if(cmdColor===67){ cmd.style.color="#c89050"; cmd.style.textShadow="0 0 18px #6a3a18";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — KNOCK OVER THE MUG"; sub.style.color="#c89050"; sub.style.textShadow="0 0 8px #6a3a18"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%64; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%68; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
