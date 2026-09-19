@@ -281,6 +281,7 @@ if (isset($_GET['stats'])) {
   #methodBox .m-lube { color:#7fe0e8; text-shadow:0 0 8px #1a6a70; }
   #methodBox .m-who { color:#3a9ad0; text-shadow:0 0 8px #1a5a8a; }
   #methodBox .m-sd { color:#c89050; text-shadow:0 0 8px #6a3a18; }
+  #methodBox .m-ricks { color:#4dff8a; text-shadow:0 0 8px #0d5c2e; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -510,6 +511,7 @@ if (isset($_GET['stats'])) {
       <a href="?m=65" class="m-lube pick" data-method="65" data-cat="fun">Lube</a>
       <a href="?m=66" class="m-who pick" data-method="66" data-cat="movie">Doctor Who</a>
       <a href="?m=67" class="m-sd pick" data-method="67" data-cat="fun">Sports Direct</a>
+      <a href="?m=68" class="m-ricks pick" data-method="68" data-cat="movie">Ricks</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1585,6 +1587,16 @@ function colorFor(ch,r,c,mode){
     if(rdk<0.7) return "#ff8000";
     return "#ff3000";
   }
+  if(mode==='ricksportal'){                                       // the portals the Ricks pour through
+    const rv=Math.random();
+    if(rv<0.4) return "#39ff6a";
+    if(rv<0.7) return "#0aff9a";
+    return "#0d5c2e";
+  }
+  if(mode==='ricksworker'){ return "#7fd9c4"; }                   // the rank and file
+  if(mode==='rickselite'){ return "#ffd700"; }                    // the ruling class, and the Council
+  if(mode==='rickscop'){ return "#3a7bff"; }                      // the police state
+  if(mode==='ricksassassin'){ return "#ff2a2a"; }                 // the one who makes a move
   return "#cccccc";
 }
 
@@ -2015,7 +2027,8 @@ const METHOD_FILES = {
   64: 'catsanddogs.js',
   65: 'lube.js',
   66: 'doctorwho.js',
-  67: 'sportsdirect.js'
+  67: 'sportsdirect.js',
+  68: 'ricks.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2225,12 +2238,14 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — EXTERMINATE!"; sub.style.color="#3a9ad0"; sub.style.textShadow="0 0 8px #1a5a8a"; } }
   else if(cmdColor===67){ cmd.style.color="#c89050"; cmd.style.textShadow="0 0 18px #6a3a18";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — KNOCK OVER THE MUG"; sub.style.color="#c89050"; sub.style.textShadow="0 0 8px #6a3a18"; } }
+  else if(cmdColor===68){ cmd.style.color="#4dff8a"; cmd.style.textShadow="0 0 18px #0d5c2e";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — BUILD THE CITADEL OF RICKS"; sub.style.color="#4dff8a"; sub.style.textShadow="0 0 8px #0d5c2e"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%68; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%69; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
