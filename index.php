@@ -544,7 +544,6 @@ let pendingLaunchMethod=null;
     if(m!==null && methodNames.hasOwnProperty(m)) pendingLaunchMethod=parseInt(m,10);
   }catch(e){}
 })();
-let currentMethodId=null;
 function getShareableURL(methodId){
   const base=location.origin+location.pathname;
   return (methodId!==undefined && methodId!==null) ? base+'?m='+methodId : base;
@@ -2198,8 +2197,10 @@ function armDrop(){
   clearInterval(cycleTimer);
   clearTimeout(timer);            // cancel the pending intro frame; we restart the chain cleanly
   recordDestruction(cmdColor);
-  currentMethodId=cmdColor;
-  try{ history.replaceState(null,'',getShareableURL(currentMethodId)); }catch(e){}
+  // deliberately leave the address bar alone here — any in-page launch (tile click,
+  // tap-anywhere, keypress, RANDOM) is not "arriving at a link," so refreshing
+  // afterward should land back on the picker, same as a fresh visit. The Share
+  // button still builds a real ?m=<id> link on demand, from cmdColor, not from this.
   methodBox.style.display="none";
   const file = METHOD_FILES[cmdColor];
   loadMethodScript(file, () => { methodDefs[cmdColor].start(); loop(); });
@@ -2275,9 +2276,6 @@ randomBtn.addEventListener('click', (e)=>{
   cmdColor=parseInt(ids[(Math.random()*ids.length)|0],10);
   paintCmd2();
   armDrop();
-  // RANDOM's pick isn't a deliberate, shareable choice — keep it out of the address
-  // bar so refreshing the page lands back on the picker, not whatever it last rolled.
-  try{ history.replaceState(null,'',location.pathname); }catch(e){}
 });
 
 // ---- share button: share the currently-shown/running method, or the bare site ----
