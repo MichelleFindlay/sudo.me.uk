@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.5.0
+
+### Changed
+- Each of the 64 destruction methods now lives in its own file under a new `js/methods/` directory, fetched on demand only the first time that method is actually launched — a plain page load, or browsing the method picker, no longer downloads any of them. `index.php`'s inline script shrank from roughly 9,400 lines to about 2,300, keeping only the shared engine (city generation, colour palette, UI wiring) and a small loader/registry.
+
+### Fixed
+- Along the way, fixed a handful of latent cross-method dependencies this refactor surfaced: a few small helpers (a demolition helper, a speech-bubble helper, an ion-cannon-style blast helper, a tank sprite, a helicopter-rotor sprite, and a bystander sprite) were each defined inside one method's code but quietly reused by several others — these now live in the shared core so no method needs another method's file loaded just to borrow one function.
+
 ## v1.4.6
 
 ### Added
