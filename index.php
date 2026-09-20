@@ -282,6 +282,9 @@ if (isset($_GET['stats'])) {
   #methodBox .m-who { color:#3a9ad0; text-shadow:0 0 8px #1a5a8a; }
   #methodBox .m-sd { color:#c89050; text-shadow:0 0 8px #6a3a18; }
   #methodBox .m-ricks { color:#4dff8a; text-shadow:0 0 8px #0d5c2e; }
+  #methodBox .m-minecraft { color:#7ed321; text-shadow:0 0 8px #2a5a10; }
+  #methodBox .m-toothpaste { color:#ff2fb0; text-shadow:0 0 8px #7a0a4a; }
+  #methodBox .m-idiocracy { color:#c0e030; text-shadow:0 0 8px #4a6a10; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -512,6 +515,9 @@ if (isset($_GET['stats'])) {
       <a href="?m=66" class="m-who pick" data-method="66" data-cat="movie">Doctor Who</a>
       <a href="?m=67" class="m-sd pick" data-method="67" data-cat="fun">Sports Direct</a>
       <a href="?m=68" class="m-ricks pick" data-method="68" data-cat="movie">Ricks</a>
+      <a href="?m=69" class="m-minecraft pick" data-method="69" data-cat="movie">Minecraft</a>
+      <a href="?m=70" class="m-toothpaste pick" data-method="70" data-cat="fun">🐘's Toothpaste</a>
+      <a href="?m=71" class="m-idiocracy pick" data-method="71" data-cat="movie">Idiocracy</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1597,6 +1603,88 @@ function colorFor(ch,r,c,mode){
   if(mode==='rickselite'){ return "#ffd700"; }                    // the ruling class, and the Council
   if(mode==='rickscop'){ return "#3a7bff"; }                      // the police state
   if(mode==='ricksassassin'){ return "#ff2a2a"; }                 // the one who makes a move
+  if(mode==='minecraft'){                                         // the whole city, repainted blocky
+    if(ch==="."||ch===":")return (r+c)%3===0?"#ffd700":"#ffaa00"; // glowstone windows
+    if(ch==="|")return (r+c)%2===0?"#8a8a8a":"#7a7a7a";           // cobblestone walls
+    if(ch==="_")return (r+c)%2===0?"#4c9a2a":"#5aa832";           // grass-block roofs
+    if(ch==="/"||ch==="\\")return "#8b5a2b";                      // oak-plank spires
+    if(ch==="["||ch==="]")return "#6b4423";                       // dirt trim
+    if(ch==="="||ch==="-")return "#a8a8a8";                       // stone trim
+    if(ch==="#")return (r+c)%2===0?"#8a8a8a":"#6d6d6d";           // cobblestone
+    if(ch==="^")return "#b0a080";                                 // gravel path
+    if(ch==="~"||ch==="≈")return "#3060d0";                  // water blocks
+    if(ch==="·")return "#7a4a2a";                            // dirt
+    if(ch==="`")return "#5c3a1f";                                 // dirt clump
+    if(ch==="█")return "#2a2a2a";                            // bedrock (already on-theme)
+    if(ch==="+"||ch==="o"||ch==="H")return "#b0b0b0";             // iron/stone fixtures
+    return "#8a8a8a";
+  }
+  if(mode==='mctnt'){                                             // the TNT stack, town-square-ready
+    if(ch==="T"||ch==="N")return "#1a1a1a";
+    return (Math.random()<0.5)?"#c21807":"#8f1005";
+  }
+  if(mode==='mccreeper'){                                         // camo-green creeper texture
+    if(ch==="X")return "#0a1a0a";
+    return (r+c)%2===0?"#3ea62f":"#2d7a1f";
+  }
+  if(mode==='mccreeperflash'){ return "#eafff0"; }                // the pre-detonation flash
+  if(mode==='mcsteve'){                                           // Steve, wisely running for it
+    if(ch==="^")return "#5a3a1a";                                 // hair
+    if(ch==="o")return "#1a1a1a";                                 // eye
+    if(ch==="=")return "#2a9a9a";                                 // shirt
+    if(ch==="/"||ch==="\\"||ch==="|")return "#2a4a9a";            // legs
+    return "#e8b088";                                             // skin
+  }
+  if(mode==='mcblast'){                                           // the crater and its debris
+    const rmc=Math.random();
+    if(rmc<0.4) return "#ff9500";
+    if(rmc<0.7) return "#2a2a2a";
+    return "#ffe070";
+  }
+  if(mode==='etflask'){                                           // the flask's glass and stand
+    if(ch==="=")return "#3a3a3a";
+    return "#cfe6ea";
+  }
+  if(mode==='etliquid'){                                          // the reacting catalyst, still contained
+    const rel=Math.random();
+    if(rel<0.4) return "#ff2fb0";
+    if(rel<0.7) return "#c020e0";
+    return "#ffffff";
+  }
+  if(mode==='etfoam'){                                            // the foam — everywhere, and rising
+    const ref=Math.random();
+    if(ref<0.35) return "#ffffff";
+    if(ref<0.65) return "#f0ece0";
+    if(ref<0.85) return "#e8c8e0";
+    return "#d8a8d8";
+  }
+  if(mode==='idiopod'){ return "#8a95a4"; }                       // the hibernation pods
+  if(mode==='idiosleep'){ return "#9ad0ff"; }                     // sound asleep for 500 years
+  if(mode==='idiogarbage'){                                       // mountains of trash, coast to coast
+    const rig=Math.random();
+    if(rig<0.08) return ["#ff5aa0","#5ad0ff","#ffe040"][(Math.random()*3)|0]; // the odd bright bit of plastic
+    if(rig<0.5) return "#7a6a4a";
+    return "#5a4e38";
+  }
+  if(mode==='idiobrawndo'){                                       // it's got what plants crave
+    const rib=Math.random();
+    if(rib<0.5) return "#c0e030";
+    return "#ff8c1a";
+  }
+  if(mode==='idioplant'){ return "#8a6a2a"; }                     // wilted, Brawndo-fed crops
+  if(mode==='idiosprout'){ return "#4a9a3a"; }                    // a first, tiny sign of recovery
+  if(mode==='idiojoe'){                                           // Joe Bauers, smartest man alive by default
+    if(ch==="o")return "#e8c090";
+    return "#6a7a8a";
+  }
+  if(mode==='idiorita'){                                          // Rita
+    if(ch==="o")return "#e8c090";
+    return "#c07aa0";
+  }
+  if(mode==='idiocamacho'){                                       // President Camacho, former pro wrestler
+    if(ch==="o")return "#e8c090";
+    return "#ffd700";
+  }
   return "#cccccc";
 }
 
@@ -2028,7 +2116,10 @@ const METHOD_FILES = {
   65: 'lube.js',
   66: 'doctorwho.js',
   67: 'sportsdirect.js',
-  68: 'ricks.js'
+  68: 'ricks.js',
+  69: 'minecraft.js',
+  70: 'elephantstoothpaste.js',
+  71: 'idiocracy.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2040,6 +2131,10 @@ function loadMethodScript(file, cb){
   const s = document.createElement('script');
   s.src = 'js/methods/' + file + '?v=' + JS_ASSET_VERSION;
   s.onload = () => { loadedMethodFiles.add(file); cb(); };
+  // a missing/failed method file would otherwise leave onload never firing and the
+  // page hung forever mid-launch (picker hidden, nothing rendering, no error shown) —
+  // recover back to the picker instead of freezing silently
+  s.onerror = () => { console.error('sudo.me.uk: failed to load method script', file); s.remove(); reset(); };
   document.head.appendChild(s);
 }
 
@@ -2240,12 +2335,18 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — KNOCK OVER THE MUG"; sub.style.color="#c89050"; sub.style.textShadow="0 0 8px #6a3a18"; } }
   else if(cmdColor===68){ cmd.style.color="#4dff8a"; cmd.style.textShadow="0 0 18px #0d5c2e";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — BUILD THE CITADEL OF RICKS"; sub.style.color="#4dff8a"; sub.style.textShadow="0 0 8px #0d5c2e"; } }
+  else if(cmdColor===69){ cmd.style.color="#7ed321"; cmd.style.textShadow="0 0 18px #2a5a10";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LIGHT THE TNT"; sub.style.color="#7ed321"; sub.style.textShadow="0 0 8px #2a5a10"; } }
+  else if(cmdColor===70){ cmd.style.color="#ff2fb0"; cmd.style.textShadow="0 0 18px #7a0a4a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — MIX THE CATALYST"; sub.style.color="#ff2fb0"; sub.style.textShadow="0 0 8px #7a0a4a"; } }
+  else if(cmdColor===71){ cmd.style.color="#c0e030"; cmd.style.textShadow="0 0 18px #4a6a10";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SLEEP FOR 500 YEARS"; sub.style.color="#c0e030"; sub.style.textShadow="0 0 8px #4a6a10"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%69; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%72; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain

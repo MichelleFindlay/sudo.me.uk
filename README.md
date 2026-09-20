@@ -1,6 +1,6 @@
 # sudo.me.uk
 
-A stupid little ASCII terminal simulator that destroys a procedurally generated city 69 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
+A stupid little ASCII terminal simulator that destroys a procedurally generated city 72 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
 
 🔗 **Live:** [sudo.me.uk](https://sudo.me.uk)
 
@@ -12,7 +12,7 @@ No backend logic, no database, no point. Just a page that renders everything as 
 
 ## Methods
 
-All 69 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
+All 72 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 
 | # | Method | Category | What happens |
 |---|--------|----------|---------------|
@@ -85,12 +85,15 @@ All 69 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 | 66 | Doctor Who | Movie/game | Classic baddies swarm the city until the TARDIS materializes and the Doctor deals with them |
 | 67 | Sports Direct | Whimsical | A mug tips over, and the city drowns in coffee |
 | 68 | Ricks | Movie/game | Thousands of Ricks build the Citadel to govern themselves — class inequality, a police state, and an assassination plot tear it apart |
+| 69 | Minecraft | Movie/game | The city is repainted blocky Minecraft colours, and a creeper sets off a stack of TNT in the town square |
+| 70 | Elephant's Toothpaste | Whimsical | A science-fair demo in the town square goes wrong, and the foam never stops rising, burying the first five floors of every building |
+| 71 | Idiocracy | Movie/game | Two hibernation volunteers oversleep by 500 years and wake to a country buried in garbage, watered with Brawndo, and run by a wrestler-president |
 
 ## How it works
 
 Everything is rendered as monospace text — a shared procedural city generator builds a skyline, a character-grid painter colors each cell per "mode," and a state machine of animation phases drives each scenario frame by frame. No canvas, no images, no sprites — just strings and `setTimeout`.
 
-Each of the 69 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 69 methods' worth of code up front.
+Each of the 72 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 72 methods' worth of code up front.
 
 Every method also has a real, shareable URL (`?m=<id>`) that launches it directly, and a share button in the bottom-right corner lets you share either the current destruction or the bare site link.
 
