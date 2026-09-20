@@ -1,6 +1,6 @@
 <?php
 // ---- version & update check ----
-$VERSION = '1.5.5';
+$VERSION = '1.5.9';
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
 $CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
