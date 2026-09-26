@@ -1,6 +1,6 @@
 # sudo.me.uk
 
-A stupid little ASCII terminal simulator that destroys a procedurally generated city 72 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
+A stupid little ASCII terminal simulator that destroys a procedurally generated city 76 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
 
 🔗 **Live:** [sudo.me.uk](https://sudo.me.uk)
 
@@ -12,7 +12,7 @@ No backend logic, no database, no point. Just a page that renders everything as 
 
 ## Methods
 
-All 72 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
+All 76 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 
 | # | Method | Category | What happens |
 |---|--------|----------|---------------|
@@ -88,12 +88,16 @@ All 72 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 | 69 | Minecraft | Movie/game | The city is repainted blocky Minecraft colours, and a creeper sets off a stack of TNT in the town square |
 | 70 | Elephant's Toothpaste | Whimsical | A science-fair demo in the town square goes wrong, and the foam never stops rising, burying the first five floors of every building |
 | 71 | Idiocracy | Movie/game | Two hibernation volunteers oversleep by 500 years and wake to a country buried in garbage, watered with Brawndo, and run by a wrestler-president |
+| 72 | Blobby | Whimsical | A pink, spotted kaiju escapes a secret lab and rampages through London, hugging landmarks to bits out of sheer enthusiasm |
+| 73 | Dumpster Fire | Whimsical | A burning bin rolls through the city, setting fire to everything in its wake |
+| 74 | Barney | Whimsical | A wished-to-life plush dinosaur lays waste to Milton Keynes, one over-enthusiastic hug at a time |
+| 75 | Blobby vs Barney | Whimsical | Clash of the Wobbly Titans — two huggers meet, and the city doesn't survive the affection |
 
 ## How it works
 
 Everything is rendered as monospace text — a shared procedural city generator builds a skyline, a character-grid painter colors each cell per "mode," and a state machine of animation phases drives each scenario frame by frame. No canvas, no images, no sprites — just strings and `setTimeout`.
 
-Each of the 72 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 72 methods' worth of code up front.
+Each of the 76 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 76 methods' worth of code up front.
 
 Every method also has a real, shareable URL (`?m=<id>`) that launches it directly, and a share button in the bottom-right corner lets you share either the current destruction or the bare site link.
 
@@ -103,7 +107,10 @@ The page is served as PHP (`index.php`) purely so it can do a lightweight server
 
 It's a PHP file plus a `js/methods/` directory of per-method scripts — no build step, no dependencies.
 
+`index.php` requires a `config.php` to exist (it's gitignored, so it's not in this repo). Copy the sample first:
+
 ```bash
+cp config.sample.php config.php
 php -S localhost:8000
 ```
 

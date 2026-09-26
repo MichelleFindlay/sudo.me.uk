@@ -6,4 +6,4 @@
 
 // current release version — shown in the top-bar badge and compared against
 // the latest GitHub release to flag when this deploy is out of date
-$VERSION = '1.5.9';
+$VERSION = '1.6.5';

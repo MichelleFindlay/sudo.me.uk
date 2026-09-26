@@ -291,6 +291,7 @@ if (isset($_GET['stats'])) {
   #methodBox .m-blobby { color:#ff5ac0; text-shadow:0 0 8px #a01a70; }
   #methodBox .m-dumpster { color:#4a9a5a; text-shadow:0 0 8px #ff6a00; }
   #methodBox .m-barney { color:#a0308a; text-shadow:0 0 8px #3aa050; }
+  #methodBox .m-clash { color:#ff5ac0; text-shadow:0 0 8px #a0308a; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -527,6 +528,7 @@ if (isset($_GET['stats'])) {
       <a href="?m=72" class="m-blobby pick" data-method="72" data-cat="fun">Blobby</a>
       <a href="?m=73" class="m-dumpster pick" data-method="73" data-cat="fun">Dumpster Fire</a>
       <a href="?m=74" class="m-barney pick" data-method="74" data-cat="fun">Barney</a>
+      <a href="?m=75" class="m-clash pick" data-method="75" data-cat="fun">Blobby vs Barney</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1776,6 +1778,29 @@ function colorFor(ch,r,c,mode){
   if(mode==='car'){                                                // flung from the roundabout, mid-flight
     return (Math.random()<0.5)?"#c0c8d0":"#d02020";
   }
+  if(mode==='interchange'){                                        // a motorway interchange, briefly
+    return "#8a92a0";
+  }
+  if(mode==='towerclash'){                                         // a round tower, increasingly less round
+    return "#9aa2ac";
+  }
+  if(mode==='stadiumclash'){                                       // a stadium, about to be sat on
+    if(/[A-Z]/.test(ch)) return "#ffd700";
+    return "#7a8a9a";
+  }
+  if(mode==='blanket'){                                            // the blanket that falls over everything
+    return (Math.random()<0.5)?"#c05a8a":"#a04a7a";
+  }
+  if(mode==='busshelter'){                                         // the scientist's vantage point
+    return "#8a97a4";
+  }
+  if(mode==='clashhouse'){                                         // where they live now
+    if(ch==="^") return "#8a4a2a";
+    return "#c8a458";
+  }
+  if(mode==='balloon'){                                            // lonely, deflating, on the horizon
+    return "#e05a9a";
+  }
   return "#cccccc";
 }
 
@@ -2213,7 +2238,8 @@ const METHOD_FILES = {
   71: 'idiocracy.js',
   72: 'blobby.js',
   73: 'dumpsterfire.js',
-  74: 'barney.js'
+  74: 'barney.js',
+  75: 'blobbyvsbarney.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2441,12 +2467,14 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LIGHT THE DUMPSTER"; sub.style.color="#ff8c1a"; sub.style.textShadow="0 0 8px #ff6a00"; } }
   else if(cmdColor===74){ cmd.style.color="#a0308a"; cmd.style.textShadow="0 0 18px #3aa050";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WISH ON THE PLUSH"; sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050"; } }
+  else if(cmdColor===75){ cmd.style.color="#ff5ac0"; cmd.style.textShadow="0 0 18px #a0308a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — CLASH OF THE WOBBLY TITANS"; sub.style.color="#ff5ac0"; sub.style.textShadow="0 0 8px #a0308a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%75; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%76; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
