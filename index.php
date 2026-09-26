@@ -1,6 +1,8 @@
 <?php
+// ---- local config (version number + secrets) — see config.sample.php ----
+require_once __DIR__ . '/config.php';
+
 // ---- version & update check ----
-$VERSION = '1.5.9';
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
 $CACHE_TTL = 3600; // seconds — don't hammer the GitHub API on every page load
@@ -151,6 +153,7 @@ if (isset($_GET['stats'])) {
     echo json_encode(['error' => 'unknown stats action']);
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -285,6 +288,10 @@ if (isset($_GET['stats'])) {
   #methodBox .m-minecraft { color:#7ed321; text-shadow:0 0 8px #2a5a10; }
   #methodBox .m-toothpaste { color:#ff2fb0; text-shadow:0 0 8px #7a0a4a; }
   #methodBox .m-idiocracy { color:#c0e030; text-shadow:0 0 8px #4a6a10; }
+  #methodBox .m-blobby { color:#ff5ac0; text-shadow:0 0 8px #a01a70; }
+  #methodBox .m-dumpster { color:#4a9a5a; text-shadow:0 0 8px #ff6a00; }
+  #methodBox .m-barney { color:#a0308a; text-shadow:0 0 8px #3aa050; }
+  #methodBox .m-clash { color:#ff5ac0; text-shadow:0 0 8px #a0308a; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -518,6 +525,10 @@ if (isset($_GET['stats'])) {
       <a href="?m=69" class="m-minecraft pick" data-method="69" data-cat="movie">Minecraft</a>
       <a href="?m=70" class="m-toothpaste pick" data-method="70" data-cat="fun">🐘's Toothpaste</a>
       <a href="?m=71" class="m-idiocracy pick" data-method="71" data-cat="movie">Idiocracy</a>
+      <a href="?m=72" class="m-blobby pick" data-method="72" data-cat="fun">Blobby</a>
+      <a href="?m=73" class="m-dumpster pick" data-method="73" data-cat="fun">Dumpster Fire</a>
+      <a href="?m=74" class="m-barney pick" data-method="74" data-cat="fun">Barney</a>
+      <a href="?m=75" class="m-clash pick" data-method="75" data-cat="fun">Blobby vs Barney</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1685,6 +1696,111 @@ function colorFor(ch,r,c,mode){
     if(ch==="o")return "#e8c090";
     return "#ffd700";
   }
+  if(mode==='blobby'){                                            // Blobby: pink, spotted, and delighted about it
+    if(ch==="o"||ch==="O")return "#3adf6a";                       // eyes (mismatched sizes, like the costume)
+    if(ch==="n")return "#c81020";                                 // nose
+    if(ch==="m")return "#8a0010";                                 // big grin
+    if(ch==="b")return "#ffe066";                                 // bow tie
+    if(ch==="k")return "#c81020";                                 // bow knot
+    if(ch==="#")return (Math.random()<0.16) ? "#ffe680" : ((Math.random()<0.5)?"#ff5ac0":"#ff8fd6"); // spotted body
+    return "#a01a70";                                             // outline
+  }
+  if(mode==='blobbyfriend'){                                      // the giant inflatable bouncy-castle friend
+    if(ch==="o"||ch==="O")return "#7a3a00";
+    if(ch==="n")return "#c04000";
+    if(ch==="m")return "#8a2800";
+    if(ch==="b"||ch==="k")return "#fff0b0";
+    if(ch==="#")return (Math.random()<0.16) ? "#fff0b0" : ((Math.random()<0.5)?"#ffb020":"#ffd060");
+    return "#c07000";
+  }
+  if(mode==='nelson'){                                            // Nelson's Column, still standing (for now)
+    if(ch==="A")return "#2a2a2a";                                 // the man himself, silhouetted
+    return "#9a978a";                                             // weathered stone
+  }
+  if(mode==='bigben'){                                            // the Elizabeth Tower
+    if(/[0-9]/.test(ch)||ch===":")return "#ffd700";               // gold clock face
+    return "#c9b878";                                             // sandstone
+  }
+  if(mode==='londoneye'){                                         // the London Eye, now a hula hoop
+    if(ch==="o")return "#dfeaf2";                                 // capsules
+    return "#8a97a4";                                             // steel rim/spokes
+  }
+  if(mode==='gherkin'){                                           // 30 St Mary Axe, now a hat
+    return (Math.random()<0.5)?"#7ec4d0":"#a0dce8";               // glass diagonal lattice
+  }
+  if(mode==='o2dome'){                                            // the O2, moments from popping
+    if(ch==="|")return "#e0201a";                                 // mast tips
+    return "#e8e0d0";                                             // cream fabric roof
+  }
+  if(mode==='towerbridge'){                                       // Tower Bridge, briefly, then not
+    if(ch==="A")return "#3a5a8a";                                 // blue steelwork
+    return "#b89858";                                             // stone towers
+  }
+  if(mode==='greggs'){                                            // a Greggs, i.e. lunch
+    if(/[A-Z]/.test(ch))return "#ffd700";                         // signage
+    return "#0a3a6a";                                             // Greggs blue
+  }
+  if(mode==='lido'){                                              // a Blobby-shaped crater, now a beloved public pool
+    if(ch==="#"||ch==="@")return "#dff3ff";                       // foam edge
+    return (Math.random()<0.5)?"#2e9bd8":"#4db0e8";               // clear blue water
+  }
+  if(mode==='dumpster'){                                          // a dumpster, on fire, rolling through the streets
+    if(ch==="o")return "#1a1a1a";                                 // caster wheels
+    return "#2a7a3a";                                             // dumpster green
+  }
+  if(mode==='barney'){                                            // a purple dinosaur, deeply overstimulated
+    if(ch==="O")return "#1a1410";                                 // eyes
+    if(ch==="m")return "#c81030";                                 // big smile
+    if(ch==="g")return "#3aa050";                                 // green belly patch
+    return (Math.random()<0.5)?"#a0308a":"#c060b0";               // purple hide
+  }
+  if(mode==='roundabout'){                                        // Milton Keynes' one true love
+    return "#9aa2ac";
+  }
+  if(mode==='custard'){                                           // six hours of imagined rain
+    return (Math.random()<0.5)?"#ffd700":"#ffe680";
+  }
+  if(mode==='sandwich'){                                          // stadium-sized, imagined, landed on the station
+    if(ch==="v"||ch==="^")return "#7aa040";                       // lettuce
+    if(ch==="o")return "#c81818";                                 // tomato
+    return "#d8a858";                                             // bread
+  }
+  if(mode==='concretecow'){                                       // Milton Keynes' famous concrete cows, now mobile
+    if(ch==="@")return "#2a2a2a";                                 // patches
+    return "#d8d8d0";                                             // concrete white
+  }
+  if(mode==='babybop'){                                           // Baby Bop, here to "help"
+    return "#4a9a5a";
+  }
+  if(mode==='bj'){                                                // BJ, also here to "help"
+    return "#ffb020";
+  }
+  if(mode==='car'){                                                // flung from the roundabout, mid-flight
+    return (Math.random()<0.5)?"#c0c8d0":"#d02020";
+  }
+  if(mode==='interchange'){                                        // a motorway interchange, briefly
+    return "#8a92a0";
+  }
+  if(mode==='towerclash'){                                         // a round tower, increasingly less round
+    return "#9aa2ac";
+  }
+  if(mode==='stadiumclash'){                                       // a stadium, about to be sat on
+    if(/[A-Z]/.test(ch)) return "#ffd700";
+    return "#7a8a9a";
+  }
+  if(mode==='blanket'){                                            // the blanket that falls over everything
+    return (Math.random()<0.5)?"#c05a8a":"#a04a7a";
+  }
+  if(mode==='busshelter'){                                         // the scientist's vantage point
+    return "#8a97a4";
+  }
+  if(mode==='clashhouse'){                                         // where they live now
+    if(ch==="^") return "#8a4a2a";
+    return "#c8a458";
+  }
+  if(mode==='balloon'){                                            // lonely, deflating, on the horizon
+    return "#e05a9a";
+  }
   return "#cccccc";
 }
 
@@ -2119,7 +2235,11 @@ const METHOD_FILES = {
   68: 'ricks.js',
   69: 'minecraft.js',
   70: 'elephantstoothpaste.js',
-  71: 'idiocracy.js'
+  71: 'idiocracy.js',
+  72: 'blobby.js',
+  73: 'dumpsterfire.js',
+  74: 'barney.js',
+  75: 'blobbyvsbarney.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2341,12 +2461,20 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — MIX THE CATALYST"; sub.style.color="#ff2fb0"; sub.style.textShadow="0 0 8px #7a0a4a"; } }
   else if(cmdColor===71){ cmd.style.color="#c0e030"; cmd.style.textShadow="0 0 18px #4a6a10";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SLEEP FOR 500 YEARS"; sub.style.color="#c0e030"; sub.style.textShadow="0 0 8px #4a6a10"; } }
+  else if(cmdColor===72){ cmd.style.color="#ff5ac0"; cmd.style.textShadow="0 0 18px #a01a70";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — RELEASE BLOBBY"; sub.style.color="#ff5ac0"; sub.style.textShadow="0 0 8px #a01a70"; } }
+  else if(cmdColor===73){ cmd.style.color="#4a9a5a"; cmd.style.textShadow="0 0 18px #ff6a00";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LIGHT THE DUMPSTER"; sub.style.color="#ff8c1a"; sub.style.textShadow="0 0 8px #ff6a00"; } }
+  else if(cmdColor===74){ cmd.style.color="#a0308a"; cmd.style.textShadow="0 0 18px #3aa050";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WISH ON THE PLUSH"; sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050"; } }
+  else if(cmdColor===75){ cmd.style.color="#ff5ac0"; cmd.style.textShadow="0 0 18px #a0308a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — CLASH OF THE WOBBLY TITANS"; sub.style.color="#ff5ac0"; sub.style.textShadow="0 0 8px #a0308a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%72; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%76; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
@@ -2476,10 +2604,10 @@ randomBtn.addEventListener('click', (e)=>{
 const shareBtn=document.getElementById('shareBtn'), shareMenu=document.getElementById('shareMenu'),
       shareCurrentBtn=document.getElementById('shareCurrentBtn'), shareSiteBtn=document.getElementById('shareSiteBtn'),
       shareToast=document.getElementById('shareToast');
-function showShareToast(msg){
+function showShareToast(msg, ms){
   shareToast.textContent=msg; shareToast.classList.add('show');
   clearTimeout(showShareToast._t);
-  showShareToast._t=setTimeout(()=>shareToast.classList.remove('show'), 1800);
+  showShareToast._t=setTimeout(()=>shareToast.classList.remove('show'), ms||1800);
 }
 function doShare(url, title){
   if(navigator.share){
