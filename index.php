@@ -292,7 +292,6 @@ if (isset($_GET['stats'])) {
   #methodBox .m-dumpster { color:#4a9a5a; text-shadow:0 0 8px #ff6a00; }
   #methodBox .m-barney { color:#a0308a; text-shadow:0 0 8px #3aa050; }
   #methodBox .m-clash { color:#ff5ac0; text-shadow:0 0 8px #a0308a; }
-  #methodBox .m-mascot { color:#ffcc00; text-shadow:0 0 8px #d8252c; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -530,7 +529,6 @@ if (isset($_GET['stats'])) {
       <a href="?m=73" class="m-dumpster pick" data-method="73" data-cat="fun">Dumpster Fire</a>
       <a href="?m=74" class="m-barney pick" data-method="74" data-cat="fun">Barney</a>
       <a href="?m=75" class="m-clash pick" data-method="75" data-cat="fun">Blobby vs Barney</a>
-      <a href="?m=76" class="m-mascot pick" data-method="76" data-cat="fun">Mascot Mayhem</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1803,45 +1801,6 @@ function colorFor(ch,r,c,mode){
   if(mode==='balloon'){                                            // lonely, deflating, on the horizon
     return "#e05a9a";
   }
-  if(mode==='mascot'){                                             // twenty-two fast-food mascots, one letter each
-    if(ch==='R') return "#d8252c";                                 // Ronald McDonald
-    if(ch==='G') return "#8a5aa8";                                 // Grimace
-    if(ch==='H') return "#2a2a2a";                                 // Hamburglar
-    if(ch==='I') return "#f0a800";                                 // Birdie
-    if(ch==='Y') return "#ff8c1a";                                 // Mayor McCheese
-    if(ch==='K') return "#7a1a2a";                                 // The King
-    if(ch==='C') return "#f0f0f0";                                 // Colonel Sanders
-    if(ch==='W') return "#d8252c";                                 // Wendy
-    if(ch==='J') return "#f0f0f0";                                 // Jack Box
-    if(ch==='B') return "#c81010";                                 // Big Boy
-    if(ch==='L') return "#f0e0c0";                                 // Little Caesar
-    if(ch==='N') return "#d8252c";                                 // The Noid
-    if(ch==='S') return "#ffd700";                                 // Happy Star
-    if(ch==='E') return "#8a6a4a";                                 // Chuck E. Cheese
-    if(ch==='O') return "#8a5a2a";                                 // Rooty
-    if(ch==='Q') return "#1a1a1a";                                 // the Chick-fil-A cows
-    if(ch==='T') return "#c89a6a";                                 // Gidget
-    if(ch==='M') return "#d8252c";                                 // Oven Mitt
-    if(ch==='P') return "#2a5a9a";                                 // Mr Wimpy
-    if(ch==='F') return "#f0f0f0";                                 // Fat Charlie
-    if(ch==='X') return "#c81010";                                 // the Barcelos Cockerel
-    if(ch==='A') return "#ff8c1a";                                 // Happy Eater
-    return "#e8c090";                                              // shared body strokes
-  }
-  if(mode==='arches'){                                             // the Golden Arches, briefly
-    return "#ffcc00";
-  }
-  if(mode==='bucket'){                                             // the Colonel's bucket, about to go off
-    if(/[A-Z]/.test(ch)) return "#f0f0f0";
-    return "#d8252c";
-  }
-  if(mode==='pizza'){                                              // Pizza! Pizza! in every direction
-    return (Math.random()<0.5)?"#d8a050":"#c81010";
-  }
-  if(mode==='arcade'){                                             // a glitching arcade cabinet
-    if(ch==='@') return "#ff2fb0";
-    return "#4a3a8a";
-  }
   return "#cccccc";
 }
 
@@ -2280,8 +2239,7 @@ const METHOD_FILES = {
   72: 'blobby.js',
   73: 'dumpsterfire.js',
   74: 'barney.js',
-  75: 'blobbyvsbarney.js',
-  76: 'mascotmayhem.js'
+  75: 'blobbyvsbarney.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2511,14 +2469,12 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WISH ON THE PLUSH"; sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050"; } }
   else if(cmdColor===75){ cmd.style.color="#ff5ac0"; cmd.style.textShadow="0 0 18px #a0308a";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — CLASH OF THE WOBBLY TITANS"; sub.style.color="#ff5ac0"; sub.style.textShadow="0 0 8px #a0308a"; } }
-  else if(cmdColor===76){ cmd.style.color="#ffcc00"; cmd.style.textShadow="0 0 18px #d8252c";
-    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SUMMON THE MASCOTS"; sub.style.color="#ffcc00"; sub.style.textShadow="0 0 8px #d8252c"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%77; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%76; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
