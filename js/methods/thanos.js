@@ -1,4 +1,4 @@
-let thanosStarted=false, thanosT=0, thanosPhase='assemble', dustMotes=[], snapFade=0, thanosX=0;
+let thanosStarted=false, thanosT=0, thanosPhase='assemble', dustMotes=[], snapFade=0, thanosX=0, thanosLostT=0;
 
 
 // ---- THANOS: the Avengers fail, he snaps, and half of everything turns to dust ----
@@ -84,7 +84,7 @@ if(phase==='thanos'){
     stepRain();
     if(thanosPhase==='assemble'){
       // Thanos strides toward the Avengers line; they stand and fail to stop him
-      thanosX-=Math.max(1,Math.floor(COLS/40));
+      thanosX-=Math.max(0.5,Math.floor(COLS/40)*0.5);
       const {grid,mg}=thanosDraw(thanosX, false, 0);
       drawRain(grid,mg);
       scene.innerHTML=paint(grid,mg,'city');
@@ -100,7 +100,7 @@ if(phase==='thanos'){
       dustMotes=[]; for(let i=0;i<Math.floor(COLS*0.8);i++){ dustMotes.push({ x:(Math.random()*COLS)|0, y:streetRow-((Math.random()*streetRow)|0), vx:(Math.random()*2-1)*0.6, vy:-(0.3+Math.random()*0.8) }); }
       timer=setTimeout(()=>{ flash.style.transition="opacity 1.6s"; flash.style.opacity=0; document.body.style.background="#160a1e"; thanosPhase='dusting'; snapFade=0; loop(); }, 240);
     }else if(thanosPhase==='dusting'){
-      snapFade=Math.min(1, snapFade+0.05);
+      snapFade=Math.min(1, snapFade+0.033);
       for(const m of dustMotes){ m.x+=m.vx; m.y+=m.vy; m.vy+=0.01; if(m.y<0||m.x<0||m.x>=COLS){ m.y=streetRow-((Math.random()*4)|0); m.x=(Math.random()*COLS)|0; m.vy=-(0.3+Math.random()*0.8); } }
       const {grid,mg}=thanosDraw(thanosX, true, snapFade);
       drawRain(grid,mg);
@@ -109,7 +109,8 @@ if(phase==='thanos'){
       sub.textContent = snapFade<0.7 ? "HALF OF EVERYTHING TURNS TO DUST" : "THEY LOST. — you should've gone for the head.";
       sub.style.color="#d090ff"; sub.style.textShadow="0 0 8px #6a20a0";
       thanosT++;
-      if(!(snapFade>=1 && thanosT>50)){ timer=setTimeout(loop,90); }
+      if(snapFade>=1) thanosLostT++;
+      if(!(snapFade>=1 && thanosLostT>30)){ timer=setTimeout(loop,90); }
       else { phase='thanos_hold'; loop(); }
     }
   }else if(phase==='thanos_hold'){
@@ -135,7 +136,7 @@ function __m19_start(){
 
 
 function __m19_reset(){
-  thanosStarted=false; thanosT=0; thanosPhase='assemble'; dustMotes=[]; snapFade=0; thanosX=0;
+  thanosStarted=false; thanosT=0; thanosPhase='assemble'; dustMotes=[]; snapFade=0; thanosX=0; thanosLostT=0;
 }
 
 

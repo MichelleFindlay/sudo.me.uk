@@ -56,7 +56,7 @@ function __m49_loop(){
 if(phase==='squad'){
     scene.style.textShadow="0 0 8px #a040e0";
     if(!squadStarted){ squadStarted=true; squadT=0; squadPortalR=0; squadInit(); document.body.style.background="#08040c"; }
-    squadPortalR=Math.min(Math.floor(COLS*0.45), squadPortalR+Math.max(1,Math.floor(COLS/50)));
+    squadPortalR=Math.min(Math.floor(COLS*0.45), squadPortalR+Math.max(0.5,Math.floor(COLS/50)*0.6));
     squadStep(squadPortalR);
     const {grid,mg}=squadRender(squadPortalR, false, 0, false);
     scene.innerHTML=paint(grid,mg,'city');
@@ -79,7 +79,7 @@ if(phase==='squad'){
     else { phase='squad_diablo'; squadT=0; squadFireR=0; loop(); }
   }else if(phase==='squad_diablo'){
     stage.classList.add('shake');
-    squadFireR=Math.min(14, squadFireR+1.2);
+    squadFireR=Math.min(14, squadFireR+0.5);
     const {grid,mg}=squadRender(squadPortalR, true, squadFireR, false);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="EL DIABLO UNLEASHES HIS FIRE";
@@ -89,7 +89,7 @@ if(phase==='squad'){
     else { phase='squad_destroy'; squadT=0; loop(); }
   }else if(phase==='squad_destroy'){
     stage.classList.add('shake');
-    squadPortalR=Math.max(0, squadPortalR-Math.max(1,Math.floor(COLS/30)));
+    squadPortalR=Math.max(0, squadPortalR-Math.max(0.4,Math.floor(COLS/30)*0.3));
     const {grid,mg}=squadRender(squadPortalR, true, squadFireR, true);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="THE MACHINE FALLS — ENCHANTRESS IS DEFEATED";

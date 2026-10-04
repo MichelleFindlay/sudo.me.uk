@@ -85,7 +85,7 @@ if(phase==='titanic'){
     if(!titanicStarted){ titanicStarted=true; titanicT=0; shipX=-4; titanicSmoke=[]; document.body.style.background="#040a12"; }
     stepRain();
     const stopAt=COLS-3;                    // bow halts against the last building at the far edge
-    shipX=Math.min(stopAt, shipX+Math.max(1,Math.floor(COLS/40)));
+    shipX=Math.min(stopAt, shipX+Math.max(1,Math.floor(COLS/70)));
     const arrived=(shipX>=stopAt);
     const {grid,mg}=titanicRender(shipX);
     drawRain(grid,mg);
@@ -98,13 +98,13 @@ if(phase==='titanic'){
     else { phase='titanic_topple'; titanicT=0; loop(); }
   }else if(phase==='titanic_topple'){
     stage.classList.add('shake');
-    titanicAngle=Math.min(26, titanicAngle+2.6);
+    titanicAngle=Math.min(26, titanicAngle+1);
     const {grid,mg}=titanicWreckRender(COLS-3, titanicAngle);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="IT KEELS OVER, LISTING HARD TO PORT";
     sub.style.color="#8ac0e0"; sub.style.textShadow="0 0 8px #103a5a";
     titanicT++;
-    if(!(titanicAngle>=26 && titanicT>10)){ timer=setTimeout(loop,80); }
+    if(!(titanicAngle>=26 && titanicT>26)){ timer=setTimeout(loop,80); }
     else { phase='titanic_hold'; loop(); }
   }else if(phase==='titanic_hold'){
     stage.classList.remove('shake');

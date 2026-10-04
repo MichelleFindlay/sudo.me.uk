@@ -1,4 +1,4 @@
-let idioStarted=false, idioT=0, idioGarbageLevel=0, idioCamachoIn=false, idioMountainOffsets=[], idioMountainAvg=0, idioClimbY=0;
+let idioStarted=false, idioT=0, idioGarbageLevel=0, idioCamachoIn=false, idioMountainOffsets=[], idioMountainAvg=0, idioClimbY=0, idioSurfaceT=0;
 
 
 // ---- IDIOCRACY: two hibernation volunteers oversleep by 500 years, and wake to a
@@ -120,10 +120,10 @@ if(phase==='idio_sleep'){
     const {grid,mg}=idioRender(idioT,{pods:true});
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.remove('shake');
-    sub.textContent = idioT<12 ? "TWO VOLUNTEERS ENTER A TOP-SECRET HIBERNATION EXPERIMENT" : "THE PROJECT IS FORGOTTEN. THEY SLEEP FOR 500 YEARS.";
+    sub.textContent = idioT<37 ? "TWO VOLUNTEERS ENTER A TOP-SECRET HIBERNATION EXPERIMENT" : "THE PROJECT IS FORGOTTEN. THEY SLEEP FOR 500 YEARS.";
     sub.style.color="#7fa0c0"; sub.style.textShadow="0 0 8px #1a3a5a";
     idioT++;
-    if(idioT<26){ timer=setTimeout(loop,90); }
+    if(idioT<71){ timer=setTimeout(loop,90); }
     else { phase='idio_garbage'; idioT=0; loop(); }
   }else if(phase==='idio_garbage'){
     idioGarbageLevel=Math.min(idioGarbageCap(), idioGarbageLevel+Math.max(1,Math.floor(streetRow/30)));
@@ -133,27 +133,30 @@ if(phase==='idio_sleep'){
     sub.textContent="GARBAGE PILES INTO MOUNTAINS ACROSS THE COUNTRY";
     sub.style.color="#a08850"; sub.style.textShadow="0 0 8px #4a3a10";
     idioT++;
-    if(!(idioGarbageLevel>=idioGarbageCap() && idioT>18)){ timer=setTimeout(loop,80); }
-    else { phase='idio_wakeup'; idioT=0; idioClimbY=streetRow; loop(); }
+    if(!(idioGarbageLevel>=idioGarbageCap() && idioT>35)){ timer=setTimeout(loop,80); }
+    else { phase='idio_wakeup'; idioT=0; idioClimbY=streetRow; idioSurfaceT=0; loop(); }
   }else if(phase==='idio_wakeup'){
-    idioClimbY=Math.max(idioSurfaceTop(), idioClimbY-Math.max(1,Math.floor(streetRow/24)));
+    // climb slowly (one row every 3 frames, not every frame) so "500 years later..." has
+    // time to actually be read before the surface caption takes over
+    if(idioT%3===0) idioClimbY=Math.max(idioSurfaceTop(), idioClimbY-1);
     const atSurface = idioClimbY<=idioSurfaceTop();
+    if(atSurface) idioSurfaceT++; else idioSurfaceT=0;
     const {grid,mg}=idioRender(idioT,{ podsTop:idioClimbY, debris:true, peopleTop: atSurface ? idioSurfaceTop() : undefined });
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.toggle('shake', !atSurface);
     sub.textContent = !atSurface ? "500 YEARS LATER, THE PODS SLIP LOOSE AND SLIDE OUT OF THE GARBAGE" : "JOE AND RITA CLIMB OUT";
     sub.style.color="#c0c890"; sub.style.textShadow="0 0 8px #4a4a2a";
     idioT++;
-    if(!(atSurface && idioT>26)){ timer=setTimeout(loop,80); }
+    if(!(atSurface && idioSurfaceT>17)){ timer=setTimeout(loop,80); }
     else { phase='idio_brawndo'; idioT=0; loop(); }
   }else if(phase==='idio_brawndo'){
     stage.classList.remove('shake');
     const {grid,mg}=idioRender(idioT,{brawndo:true, peopleTop:idioSurfaceTop()});
     scene.innerHTML=paint(grid,mg,'city');
-    sub.textContent = idioT<15 ? "CROPS ARE WATERED WITH BRAWNDO. IT'S GOT ELECTROLYTES." : "THE CROPS ARE DYING";
+    sub.textContent = idioT<36 ? "CROPS ARE WATERED WITH BRAWNDO. IT'S GOT ELECTROLYTES." : "THE CROPS ARE DYING";
     sub.style.color="#c0e030"; sub.style.textShadow="0 0 8px #4a6a10";
     idioT++;
-    if(idioT<30){ timer=setTimeout(loop,90); }
+    if(idioT<51){ timer=setTimeout(loop,90); }
     else { phase='idio_camacho'; idioT=0; loop(); }
   }else if(phase==='idio_camacho'){
     idioCamachoIn=true;
@@ -184,7 +187,7 @@ function __m71_start(){
 
 
 function __m71_reset(){
-  idioStarted=false; idioT=0; idioGarbageLevel=0; idioCamachoIn=false; idioMountainOffsets=[]; idioMountainAvg=0; idioClimbY=0;
+  idioStarted=false; idioT=0; idioGarbageLevel=0; idioCamachoIn=false; idioMountainOffsets=[]; idioMountainAvg=0; idioClimbY=0; idioSurfaceT=0;
 }
 
 

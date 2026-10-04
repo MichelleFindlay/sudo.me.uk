@@ -1,4 +1,4 @@
-let ricksStarted=false, ricksT=0, rickPop=[], ricksPortalCols=[], ricksCouncilIdx=-1, ricksCops=[], ricksAssassinX=-2, ricksAssassinHit=false, ricksFires=[];
+let ricksStarted=false, ricksT=0, rickPop=[], ricksPortalCols=[], ricksCouncilIdx=-1, ricksCops=[], ricksAssassinX=-2, ricksAssassinHit=false, ricksFires=[], ricksPopDoneT=0, ricksHitT=0;
 
 
 // ---- RICKS: the Citadel of Ricks — thousands of Ricks build a society purely to govern
@@ -14,7 +14,7 @@ function ricksInit(){
 function ricksBuildStep(t){
   const target=Math.max(20,Math.floor(COLS*0.5));
   if(rickPop.length<target){
-    const addN=Math.max(1,Math.floor(COLS/40));
+    const addN=Math.max(1,Math.floor(COLS/90));
     for(let i=0;i<addN && rickPop.length<target;i++){
       const col=ricksPortalCols[(Math.random()*ricksPortalCols.length)|0];
       rickPop.push({ x: col+(Math.random()*6-3), cls:'worker', rx:0, alive:true });
@@ -47,7 +47,7 @@ function ricksAssassinateStep(){
   if(ricksAssassinHit) return;
   const council=rickPop[ricksCouncilIdx];
   const targetX=council?council.rx:cx;
-  ricksAssassinX=Math.min(targetX,ricksAssassinX+Math.max(1,Math.floor(COLS/50)));
+  ricksAssassinX=Math.min(targetX,ricksAssassinX+Math.max(1,Math.floor(COLS/75)));
   if(ricksAssassinX>=targetX){ ricksAssassinHit=true; if(council) council.alive=false; }
 }
 function ricksRiotStep(t){
@@ -137,7 +137,8 @@ if(phase==='ricks_build'){
     sub.textContent = rickPop.length<target ? "THOUSANDS OF RICKS POUR THROUGH THE PORTALS" : "…TO BUILD A SOCIETY PURELY TO GOVERN THEMSELVES";
     sub.style.color="#4dff8a"; sub.style.textShadow="0 0 8px #0d5c2e";
     ricksT++;
-    if(!(rickPop.length>=target && ricksT>25)){ timer=setTimeout(loop,80); }
+    if(rickPop.length>=target) ricksPopDoneT++;
+    if(!(rickPop.length>=target && ricksPopDoneT>32)){ timer=setTimeout(loop,80); }
     else { phase='ricks_class'; ricksT=0; ricksStratify(); loop(); }
   }else if(phase==='ricks_class'){
     const {grid,mg}=ricksBuildRender(ricksT);
@@ -145,7 +146,7 @@ if(phase==='ricks_build'){
     sub.textContent="A GOVERNMENT FORMS OVERNIGHT — SOME RICKS ARE MORE EQUAL THAN OTHERS";
     sub.style.color="#ffd700"; sub.style.textShadow="0 0 8px #8a6a00";
     ricksT++;
-    if(ricksT<22){ timer=setTimeout(loop,80); }
+    if(ricksT<52){ timer=setTimeout(loop,80); }
     else { phase='ricks_police'; ricksT=0; loop(); }
   }else if(phase==='ricks_police'){
     ricksPoliceStep(ricksT);
@@ -154,7 +155,7 @@ if(phase==='ricks_build'){
     sub.textContent="THE CITADEL BUILDS A POLICE STATE TO KEEP ITSELF IN LINE";
     sub.style.color="#3a7bff"; sub.style.textShadow="0 0 8px #0a1a6a";
     ricksT++;
-    if(ricksT<30){ timer=setTimeout(loop,80); }
+    if(ricksT<42){ timer=setTimeout(loop,80); }
     else { phase='ricks_assassinate'; ricksT=0; ricksAssassinX=2; ricksAssassinHit=false; loop(); }
   }else if(phase==='ricks_assassinate'){
     ricksAssassinateStep();
@@ -164,7 +165,8 @@ if(phase==='ricks_build'){
     sub.textContent = ricksAssassinHit ? "THE COUNCIL OF RICKS HAS BEEN ASSASSINATED" : "IN THE SHADOWS, ONE OF THEIR OWN MAKES A MOVE";
     sub.style.color="#ff2a2a"; sub.style.textShadow="0 0 8px #6a0a0a";
     ricksT++;
-    if(!(ricksAssassinHit && ricksT>16)){ timer=setTimeout(loop,70); }
+    if(ricksAssassinHit) ricksHitT++;
+    if(!(ricksAssassinHit && ricksHitT>37)){ timer=setTimeout(loop,70); }
     else { phase='ricks_riot'; ricksT=0; loop(); }
   }else if(phase==='ricks_riot'){
     ricksRiotStep(ricksT);
@@ -199,7 +201,7 @@ function __m68_start(){
 
 
 function __m68_reset(){
-  ricksStarted=false; ricksT=0; rickPop=[]; ricksPortalCols=[]; ricksCouncilIdx=-1; ricksCops=[]; ricksAssassinX=-2; ricksAssassinHit=false; ricksFires=[];
+  ricksStarted=false; ricksT=0; rickPop=[]; ricksPortalCols=[]; ricksCouncilIdx=-1; ricksCops=[]; ricksAssassinX=-2; ricksAssassinHit=false; ricksFires=[]; ricksPopDoneT=0; ricksHitT=0;
 }
 
 

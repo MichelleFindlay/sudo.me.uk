@@ -47,7 +47,7 @@ if(phase==='crash'){
     if(!crashStarted){ crashStarted=true; crashT=0; planeX=-18; planeY=1; crashHit=false; crashFire=0; document.body.style.background="#080a0e"; }
     stepRain();
     if(!crashHit){
-      planeX+=Math.max(2,Math.floor(COLS/20)); planeY+=Math.max(1,Math.floor(streetRow/16));
+      planeX+=Math.max(1,Math.floor(COLS/45)); planeY+=Math.max(1,Math.floor(streetRow/22));
       if(planeX>=cx || planeY>=streetRow-2){ crashHit=true; }
     } else { crashFire=Math.min(Math.floor(COLS*0.3), crashFire+Math.max(2,Math.floor(COLS/22))); }
     const {grid,mg}=crashRender(planeX,planeY,crashHit,crashFire);

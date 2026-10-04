@@ -1,4 +1,4 @@
-let jumStarted=false, jumT=0, jumPhase='board', vineH=[], beasts=[], jumGrowth=0;
+let jumStarted=false, jumT=0, jumPhase='board', vineH=[], beasts=[], jumGrowth=0, jumStampedeT=0;
 
 
 // ---- JUMANJI: the jungle bursts out of the board game and overruns the city ----
@@ -79,7 +79,7 @@ if(phase==='jumanji'){
       scene.innerHTML=paint(grid,mg,'city');
       sub.textContent="A GAME BOARD LIES IN THE STREET… THE DICE ARE ROLLED"; sub.style.color="#7ad04a"; sub.style.textShadow="0 0 8px #6a4a10";
       jumT++;
-      if(jumT<14){ timer=setTimeout(loop,90); }
+      if(jumT<35){ timer=setTimeout(loop,90); }
       else { jumPhase='jungle'; loop(); }
     }else if(jumPhase==='jungle'){
       jumStep(jumT);
@@ -89,7 +89,8 @@ if(phase==='jumanji'){
       sub.textContent= jumGrowth<0.6 ? "THE JUNGLE ESCAPES INTO THE CITY" : "A STAMPEDE TEARS THROUGH THE STREETS";
       sub.style.color="#7ad04a"; sub.style.textShadow="0 0 8px #6a4a10";
       jumT++;
-      if(!(jumGrowth>=1 && jumT>60)){ timer=setTimeout(loop,80); }
+      if(jumGrowth>=0.6) jumStampedeT++;
+      if(!(jumGrowth>=1 && jumStampedeT>27)){ timer=setTimeout(loop,80); }
       else { phase='jumanji_hold'; loop(); }
     }
   }else if(phase==='jumanji_hold'){
@@ -115,7 +116,7 @@ function __m31_start(){
 
 
 function __m31_reset(){
-  jumStarted=false; jumT=0; jumPhase='board'; vineH=[]; beasts=[]; jumGrowth=0;
+  jumStarted=false; jumT=0; jumPhase='board'; vineH=[]; beasts=[]; jumGrowth=0; jumStampedeT=0;
 }
 
 

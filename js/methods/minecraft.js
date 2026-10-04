@@ -1,4 +1,4 @@
-let mcStarted=false, mcT=0, mcDmg=0, mcCreeperX=-2, mcCreeperDir=1, mcCreeperArrived=false, mcSteveX=-2, mcSteveActive=false;
+let mcStarted=false, mcT=0, mcDmg=0, mcCreeperX=-2, mcCreeperDir=1, mcCreeperArrived=false, mcSteveX=-2, mcSteveActive=false, mcArrivedT=0;
 
 
 // ---- MINECRAFT: the whole city gets repainted in blocky, glowstone-and-cobblestone
@@ -104,10 +104,10 @@ if(phase==='mc_build'){
     const {grid,mg}=mcBuildRender();
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.remove('shake');
-    sub.textContent = mcT<10 ? "THE WORLD LOADS IN, BLOCK BY BLOCK" : "SOMEONE STACKED TNT IN THE TOWN SQUARE";
+    sub.textContent = mcT<23 ? "THE WORLD LOADS IN, BLOCK BY BLOCK" : "SOMEONE STACKED TNT IN THE TOWN SQUARE";
     sub.style.color="#7ed321"; sub.style.textShadow="0 0 8px #2a5a10";
     mcT++;
-    if(mcT<24){ timer=setTimeout(loop,90); }
+    if(mcT<48){ timer=setTimeout(loop,90); }
     else { phase='mc_creeper'; mcT=0; loop(); }
   }else if(phase==='mc_creeper'){
     if(!mcCreeperArrived){
@@ -120,11 +120,12 @@ if(phase==='mc_build'){
     sub.textContent = mcCreeperArrived ? "SSSSSSSSSSSS…" : "A CREEPER SSSSSNEAKS CLOSER";
     sub.style.color="#7ed321"; sub.style.textShadow="0 0 8px #2a5a10";
     mcT++;
-    if(!(mcCreeperArrived && mcT>12)){ timer=setTimeout(loop,80); }
+    if(mcCreeperArrived) mcArrivedT++;
+    if(!(mcCreeperArrived && mcArrivedT>17)){ timer=setTimeout(loop,80); }
     else { phase='mc_boom'; mcT=0; loop(); }
   }else if(phase==='mc_boom'){
     scene.style.textShadow="0 0 14px #ff6a00";
-    mcDmg=Math.min(mcMaxDmg(), mcDmg+Math.max(1,Math.floor(COLS/60)));
+    mcDmg=Math.min(mcMaxDmg(), mcDmg+Math.max(0.4,Math.floor(COLS/60)*0.4));
     mcSteveStep();
     const {grid,mg}=mcBoomRender(mcT);
     scene.innerHTML=paint(grid,mg,'city');
@@ -132,7 +133,7 @@ if(phase==='mc_build'){
     sub.textContent="THE CREEPER SETS OFF THE TNT — CHUNKS EVERYWHERE";
     sub.style.color="#ff9a3a"; sub.style.textShadow="0 0 8px #8a3a00";
     mcT++;
-    if(!(mcDmg>=mcMaxDmg() && mcT>16)){ timer=setTimeout(loop,70); }
+    if(!(mcDmg>=mcMaxDmg() && mcT>41)){ timer=setTimeout(loop,70); }
     else { phase='mc_hold'; loop(); }
   }else if(phase==='mc_hold'){
     stage.classList.remove('shake');
@@ -156,7 +157,7 @@ function __m69_start(){
 
 
 function __m69_reset(){
-  mcStarted=false; mcT=0; mcDmg=0; mcCreeperX=-2; mcCreeperDir=1; mcCreeperArrived=false; mcSteveX=-2; mcSteveActive=false;
+  mcStarted=false; mcT=0; mcDmg=0; mcCreeperX=-2; mcCreeperDir=1; mcCreeperArrived=false; mcSteveX=-2; mcSteveActive=false; mcArrivedT=0;
 }
 
 

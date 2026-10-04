@@ -1,4 +1,4 @@
-let neilStarted=false, neilT=0, neilX=0;
+let neilStarted=false, neilT=0, neilX=0, neilDisplayBashing=false, neilMsgT=0;
 
 
 // ---- NEIL THE SEAL: he waddles up to each building, bashes it flat, then moves to the next ----
@@ -77,8 +77,13 @@ if(phase==='neil'){
     const {grid,mg}=neilRender(neilX, arrived, bashing);
     scene.innerHTML=paint(grid,mg,'city');
     if(bashing) stage.classList.add('shake'); else stage.classList.remove('shake');
+    // the underlying bashing/waddling state can flip every few frames as buildings get
+    // chipped away column by column — only let the CAPTION switch once it's had a minimum
+    // readable stretch, so it doesn't flicker between the two messages mid-sentence
+    neilMsgT++;
+    if(bashing!==neilDisplayBashing && neilMsgT>35){ neilDisplayBashing=bashing; neilMsgT=0; }
     sub.textContent= arrived ? "…AND THEN HE FOUND A CONE."
-                    : (bashing ? "NEIL HEADBUTTS THE BUILDING — IT DOESN'T STAND A CHANCE" : "NEIL WADDLES ON, LOOKING FOR SOMETHING TO BASH");
+                    : (neilDisplayBashing ? "NEIL HEADBUTTS THE BUILDING — IT DOESN'T STAND A CHANCE" : "NEIL WADDLES ON, LOOKING FOR SOMETHING TO BASH");
     sub.style.color="#c8ccd0"; sub.style.textShadow="0 0 8px #4a4e54";
     neilT++;
     if(!(arrived && neilT>30)){ timer=setTimeout(loop,80); }
@@ -105,7 +110,7 @@ function __m39_start(){
 
 
 function __m39_reset(){
-  neilStarted=false; neilT=0; neilX=0;
+  neilStarted=false; neilT=0; neilX=0; neilDisplayBashing=false; neilMsgT=0;
 }
 
 

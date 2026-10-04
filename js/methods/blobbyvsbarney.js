@@ -92,19 +92,19 @@ function __m75_loop(){
     const {grid,mg}=cvbRenderBase();
     if(!cvbInterchangeDown) cvbPlace(grid,mg,cvbInterchangeArt,interchangeX-5,streetRow-cvbInterchangeArt.length,'interchange');
     else cvbPlace(grid,mg,cvbInterchangeFlatArt,interchangeX-5,streetRow,'interchange');
-    if(cvbT<20){
+    if(cvbT<26){
       cvbBarneyX=Math.round(-10+(interchangeX-(-10))*Math.min(1,cvbT/18));
       sub.textContent="AT SUNSET, BARNEY BOUNCES INTO THE CITY";
     } else {
       cvbBarneyX=interchangeX;
-      if(cvbT>28) cvbInterchangeDown=true;
+      if(cvbT>34) cvbInterchangeDown=true;
       sub.textContent="HE SITS ON A MOTORWAY INTERCHANGE, SQUASHING IT FLAT";
     }
     cvbDrawChar(cvbBarneyArt,grid,mg,cvbBarneyX,cvbBaseRow,cvbScale,'barney');
     scene.innerHTML=paint(grid,mg,'city');
     sub.style.color="#ff9ad0"; sub.style.textShadow="0 0 8px #a0308a";
     cvbT++;
-    if(!(cvbInterchangeDown && cvbT>40)){ timer=setTimeout(loop,90); }
+    if(!(cvbInterchangeDown && cvbT>60)){ timer=setTimeout(loop,90); }
     else { phase='cvb_charge'; cvbT=0; cvbBlobbyX=COLS+10; loop(); }
   }else if(phase==='cvb_charge'){
     const {grid,mg}=cvbRenderBase();
@@ -127,20 +127,20 @@ function __m75_loop(){
   }else if(phase==='cvb_escalate'){
     const {grid,mg}=cvbRenderBase();
     cvbPlace(grid,mg,cvbInterchangeFlatArt,interchangeX-5,streetRow,'interchange');
-    if(cvbT<25){
+    if(cvbT<36){
       if(!cvbTowerSquished) cvbPlace(grid,mg,cvbTowerArt,towerX-2,streetRow-cvbTowerArt.length,'towerclash');
       else cvbPlace(grid,mg,cvbTowerOvalArt,towerX-5,streetRow-cvbTowerOvalArt.length,'towerclash');
-      if(cvbT>14) cvbTowerSquished=true;
+      if(cvbT>20) cvbTowerSquished=true;
       stage.classList.add('shake');
       sub.textContent="BUILDINGS WOBBLE. A ROUND TOWER GETS SQUEEZED OVAL.";
-    } else if(cvbT<50){
+    } else if(cvbT<61){
       if(cvbTowerSquished) cvbPlace(grid,mg,cvbTowerOvalArt,towerX-5,streetRow-cvbTowerOvalArt.length,'towerclash');
       if(!cvbStadiumSat) cvbPlace(grid,mg,cvbStadiumArt,stadiumX-6,streetRow-cvbStadiumArt.length,'stadiumclash');
-      if(cvbT>42) cvbStadiumSat=true;
+      if(cvbT>53) cvbStadiumSat=true;
       sub.textContent="A STADIUM GETS SAT ON";
     } else {
       if(cvbTowerSquished) cvbPlace(grid,mg,cvbTowerOvalArt,towerX-5,streetRow-cvbTowerOvalArt.length,'towerclash');
-      cvbBlanketTop=Math.max(0, streetRow-2-(cvbT-50)*3);
+      cvbBlanketTop=Math.max(0, streetRow-2-(cvbT-61)*3);
       cvbBlanketOverlay(grid,mg,cvbBlanketTop);
       sub.textContent="A GIANT BLANKET FALLS OVER THE WHOLE CITY";
     }
@@ -149,7 +149,7 @@ function __m75_loop(){
     scene.innerHTML=paint(grid,mg,'city');
     sub.style.color="#ff9ad0"; sub.style.textShadow="0 0 8px #a0308a";
     cvbT++;
-    if(cvbT<80){ timer=setTimeout(loop,85); }
+    if(cvbT<91){ timer=setTimeout(loop,85); }
     else { phase='cvb_calm'; cvbT=0; stage.classList.remove('shake'); loop(); }
   }else if(phase==='cvb_calm'){
     const {grid,mg}=cvbRenderBase();
@@ -158,10 +158,10 @@ function __m75_loop(){
     const shelterX=cx+Math.floor(COLS*0.35);
     cvbPlace(grid,mg,cvbShelterArt,shelterX-4,streetRow-cvbShelterArt.length,'busshelter');
     cvbPlace(grid,mg,rubberPersonSprite,shelterX-1,streetRow-cvbShelterArt.length-rubberPersonSprite.length,'body');
-    if(cvbT<22){
+    if(cvbT<49){
       mtDrawBubble(grid,mg,shelterX,streetRow-cvbShelterArt.length-rubberPersonSprite.length,"GENTLE HUG?");
       sub.textContent="A TINY SCIENTIST ON A BUS SHELTER MIMES A \"GENTLE HUG\" THROUGH A MEGAPHONE";
-    } else if(cvbT<45){
+    } else if(cvbT<72){
       sub.textContent="THE TITANS CALM DOWN";
     } else {
       cvbHighFived=true;
@@ -173,7 +173,7 @@ function __m75_loop(){
     scene.innerHTML=paint(grid,mg,'city');
     sub.style.color="#ff9ad0"; sub.style.textShadow="0 0 8px #a0308a";
     cvbT++;
-    if(!(cvbHighFived && cvbScale<=1 && cvbT>60)){ timer=setTimeout(loop,90); }
+    if(!(cvbHighFived && cvbScale<=1 && cvbT>89)){ timer=setTimeout(loop,90); }
     else { phase='cvb_hold'; cvbT=0; cityGridArr=buildCity(); loop(); }
   }else if(phase==='cvb_hold'){
     const {grid,mg}=cvbRenderBase();

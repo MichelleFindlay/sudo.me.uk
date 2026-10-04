@@ -85,7 +85,7 @@ if(phase==='simpsons'){
     const seated=dropOffset<=0;
     if(!seated){ dropOffset=Math.max(0, dropOffset-Math.max(1,Math.floor(ROWS/16))); }
     else { heliFly++; }
-    const sealed=seated && heliFly>14;
+    const sealed=seated && heliFly>33;
     const {grid,mg}=simpsonsRender(domeR, dropOffset, heliFly, sealed);
     scene.innerHTML=paint(grid,mg,'city');
     if(!seated) stage.classList.add('shake'); else stage.classList.remove('shake');
@@ -93,7 +93,7 @@ if(phase==='simpsons'){
                     : (!sealed ? "THE DOME IS SEATED — CHOPPERS PEEL AWAY" : "SPRINGFIELDIFIED — EVERYTHING IS YELLOW NOW");
     sub.style.color="#ffd90f"; sub.style.textShadow="0 0 8px #c89a00";
     simpT++;
-    if(!(seated && heliFly>34)){ timer=setTimeout(loop,70); }
+    if(!(seated && heliFly>70)){ timer=setTimeout(loop,70); }
     else { phase='simpsons_hold'; loop(); }
   }else if(phase==='simpsons_hold'){
     stage.classList.remove('shake');

@@ -51,7 +51,7 @@ if(phase==='iss'){
     if(!issStarted){ issStarted=true; issT=0; issX=-20; issY=0; issHit=false; issBoom=0; document.body.style.background="#03060c"; }
     stepRain();
     if(!issHit){
-      issX+=Math.max(2,Math.floor(COLS/22)); issY+=Math.max(1,Math.floor(streetRow/18));
+      issX+=Math.max(1,Math.floor(COLS/48)); issY+=Math.max(1,Math.floor(streetRow/24));
       if(issX>=cx || issY>=streetRow-3){ issHit=true; }
     } else { issBoom=Math.min(Math.floor(COLS*0.32), issBoom+Math.max(2,Math.floor(COLS/22))); }
     const {grid,mg}=issRender(issX,issY,issHit,issBoom);

@@ -1,4 +1,4 @@
-let monkeysStarted=false, monkeysT=0, zooAnimals=[], petersX=0, virusR=0, spreadR=0, coleX=0, youngColeX=0, coleShotFlag=false;
+let monkeysStarted=false, monkeysT=0, zooAnimals=[], petersX=0, virusR=0, spreadR=0, coleX=0, youngColeX=0, coleShotFlag=false, monkeysShotT=0;
 
 
 // ---- 12 MONKEYS: the zoo stunt is a red herring, Dr. Peters spreads the real virus, the city empties, animals reclaim it, and the loop closes at the airport ----
@@ -105,7 +105,7 @@ if(phase==='monkeys'){
     if(monkeysT<40){ timer=setTimeout(loop,90); }
     else { phase='monkeys_release'; monkeysT=0; petersX=-4; virusR=0; loop(); }
   }else if(phase==='monkeys_release'){
-    petersX=Math.min(cx, petersX+Math.max(1,Math.floor(COLS/70)));
+    petersX=Math.min(cx, petersX+0.7);
     if(petersX>=cx*0.3) virusR=Math.min(6, virusR+0.3);
     const {grid,mg}=monkeysReleaseRender(petersX, Math.round(virusR));
     scene.innerHTML=paint(grid,mg,'city');
@@ -117,7 +117,7 @@ if(phase==='monkeys'){
   }else if(phase==='monkeys_spread'){
     stage.classList.add('shake');
     const maxR=Math.hypot(cx,streetRow*2)+6;
-    spreadR=Math.min(maxR, spreadR+Math.max(1,COLS/50));
+    spreadR=Math.min(maxR, spreadR+Math.max(0.5,COLS/90));
     const {grid,mg}=monkeysSpreadRender(spreadR);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="THE VIRUS SPREADS — CITY AFTER CITY FALLS SILENT";
@@ -138,14 +138,15 @@ if(phase==='monkeys'){
     if(monkeysT<50){ timer=setTimeout(loop,90); }
     else { phase='monkeys_loop'; monkeysT=0; coleX=cx-16; youngColeX=cx+14; coleShotFlag=false; loop(); }
   }else if(phase==='monkeys_loop'){
-    coleX=Math.min(cx, coleX+Math.max(1,Math.floor(COLS/60)));
+    coleX=Math.min(cx, coleX+0.55);
     const {grid,mg}=monkeysLoopRender(coleX, youngColeX, coleShotFlag);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent = coleShotFlag ? "HE WATCHED HIMSELF DIE, AND HE WAS ALREADY THERE." : "COLE RACES THROUGH THE AIRPORT TO STOP IT";
     sub.style.color="#c0c0c0"; sub.style.textShadow="0 0 8px #4a4e54";
     monkeysT++;
     if(!coleShotFlag && coleX>=cx){ coleShotFlag=true; stage.classList.add('shake'); }
-    if(!(coleShotFlag && monkeysT>26)){ timer=setTimeout(loop,80); }
+    if(coleShotFlag) monkeysShotT++;
+    if(!(coleShotFlag && monkeysShotT>34)){ timer=setTimeout(loop,80); }
     else { phase='monkeys_hold'; loop(); }
   }else if(phase==='monkeys_hold'){
     stage.classList.remove('shake');
@@ -169,7 +170,7 @@ function __m50_start(){
 
 
 function __m50_reset(){
-  monkeysStarted=false; monkeysT=0; zooAnimals=[]; petersX=0; virusR=0; spreadR=0; coleX=0; youngColeX=0; coleShotFlag=false;
+  monkeysStarted=false; monkeysT=0; zooAnimals=[]; petersX=0; virusR=0; spreadR=0; coleX=0; youngColeX=0; coleShotFlag=false; monkeysShotT=0;
 }
 
 

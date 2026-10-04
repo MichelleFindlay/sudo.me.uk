@@ -97,7 +97,7 @@ if(phase==='nautiloid'){
       // STEEP, FAST plunge along a straight line to the exact crash point
       if(nautDiveSteps===0){ nautDiveSteps = 1; nautStartX = nautX; nautStartY = nautY; }
       nautDiveT = (nautDiveT||0) + 1;
-      const totalDive = Math.max(6, Math.floor(ROWS*0.5));
+      const totalDive = Math.max(64, Math.floor(ROWS*1.6));
       const f = Math.min(1, nautDiveT/totalDive);
       const fe = f*f;                                     // ease-in = accelerating dive
       nautX = Math.round(nautStartX + (endX - nautStartX)*fe);
@@ -123,7 +123,7 @@ if(phase==='nautiloid'){
       scene.innerHTML=paint(grid,mg,'city');
       stage.classList.add('shake');
       sub.textContent="THE CITY IS BLOWN APART BY THE CRASH"; sub.style.color="#c090ff"; sub.style.textShadow="0 0 10px #40e0c0";
-      nautImpactR+=Math.max(3,Math.floor(COLS/16));
+      nautImpactR+=Math.max(1,Math.floor(COLS/65));
       if(nautImpactR < Math.floor(COLS*0.6)){ timer=setTimeout(loop,55); }
       else { nautPhase='crashed'; nautT=0; loop(); }
     }else if(nautPhase==='crashed'){

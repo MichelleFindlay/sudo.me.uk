@@ -58,7 +58,7 @@ function cbStep(t){
     for(const bag of cbBags){ if(bag.eaten) continue; const d=Math.abs(bag.x-cbBearX); if(d<bestD){ bestD=d; target=bag; } }
     if(target){
       const diff=target.x-cbBearX;
-      cbBearX += Math.sign(diff)*Math.min(Math.abs(diff), Math.max(1, COLS/70));
+      cbBearX += Math.sign(diff)*Math.min(Math.abs(diff), Math.max(0.6, COLS/130));
       if(Math.abs(target.x-cbBearX)<3){ target.eaten=true; cbHigh=true; cbSubPhase='rampage'; cbBearDir=Math.random()<0.5?-1:1; }
     } else { cbHigh=true; cbSubPhase='rampage'; }
   } else if(cbSubPhase==='rampage'){

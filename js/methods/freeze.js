@@ -66,7 +66,7 @@ if(phase==='freeze'){
     if(!frzStarted){ frzStarted=true; frzT=0; frzLevel=0; freezeInit(); document.body.style.background="#060c14"; }
     freezeStep();
     spTrainX+=Math.max(1,Math.floor(COLS/44));   // the Snowpiercer circles
-    frzLevel=Math.min(1, frzLevel+0.02);
+    frzLevel=Math.min(1, frzLevel+0.0147);
     const {grid,mg}=freezeRender(frzT, frzLevel);
     scene.innerHTML=paint(grid,mg,'city');
     // background pales as the deep freeze sets in

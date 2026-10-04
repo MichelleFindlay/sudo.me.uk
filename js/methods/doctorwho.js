@@ -32,7 +32,7 @@ function doctorwhoZap(col){
     cityGridArr[r]=ln.join("");
   }
 }
-const DW_TARDIS_MATERIALIZE_FRAMES=20;
+const DW_TARDIS_MATERIALIZE_FRAMES=43;
 // steps the fight one frame; returns true once every baddie has been dealt with.
 // the baddies swarm freely at first — no one is fighting back yet — until the
 // TARDIS finishes materializing; only then does the sonic screwdriver's sweep

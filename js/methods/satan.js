@@ -96,7 +96,7 @@ if(phase==='satan'){
     stage.classList.add('shake');
     if(satanPhase==='rift'){
       // the ground tears open in the middle of the city, widening
-      riftW=Math.min(Math.floor(COLS*0.16), riftW+Math.max(1,Math.floor(COLS/40)));
+      riftW=Math.min(Math.floor(COLS*0.16), riftW+Math.max(0.5,Math.floor(COLS/40)*0.3));
       const {grid,mg}=satanRender(satanT, 'rift', riftW, 0);
       scene.innerHTML=paint(grid,mg,'city');
       sub.textContent="THE GROUND SPLITS — HELL YAWNS OPEN"; sub.style.color="#ff4020"; sub.style.textShadow="0 0 8px #800000";

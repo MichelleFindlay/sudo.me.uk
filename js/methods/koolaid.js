@@ -50,7 +50,7 @@ if(phase==='koolaid'){
     scene.style.textShadow="0 0 8px #ff2a40";
     if(!koolStarted){ koolStarted=true; koolT=0; koolX=-10; document.body.style.background="#0c0405"; }
     const stopAt=cx;                                        // he only bursts through half the city
-    koolX=Math.min(stopAt, koolX+Math.max(1,Math.floor(COLS/45)));
+    koolX=Math.min(stopAt, koolX+Math.max(1,Math.floor(COLS/60)));
     const arrived=koolX>=stopAt;
     const ohYeah=(koolT%10)<4;
     const {grid,mg}=koolaidRender(koolX, ohYeah);
@@ -69,7 +69,7 @@ if(phase==='koolaid'){
     sub.textContent="…AND THEN HE JUST KIND OF FELL APART.";
     sub.style.color="#ff2a40"; sub.style.textShadow="0 0 8px #a00010";
     koolT++;
-    if(koolT<24){ timer=setTimeout(loop,60); }
+    if(koolT<37){ timer=setTimeout(loop,60); }
     else { phase='koolaid_hold'; loop(); }
   }else if(phase==='koolaid_hold'){
     stage.classList.remove('shake');

@@ -65,7 +65,7 @@ if(phase==='volcano'){
       document.body.style.background="#160604"; }
     stepRain();
     // PHASE 1: the mountain rises out of the ground; PHASE 2: it erupts & floods
-    if(volRise<1){ volRise=Math.min(1, volRise+0.06); }
+    if(volRise<1){ volRise=Math.min(1, volRise+0.0385); }
     const risen = volRise>=1;
     if(risen){
       for(const b of volBombs){ b.x+=b.vx; b.y+=b.vy; b.vy+=b.g; if(b.y>=streetRow || b.x<0){ b.x=Math.floor(COLS*0.78); b.y=Math.floor(streetRow*0.3); b.vx=(Math.random()*-3-0.5); b.vy=-(1+Math.random()*2); } }

@@ -125,7 +125,7 @@ if(phase==='fart'){
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="*COUGH* — THEY LOWER THE MIC"; sub.style.color="#a0d040"; sub.style.textShadow="0 0 8px #5a7a1a";
     fartT++;
-    if(fartT<16){ timer=setTimeout(loop,90); }
+    if(fartT<19){ timer=setTimeout(loop,90); }
     else { phase='fart_turn'; fartT=0; loop(); }
   }else if(phase==='fart_turn'){
     scene.style.textShadow="0 0 10px #a0d040";
@@ -141,7 +141,7 @@ if(phase==='fart'){
   }else if(phase==='fart_blast'){
     scene.style.textShadow="0 0 12px #c8f050";
     stage.classList.add('shake');
-    fartWaveR+=Math.max(1, COLS/50);
+    fartWaveR+=Math.max(0.5, COLS/75);
     const {grid,mg}=fartWaveRender(fartPersonX, fartWaveR);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="A SOUND WAVE ROLLS OUT ACROSS THE CITY"; sub.style.color="#c8f050"; sub.style.textShadow="0 0 10px #5a7a1a";

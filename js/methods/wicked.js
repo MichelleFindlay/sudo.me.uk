@@ -6,6 +6,15 @@ let wickedStarted=false, wickedT=0, wickedFront=0, wickedWitch=null, wickedMonke
 const witchSprite=[" /\\","(O)","=#>~~~"];
 const flyingMonkeySprite=["^-^","(o)","/|\\"];
 const glindaBubbleSprite=[" .--. ","( o  )"," '--' "];
+// a fixed 16-frame window shortchanges the longer captions — size each to its own length
+const wickedChaseLines=["THE WITCH TAKES TO THE SKIES","THE FLYING MONKEYS GIVE CHASE","SHE WON'T GET AWAY THAT EASILY","GLINDA WATCHES FROM HER BUBBLE, UNBOTHERED"];
+const wickedChaseFrames=wickedChaseLines.map(t=>Math.max(16,Math.ceil(t.length/17*1000/60)));
+const wickedChaseTotal=wickedChaseFrames.reduce((a,b)=>a+b,0);
+function wickedCurrentChaseLine(t){
+  let m=t%wickedChaseTotal, idx=0;
+  while(m>=wickedChaseFrames[idx]){ m-=wickedChaseFrames[idx]; idx++; }
+  return wickedChaseLines[idx];
+}
 function wickedEmeraldRender(front){
   if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }
   const grid=cityGridArr.slice();
@@ -99,10 +108,10 @@ if(phase==='wicked'){
     const {grid,mg}=wickedChaseRender();
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.add('shake');
-    sub.textContent=["THE WITCH TAKES TO THE SKIES","THE FLYING MONKEYS GIVE CHASE","SHE WON'T GET AWAY THAT EASILY","GLINDA WATCHES FROM HER BUBBLE, UNBOTHERED"][Math.floor(wickedT/16)%4];
+    sub.textContent=wickedCurrentChaseLine(wickedT);
     sub.style.color="#1fae5a"; sub.style.textShadow="0 0 8px #0a5a2a";
     wickedT++;
-    if(!(wickedDmg>=COLS*0.55 && wickedT>40)){ timer=setTimeout(loop,60); }
+    if(!(wickedDmg>=COLS*0.55 && wickedT>wickedChaseTotal)){ timer=setTimeout(loop,60); }
     else { phase='wicked_melt'; wickedMeltT=0; loop(); }
   }else if(phase==='wicked_melt'){
     stage.classList.remove('shake');
@@ -110,7 +119,7 @@ if(phase==='wicked'){
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="I'M MELTING!"; sub.style.color="#7ad020"; sub.style.textShadow="0 0 10px #1fae5a";
     wickedMeltT++;
-    if(wickedMeltT<12){ timer=setTimeout(loop,90); }
+    if(wickedMeltT<15){ timer=setTimeout(loop,90); }
     else { phase='wicked_hold'; loop(); }
   }else if(phase==='wicked_hold'){
     stage.classList.remove('shake');

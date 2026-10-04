@@ -1,4 +1,4 @@
-let etStarted=false, etT=0, etFoamLevel=0, etStreamH=0;
+let etStarted=false, etT=0, etFoamLevel=0, etStreamH=0, etFullT=0;
 
 
 // ---- ELEPHANT'S TOOTHPASTE: a science-fair demo in the town square gets way out of
@@ -71,22 +71,24 @@ if(phase==='et_build'){
     const {grid,mg}=etRender(etT,false);
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.remove('shake');
-    sub.textContent = etT<10 ? "AN ELEPHANT'S TOOTHPASTE EXPERIMENT SITS IN THE TOWN SQUARE" : "SOMEONE ADDED WAY TOO MUCH CATALYST";
+    sub.textContent = etT<39 ? "AN ELEPHANT'S TOOTHPASTE EXPERIMENT SITS IN THE TOWN SQUARE" : "SOMEONE ADDED WAY TOO MUCH CATALYST";
     sub.style.color="#ff2fb0"; sub.style.textShadow="0 0 8px #7a0a4a";
     etT++;
-    if(etT<22){ timer=setTimeout(loop,90); }
-    else { phase='et_erupt'; etT=0; etFoamLevel=0; etStreamH=0; loop(); }
+    if(etT<62){ timer=setTimeout(loop,90); }
+    else { phase='et_erupt'; etT=0; etFoamLevel=0; etStreamH=0; etFullT=0; loop(); }
   }else if(phase==='et_erupt'){
     scene.style.textShadow="0 0 14px #ff2fb0";
     etStreamH=Math.min(12, etStreamH+1);
-    etFoamLevel=Math.min(etFoamCap(), etFoamLevel+Math.max(1,Math.floor(streetRow/40)));
+    etFoamLevel=Math.min(etFoamCap(), etFoamLevel+Math.max(0.4,Math.floor(streetRow/40)*0.4));
     const {grid,mg}=etRender(etT,true);
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.toggle('shake', etFoamLevel>2);
-    sub.textContent = etFoamLevel<etFoamCap() ? "THE FOAM WON'T STOP COMING" : "IT FILLS THE FIRST FIVE FLOORS OF EVERY BUILDING";
+    const etFull=etFoamLevel>=etFoamCap();
+    if(etFull) etFullT++;
+    sub.textContent = !etFull ? "THE FOAM WON'T STOP COMING" : "IT FILLS THE FIRST FIVE FLOORS OF EVERY BUILDING";
     sub.style.color="#ff2fb0"; sub.style.textShadow="0 0 8px #7a0a4a";
     etT++;
-    if(!(etFoamLevel>=etFoamCap() && etT>35)){ timer=setTimeout(loop,80); }
+    if(!(etFull && etFullT>36)){ timer=setTimeout(loop,80); }
     else { phase='et_hold'; loop(); }
   }else if(phase==='et_hold'){
     stage.classList.remove('shake');
@@ -110,7 +112,7 @@ function __m70_start(){
 
 
 function __m70_reset(){
-  etStarted=false; etT=0; etFoamLevel=0; etStreamH=0;
+  etStarted=false; etT=0; etFoamLevel=0; etStreamH=0; etFullT=0;
 }
 
 

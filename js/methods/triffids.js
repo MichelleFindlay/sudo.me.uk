@@ -47,7 +47,7 @@ if(phase==='triffid'){
     scene.style.textShadow="0 0 8px #3a8a3a";
     if(!triffStarted){ triffStarted=true; triffT=0; triffidInit(); document.body.style.background="#04100a"; }
     triffidStep();
-    const cometFlash = triffT<20 ? (20-triffT) : 0;
+    const cometFlash = triffT<28 ? (28-triffT) : 0;
     const {grid,mg}=triffidRender(triffT, cometFlash);
     scene.innerHTML=paint(grid,mg,'city');
     if(triffStalks.some(s=>s.lash>0)) stage.classList.add('shake'); else stage.classList.remove('shake');

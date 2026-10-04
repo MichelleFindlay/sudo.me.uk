@@ -44,15 +44,15 @@ if(phase==='ion'){
     const {grid,mg}=ionRender(ionT,'target',ionTx,0,0);
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.remove('shake');
-    sub.textContent= ionT<10 ? "TARGET ACQUIRED" : "ION CANNON — FIRING";
+    sub.textContent= ionT<17 ? "TARGET ACQUIRED" : "ION CANNON — FIRING";
     sub.style.color="#7ad4ff"; sub.style.textShadow="0 0 8px #2a5a8a";
     ionT++;
-    if(ionT<18){ timer=setTimeout(loop,80); }
+    if(ionT<34){ timer=setTimeout(loop,80); }
     else { phase='ion_beam'; ionT=0; loop(); }
   }else if(phase==='ion_beam'){
     stage.classList.add('shake');
     ionT++;
-    const beamY=Math.min(streetRow, ionT*Math.max(2,Math.floor(streetRow/6)));
+    const beamY=Math.min(streetRow, ionT*Math.max(1,Math.floor(streetRow/32)));
     const {grid,mg}=ionRender(ionT,'beam',ionTx,beamY,0);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="IMPACT IMMINENT";
@@ -61,7 +61,7 @@ if(phase==='ion'){
     else { phase='ion_blast'; ionT=0; ionBlastR=0; loop(); }
   }else if(phase==='ion_blast'){
     stage.classList.add('shake');
-    ionBlastR=Math.min(16, ionBlastR+1.3);
+    ionBlastR=Math.min(16, ionBlastR+0.73);
     const {grid,mg}=ionRender(ionT,'blast',ionTx,streetRow,ionBlastR);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="DIRECT HIT";

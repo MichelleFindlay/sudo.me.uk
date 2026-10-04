@@ -105,14 +105,14 @@ function __m67_loop(){
 if(phase==='sportsdirect'){
     scene.style.textShadow="0 0 10px #6a3a18";
     if(!sdStarted){ sdStarted=true; sdT=0; sdWaveX=-Math.floor(COLS*0.15); document.body.style.background="#160a04"; }
-    if(sdT<23){
+    if(sdT<37){
       const {grid,mg}=sportsdirectRender(sdT);
       scene.innerHTML=paint(grid,mg,'city');
-      sub.textContent = sdT<5 ? "A SPORTS DIRECT MUG WOBBLES…" : "…AND TIPS RIGHT OVER";
+      sub.textContent = sdT<19 ? "A SPORTS DIRECT MUG WOBBLES…" : "…AND TIPS RIGHT OVER";
       sub.style.color="#c89050"; sub.style.textShadow="0 0 8px #6a3a18";
       sdT++;
       timer=setTimeout(loop,90);
-    } else if(sdT<31){                                // hold on the fully-fallen mug before it floods
+    } else if(sdT<52){                                // hold on the fully-fallen mug before it floods
       const {grid,mg}=sportsdirectRender(sdT);
       scene.innerHTML=paint(grid,mg,'city');
       sub.textContent="COFFEE EVERYWHERE"; sub.style.color="#c89050"; sub.style.textShadow="0 0 8px #6a3a18";
