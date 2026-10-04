@@ -99,7 +99,7 @@ if(phase==='mortal'){
     sub.textContent="THE RUBBLE RISES AS A TRACTION CITY";
     sub.style.color="#d0a020"; sub.style.textShadow="0 0 8px #8a6a20";
     mortalT++;
-    if(mortalT<16){ timer=setTimeout(loop,80); }
+    if(mortalT<26){ timer=setTimeout(loop,80); }
     else { phase='mortal_drive'; mortalT=0; loop(); }
   }else if(phase==='mortal_drive'){
     stage.classList.add('shake');

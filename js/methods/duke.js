@@ -22,6 +22,15 @@ const dukeLines=[
   "YOUR FACE, YOUR ASS — WHAT'S THE DIFFERENCE?",
   "LET GOD SORT 'EM OUT!",
 ];
+// a fixed per-line window (like the original 16-frame cycle) shortchanges the longer
+// one-liners — size each line's dwell time to its own length instead
+const dukeLineFrames=dukeLines.map(t=>Math.max(16,Math.ceil(t.length/17*1000/70)));
+const dukeLineTotal=dukeLineFrames.reduce((a,b)=>a+b,0);
+function dukeCurrentLine(t){
+  let m=t%dukeLineTotal, idx=0;
+  while(m>=dukeLineFrames[idx]){ m-=dukeLineFrames[idx]; idx++; }
+  return dukeLines[idx];
+}
 // centered multi-line text splash (logo cards, title screen, level-start banner)
 function dukeTextRender(lines, mode){
   const grid=blankGrid(ROWS);
@@ -160,10 +169,10 @@ if(phase==='duke'){
       stage.classList.add('shake');
       sub.textContent="TAKING FIRE!"; sub.style.color="#ff3030"; sub.style.textShadow="0 0 8px #ff3000";
       dukeT++;
-      if(dukeT<10){ timer=setTimeout(loop,80); }
+      if(dukeT<17){ timer=setTimeout(loop,80); }
       else { dukeSubPhase='crash'; dukeT=0; dukeShipStartX=dukeShipX; dukeShipStartY=dukeShipY; dukeShipTargetX=dukeShipX; dukeShipTargetY=streetRow-1; loop(); }
     }else if(dukeSubPhase==='crash'){
-      const CRASH_FRAMES=16;
+      const CRASH_FRAMES=22;
       const f=Math.min(1, dukeT/CRASH_FRAMES);
       dukeShipX=dukeShipStartX+(dukeShipTargetX-dukeShipStartX)*f;
       dukeShipY=dukeShipStartY+(dukeShipTargetY-dukeShipStartY)*f;
@@ -175,12 +184,12 @@ if(phase==='duke'){
       else { dukeSubPhase='impact'; dukeT=0; dukeCrashR=0; loop(); }
     }else if(dukeSubPhase==='impact'){
       stage.classList.add('shake');
-      dukeCrashR=Math.min(9, dukeCrashR+1.3);
+      dukeCrashR=Math.min(9, dukeCrashR+0.42);
       const {grid,mg}=dukeCrashBlastRender(Math.round(dukeShipTargetX), Math.round(dukeShipTargetY), dukeCrashR);
       scene.innerHTML=paint(grid,mg,'city');
       sub.textContent="CRASH LANDING"; sub.style.color="#ff3030"; sub.style.textShadow="0 0 10px #ff3000";
       dukeT++;
-      if(dukeCrashR<9 && dukeT<12){ timer=setTimeout(loop,60); }
+      if(dukeCrashR<9 && dukeT<22){ timer=setTimeout(loop,60); }
       else { dukeSubPhase='levelstart'; dukeT=0; loop(); }
     }else if(dukeSubPhase==='levelstart'){
       stage.classList.remove('shake');
@@ -191,7 +200,7 @@ if(phase==='duke'){
       if(dukeT<20){ timer=setTimeout(loop,110); }
       else { dukeSubPhase='arrive'; dukeT=0; dukeX=dukeShipTargetX-10; document.body.style.background="#0a0a0a"; loop(); }
     }else if(dukeSubPhase==='arrive'){
-      dukeX=Math.min(cx-Math.floor(COLS*0.35), dukeX+Math.max(1,Math.floor(COLS/60)));
+      dukeX=Math.min(cx-Math.floor(COLS*0.35), dukeX+Math.max(1,Math.floor(COLS/75)));
       dukeStep(dukeX);
       const {grid,mg}=dukeRender(dukeT, dukeX);
       scene.innerHTML=paint(grid,mg,'city');
@@ -200,12 +209,12 @@ if(phase==='duke'){
       if(dukeX < cx-Math.floor(COLS*0.35)){ timer=setTimeout(loop,80); }
       else { dukeSubPhase='blast'; dukeT=0; loop(); }
     }else if(dukeSubPhase==='blast'){
-      dukeX=Math.min(COLS+4, dukeX+Math.max(1,Math.floor(COLS/70)));
+      dukeX=Math.min(COLS+4, dukeX+Math.max(1,Math.floor(COLS/95)));
       dukeStep(dukeX);
       const {grid,mg}=dukeRender(dukeT, dukeX);
       scene.innerHTML=paint(grid,mg,'city');
       if(dukeBursts.length>0) stage.classList.add('shake'); else stage.classList.remove('shake');
-      sub.textContent=dukeLines[Math.floor(dukeT/16)%dukeLines.length]; sub.style.color="#ff8000"; sub.style.textShadow="0 0 8px #ff3000";
+      sub.textContent=dukeCurrentLine(dukeT); sub.style.color="#ff8000"; sub.style.textShadow="0 0 8px #ff3000";
       dukeT++;
       if(dukeX < COLS+4){ timer=setTimeout(loop,70); }
       else { dukeSubPhase='final'; dukeT=0; dukeBlastR=0; loop(); }

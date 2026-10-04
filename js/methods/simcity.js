@@ -62,7 +62,7 @@ if(phase==='simcity'){
       stage.classList.remove('shake');
       sub.textContent="AN EMPTY FIELD…"; sub.style.color="#7aca5a"; sub.style.textShadow="0 0 8px #2a5a1a";
       simT++;
-      if(simT<14){ timer=setTimeout(loop,90); }
+      if(simT<15){ timer=setTimeout(loop,90); }
       else { simSubPhase='grow'; loop(); }
     }else if(simSubPhase==='grow'){
       const done = simGrowCols.every(h=>h>=streetRow);

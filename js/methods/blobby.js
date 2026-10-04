@@ -112,10 +112,10 @@ function __m72_loop(){
     if(!blobStarted){ blobStarted=true; blobT=0; blobScale=1; blobCX=cx; blobBaseRow=ROWS-2; document.body.style.background="#05060d"; }
     const {grid,mg}=blobRenderBase();
     blobDrawCharacter(grid,mg,cx,blobBaseRow,blobScale,'blobby');
-    if(blobT<16){
+    if(blobT<48){
       mtDrawBubble(grid,mg,cx,blobBaseRow-blobCharHeight(blobScale),"BLOBBY BLOBBY BLOBBY");
       sub.textContent="A PINK BLOB IS FOUND IN A THAMES SEWAGE OUTFLOW. SCIENTISTS INVESTIGATE.";
-    } else if(blobT<30){
+    } else if(blobT<75){
       stage.classList.toggle('shake', blobT%2===0);
       flash.style.transition="opacity 0.05s"; flash.style.opacity = blobT%3===0 ? 0.5 : 0;
       sub.textContent="EVERY INSTRUMENT POINTED AT HIM EXPLODES";
@@ -127,7 +127,7 @@ function __m72_loop(){
     sub.style.color="#ff8fd6"; sub.style.textShadow="0 0 8px #a01a70";
     scene.innerHTML=paint(grid,mg,'city');
     blobT++;
-    if(!(blobBaseRow<=streetRow && blobT>34)){ timer=setTimeout(loop,90); }
+    if(!(blobBaseRow<=streetRow && blobT>115)){ timer=setTimeout(loop,90); }
     else { phase='blob_wobble'; blobT=0; blobBaseRow=streetRow; blobScale=1; loop(); }
   }else if(phase==='blob_wobble'){
     const {grid,mg}=blobRenderBase();
@@ -145,34 +145,39 @@ function __m72_loop(){
     blobDrawCharacter(grid,mg,blobCX,blobBaseRow,blobScale,'blobby');
     stage.classList.toggle('shake', blobShocks>0 && blobT%2===0);
     scene.innerHTML=paint(grid,mg,'city');
-    if(blobT<20){
+    if(blobT<25){
       blobCX=Math.round(cx + (nelsonX-cx)*Math.min(1,blobT/18));
       sub.textContent="BLOBBY TRIES TO HUG NELSON'S COLUMN";
-    } else if(blobT<26){
+    } else if(blobT<47){
       blobNelsonDown=true; blobShocks=6;
       sub.textContent="IT GOES DOWN LIKE A FELLED TREE";
-    } else if(blobT<48){
+    } else if(blobT<81){
       blobShocks=Math.max(0,blobShocks-1);
       blobCX=Math.round(nelsonX + (cx-nelsonX)*Math.min(1,(blobT-26)/16));
       if(blobBusX===null) blobBusX=cx-10;
       blobBusX+=2+((blobT-26)*0.4);
-      sub.textContent = blobBusX<COLS ? "HE TRIES TO HELP A BUS DRIVER BY PUSHING THE BUS" : "THE BUS ENDS UP IN HERTFORDSHIRE";
+      sub.textContent="HE TRIES TO HELP A BUS DRIVER BY PUSHING THE BUS";
+    } else if(blobT<104){
+      blobShocks=Math.max(0,blobShocks-1);
+      blobCX=Math.round(nelsonX + (cx-nelsonX)*Math.min(1,(blobT-26)/16));
+      if(blobBusX!==null) blobBusX+=2+((blobT-26)*0.4);
+      sub.textContent="THE BUS ENDS UP IN HERTFORDSHIRE";
     } else {
       blobBusX=null;
       blobCX=Math.round(cx + (benX-cx)*Math.min(1,(blobT-48)/18));
-      blobBenLean=Math.min(3,(blobT-48)*0.15);
+      blobBenLean=Math.min(3,(blobT-83)*0.15);
       if(blobT%6===0) blobShocks=3;
       blobShocks=Math.max(0,blobShocks-1);
       sub.textContent="BIG BEN CHIMES. BLOBBY DANCES ALONG. THE TOWER STARTS TO LEAN.";
     }
     sub.style.color="#ff8fd6"; sub.style.textShadow="0 0 8px #a01a70";
     blobT++;
-    if(!(blobT>72 && blobBenLean>=2.5)){ timer=setTimeout(loop,85); }
+    if(!(blobT>147 && blobBenLean>=2.5)){ timer=setTimeout(loop,85); }
     else { phase='blob_growth'; blobT=0; blobShocks=0; loop(); }
   }else if(phase==='blob_growth'){
     const {grid,mg}=blobRenderBase();
     const greggsX=cx-Math.floor(COLS*0.15)+blobGreggsEaten*6;
-    if(blobGreggsEaten<5 && blobT%22<10){
+    if(blobGreggsEaten<5 && blobT%40<18){
       blobPlace(grid,mg,["_______","|GREGGS|","|______|"],greggsX-3,streetRow-3,'greggs');
     }
     blobDrawCharacter(grid,mg,blobCX,blobBaseRow,blobScale,'blobby');
@@ -182,7 +187,7 @@ function __m72_loop(){
       if(h.ejected){ const c=Math.round(h.x)+3; if(c>=0&&c<COLS) { setCh(grid,h.y+3,c,'Y'); setMode(mg,h.y+3,c,'body'); } }
     }
     scene.innerHTML=paint(grid,mg,'city');
-    if(blobT%22===19 && blobGreggsEaten<5){
+    if(blobT%40===34 && blobGreggsEaten<5){
       blobEatChunk(greggsX,3);
       blobGreggsEaten++;
       // capped well below what his full height would need — the hula hoop ring and the
@@ -194,7 +199,9 @@ function __m72_loop(){
     if(blobGreggsEaten<5){
       sub.textContent="GREGGS EATEN: "+blobGreggsEaten+"/5 — BLOBBY GROWS THREE STOREYS EACH TIME";
     } else {
-      if(blobHelis.length===0 && blobT>110){
+      // gated on the eating being fully done (not just a fixed blobT) so "taller than the
+      // Shard" always gets its own uninterrupted stretch on screen before helicopters show up
+      if(blobHelis.length===0 && blobT>240){
         blobHelis=[{x:-10,y:Math.max(1,blobBaseRow-blobCharHeight(blobScale)-4),ejected:false},{x:COLS+10,y:Math.max(1,blobBaseRow-blobCharHeight(blobScale)-6),ejected:false}];
       }
       for(const h of blobHelis){ h.x += (h.x<blobCX?1:-1)*2.2; if(!h.ejected && Math.abs(h.x-blobCX)<12) h.ejected=true; }
@@ -204,7 +211,7 @@ function __m72_loop(){
     }
     sub.style.color="#ff8fd6"; sub.style.textShadow="0 0 8px #a01a70";
     blobT++;
-    if(!(blobGreggsEaten>=5 && blobT>150)){ timer=setTimeout(loop,85); }
+    if(!(blobGreggsEaten>=5 && blobT>340)){ timer=setTimeout(loop,85); }
     else { phase='blob_chaos'; blobT=0; loop(); }
   }else if(phase==='blob_chaos'){
     const {grid,mg}=blobRenderBase();
@@ -228,12 +235,12 @@ function __m72_loop(){
     if(blobT<50) sub.textContent="HE USES THE LONDON EYE AS A HULA HOOP";
     else if(blobT<90) sub.textContent="HE WEARS THE GHERKIN AS A HAT";
     else if(blobT<138) sub.textContent="HE SITS ON THE O2. IT POPS LIKE A WHOOPEE CUSHION.";
-    else if(blobT<150) { blobO2Popped=true; sub.textContent="THE SOUND IS HEARD IN FRANCE"; }
-    else if(blobT<190) sub.textContent="TRYING TO TIDY UP, HE DROPS TOWER BRIDGE INTO THE THAMES";
+    else if(blobT<158) { blobO2Popped=true; sub.textContent="THE SOUND IS HEARD IN FRANCE"; }
+    else if(blobT<198) sub.textContent="TRYING TO TIDY UP, HE DROPS TOWER BRIDGE INTO THE THAMES";
     else { blobBridgeDown=true; blobFlood=Math.min(4,blobFlood+1); sub.textContent="THE UNDERGROUND FLOODS. COMMUTERS AGREE THIS IS STILL BETTER THAN USUAL SERVICE."; }
     sub.style.color="#ff8fd6"; sub.style.textShadow="0 0 8px #a01a70";
     blobT++;
-    if(blobT<230){ timer=setTimeout(loop,85); }
+    if(blobT<254){ timer=setTimeout(loop,85); }
     else { phase='blob_twist'; blobT=0; loop(); }
   }else if(phase==='blob_twist'){
     const {grid,mg}=blobRenderBase();
@@ -248,12 +255,12 @@ function __m72_loop(){
       if(blobFriendX===null) blobFriendX=Math.max(4,blobCX-blobCharWidth(blobScale)-8);
       blobDrawCharacter(grid,mg,blobFriendX,blobBaseRow,Math.min(blobScale,blobScale*Math.min(1,(blobT-40)/20)),'blobbyfriend');
       blobDrawCharacter(grid,mg,blobCX,blobBaseRow,blobScale,'blobby');
-      if(blobT>65){
+      if(blobT>92){
         if(blobT%8===0) blobCraters.push(Math.round((blobCX+blobFriendX)/2));  // one crater per "bounce", not per frame
         blobCX=Math.max(-blobCharWidth(blobScale),blobCX-4);
         blobFriendX=Math.max(-blobCharWidth(blobScale),blobFriendX-4);
       }
-      sub.textContent = blobT<65
+      sub.textContent = blobT<92
         ? "A GIANT INFLATABLE FRIEND, BUILT FROM EVERY BOUNCY CASTLE IN THE SOUTH EAST"
         : "HAND IN HAND, THEY BOUNCE TOWARD THE ENGLISH CHANNEL";
     }
@@ -263,7 +270,7 @@ function __m72_loop(){
     blobT++;
     // blobCX is clamped to -blobCharWidth(blobScale) above, so it settles AT that floor
     // rather than ever going below it — the exit check has to match that or it never fires
-    if(!(blobT>65 && blobCX<=-blobCharWidth(blobScale))){ timer=setTimeout(loop,85); }
+    if(!(blobT>92 && blobCX<=-blobCharWidth(blobScale))){ timer=setTimeout(loop,85); }
     else { phase='blob_hold'; blobT=0; loop(); }
   }else if(phase==='blob_hold'){
     const {grid,mg}=blobRenderBase();

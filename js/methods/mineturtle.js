@@ -19,7 +19,7 @@ function mtSpawnFaller(mtCol, doomed){
 function mtStep(spawnRandom){
   if(spawnRandom && Math.random()<0.35 && mtFallers.length<8) mtSpawnFaller();
   let doomedLanded=false;
-  for(const f of mtFallers){ f.y+=f.vy; f.vy+=0.15;
+  for(const f of mtFallers){ f.y+=f.vy; f.vy+=0.11;
     if(f.y>=streetRow){ f.y=streetRow; f.landed=true; mtBodies.push({x:f.x, y:streetRow, vx:0, vy:0, flying:false}); if(f.doomed) doomedLanded=true; } }
   mtFallers=mtFallers.filter(f=>!f.landed);
   for(const b of mtBodies){ if(!b.flying) continue;
@@ -95,7 +95,7 @@ if(phase==='mineturtle'){
   }else if(phase==='mineturtle_blast'){
     stage.classList.add('shake');
     mtStep(false);
-    mtBlastR=Math.min(14, mtBlastR+1.2);
+    mtBlastR=Math.min(14, mtBlastR+0.64);
     const {grid,mg}=mtRender(mtT, mtCol, false, mtBlastR);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="MINE TURTLE!";

@@ -103,10 +103,10 @@ function __m74_loop(){
     if(!barnStarted){ barnStarted=true; barnT=0; barnScale=1; barnCX=cx; barnBaseRow=streetRow; document.body.style.background="#0a0612"; }
     const {grid,mg}=barnRenderBase();
     barnDrawCharacter(grid,mg,barnCX,barnBaseRow,barnScale,'barney');
-    if(barnT<16){
+    if(barnT<40){
       mtDrawBubble(grid,mg,barnCX,barnBaseRow-barnCharHeight(barnScale),"HI THERE, FRIEND!");
       sub.textContent="A CHILD FINDS AN OLD PURPLE PLUSH DINOSAUR AT A CAR BOOT SALE";
-    } else if(barnT<32){
+    } else if(barnT<78){
       sub.textContent="SHE WISHES ON IT. IT GROWS TO EIGHT FEET AND BEAMS AT HER.";
     } else {
       sub.textContent="THEN HE SPOTS THE SKYLINE. SO MANY FRIENDS TO HUG.";
@@ -114,7 +114,7 @@ function __m74_loop(){
     sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050";
     scene.innerHTML=paint(grid,mg,'city');
     barnT++;
-    if(barnT<48){ timer=setTimeout(loop,90); }
+    if(barnT<111){ timer=setTimeout(loop,90); }
     else { phase='barn_hugs'; barnT=0; loop(); }
   }else if(phase==='barn_hugs'){
     const roundX=cx-Math.floor(COLS*0.22), lampX=cx, shopX=cx+Math.floor(COLS*0.24);
@@ -124,38 +124,38 @@ function __m74_loop(){
     else barnPlace(grid,mg,barnLamppostBentArt,lampX-2,streetRow-barnLamppostBentArt.length,'roundabout');
     if(!barnShopHit) barnPlace(grid,mg,barnShopArt,shopX-4,streetRow-barnShopArt.length,'roundabout');
     for(const car of barnCars){ setCh(grid,Math.round(car.y),Math.round(car.x),'='); setMode(mg,Math.round(car.y),Math.round(car.x),'car'); }
-    if(barnT<20){
+    if(barnT<44){
       barnCX=Math.round(cx + (roundX-cx)*Math.min(1,barnT/18));
       sub.textContent="HE FINDS A CITY MADE ENTIRELY OF ROUNDABOUTS, AND HE LOVES THEM";
-    } else if(barnT<45){
+    } else if(barnT<82){
       if(barnT%3===0) barnCars.push({x:roundX,y:streetRow-1,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*2});
       for(const car of barnCars){ car.x+=car.vx; car.y+=car.vy; }
       barnCars=barnCars.filter(c=>c.x>=0&&c.x<COLS&&c.y>=0&&c.y<ROWS);
       stage.classList.toggle('shake', barnT%2===0);
       sub.textContent="HE SPINS ON EACH ONE LIKE A PLAYGROUND MERRY-GO-ROUND";
-    } else if(barnT<62){
+    } else if(barnT<116){
       stage.classList.remove('shake');
       barnCX=Math.round(roundX + (lampX-roundX)*Math.min(1,(barnT-45)/15));
-      if(barnT>58) barnLamppostBent=true;
+      if(barnT>112) barnLamppostBent=true;
       sub.textContent="HE HUGS A LAMPPOST TOO HARD AND IT FOLDS IN HALF";
     } else {
       barnCX=Math.round(lampX + (shopX-lampX)*Math.min(1,(barnT-62)/18));
-      if(barnT>82 && !barnShopHit){ barnShopHit=true; barnFlatten(shopX,5); }
+      if(barnT>136 && !barnShopHit){ barnShopHit=true; barnFlatten(shopX,5); }
       sub.textContent="HE HUGS A SHOPPING CENTRE AND IT COLLAPSES INWARD WITH A SAD CRUNCH";
     }
     barnDrawCharacter(grid,mg,barnCX,barnBaseRow,barnScale,'barney');
     scene.innerHTML=paint(grid,mg,'city');
     sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050";
     barnT++;
-    if(!(barnShopHit && barnT>95)){ timer=setTimeout(loop,85); }
+    if(!(barnShopHit && barnT>163)){ timer=setTimeout(loop,85); }
     else { phase='barn_imagine'; barnT=0; barnSandwichY=1; loop(); }
   }else if(phase==='barn_imagine'){
     const {grid,mg}=barnRenderBase();
     barnDrawCharacter(grid,mg,barnCX,barnBaseRow,barnScale,'barney');
-    if(barnT<30){
+    if(barnT<42){
       barnCustardRain(grid,mg);
       sub.textContent="HE IMAGINES A FUN RAINY DAY. IT RAINS CUSTARD FOR SIX HOURS.";
-    } else if(barnT<58){
+    } else if(barnT<92){
       barnSandwichY=Math.min(streetRow-barnSandwichArt.length, barnSandwichY+2);
       barnPlace(grid,mg,barnSandwichArt,cx+Math.floor(COLS*0.15)-8,barnSandwichY,'sandwich');
       sub.textContent="HE IMAGINES A BIG PICNIC. A STADIUM-SIZED SANDWICH LANDS ON THE STATION.";
@@ -167,20 +167,20 @@ function __m74_loop(){
     scene.innerHTML=paint(grid,mg,'city');
     sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050";
     barnT++;
-    if(barnT<95){ timer=setTimeout(loop,85); }
+    if(barnT<140){ timer=setTimeout(loop,85); }
     else { phase='barn_chaos'; barnT=0; loop(); }
   }else if(phase==='barn_chaos'){
     const {grid,mg}=barnRenderBase();
-    if(barnT<40){
-      barnScale=Math.min(2, barnScale+0.05);
+    if(barnT<48){
+      barnScale=Math.min(2, barnScale+0.042);
       if(barnT%12===11) barnFlatten(barnCX+((Math.random()*40)|0)-20, 4);
       sub.textContent="HE GROWS TO SKYSCRAPER SIZE. \"IMAGINATION MAKES US BIG AND STRONG!\"";
-    } else if(barnT<80){
+    } else if(barnT<88){
       if(!barnCowsSpawned){ barnCowsSpawned=true; barnCows=[0,1,2,3].map(i=>({x:cx-24+i*10})); }
       for(const c of barnCows) c.x+=1.4;
       for(const c of barnCows) barnPlace(grid,mg,barnCowArt,Math.round(c.x)-3,streetRow-barnCowArt.length,'concretecow');
       sub.textContent="THE CONCRETE COWS COME ALIVE AND STAMPEDE TOWARD LONDON";
-    } else if(barnT<110){
+    } else if(barnT<129){
       for(const c of barnCows) c.x+=1.4;
       for(const c of barnCows) barnPlace(grid,mg,barnCowArt,Math.round(c.x)-3,streetRow-barnCowArt.length,'concretecow');
       barnHelpersIn=true;
@@ -198,31 +198,31 @@ function __m74_loop(){
     }
     barnDrawCharacter(grid,mg,barnCX,barnBaseRow,barnScale,'barney');
     scene.innerHTML=paint(grid,mg,'city');
-    stage.classList.toggle('shake', barnT<40);
+    stage.classList.toggle('shake', barnT<48);
     sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050";
     barnT++;
-    if(barnT<150){ timer=setTimeout(loop,85); }
+    if(barnT<181){ timer=setTimeout(loop,85); }
     else { phase='barn_twist'; barnT=0; loop(); }
   }else if(phase==='barn_twist'){
     stage.classList.remove('shake');
     const {grid,mg}=barnRenderBase();
     const signX=cx-Math.floor(COLS*0.1);
     barnPlace(grid,mg,barnRoundaboutArt,signX-3,streetRow-barnRoundaboutArt.length,'roundabout');
-    if(barnT<30){
+    if(barnT<44){
       barnChildIn=true;
       barnPlace(grid,mg,rubberPersonSprite,signX-1,streetRow-barnRoundaboutArt.length-rubberPersonSprite.length,'body');
       mtDrawBubble(grid,mg,signX,streetRow-barnRoundaboutArt.length-rubberPersonSprite.length,"SOMETIMES FRIENDS NEED PERSONAL SPACE");
       barnDrawCharacter(grid,mg,barnCX,barnBaseRow,barnScale,'barney');
       sub.textContent="SHE CLIMBS THE ONE SURVIVING ROUNDABOUT SIGN AND TELLS HIM, GENTLY";
     } else {
-      barnScale=Math.max(1, barnScale-0.06);
+      barnScale=Math.max(1, barnScale-0.025);
       barnDrawCharacter(grid,mg,barnCX,barnBaseRow,barnScale,'barney');
       sub.textContent="HIS LIP WOBBLES. HE SHRINKS WITH A SAD DEFLATING SQUEAK.";
     }
     scene.innerHTML=paint(grid,mg,'city');
     sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050";
     barnT++;
-    if(!(barnT>30 && barnScale<=1)){ timer=setTimeout(loop,90); }
+    if(!(barnT>44 && barnScale<=1)){ timer=setTimeout(loop,90); }
     else { phase='barn_hold'; barnT=0; cityGridArr=buildCity(); loop(); }
   }else if(phase==='barn_hold'){
     const {grid,mg}=barnRenderBase();

@@ -1,4 +1,4 @@
-let fznStarted=false, fznT=0, fznLevel=0, castleH=0, olafX=0, snowFall=[];
+let fznStarted=false, fznT=0, fznLevel=0, castleH=0, olafX=0, snowFall=[], fznWinterT=0;
 
 
 // ---- FROZEN: Elsa's magic sweeps out, an ice castle rises, the world freezes ----
@@ -8,7 +8,7 @@ function frozenInit(){
 }
 function frozenStep(t){
   fznLevel=Math.min(1, fznLevel+0.018);
-  castleH=Math.min(Math.floor(streetRow*0.6), castleH + (fznLevel>0.25 ? 1 : 0));
+  castleH=Math.min(Math.floor(streetRow*0.6), castleH + (fznLevel>0.25 ? 0.3 : 0));
   for(const s of snowFall){ s.y+=s.spd; s.x+=s.drift; if(s.y>ROWS){ s.y=-1; s.x=(Math.random()*COLS)|0; } if(s.x<0)s.x=COLS-1; if(s.x>=COLS)s.x=0; }
   // Olaf waddles along the street
   olafX += 0.4;
@@ -92,10 +92,12 @@ if(phase==='frozen'){
     const {grid,mg}=frozenRender(fznT);
     scene.innerHTML=paint(grid,mg,'city');
     document.body.style.background = fznLevel<0.5 ? "#0c1c2c" : (fznLevel<0.9?"#16324a":"#2a5578");
-    sub.textContent = fznLevel<0.4 ? "LET IT GO — THE FROST SPREADS" : (castleH<streetRow*0.5 ? "AN ICE CASTLE RISES OVER THE CITY" : "AN ETERNAL WINTER GRIPS THE WORLD");
+    const winterFinal = fznLevel>=0.4 && castleH>=streetRow*0.5;
+    sub.textContent = fznLevel<0.4 ? "LET IT GO — THE FROST SPREADS" : (!winterFinal ? "AN ICE CASTLE RISES OVER THE CITY" : "AN ETERNAL WINTER GRIPS THE WORLD");
     sub.style.color="#c0f0ff"; sub.style.textShadow="0 0 8px #4a90c0";
     fznT++;
-    if(!(fznLevel>=1 && fznT>60)){ timer=setTimeout(loop,80); }
+    if(winterFinal) fznWinterT++;
+    if(!(winterFinal && fznWinterT>25)){ timer=setTimeout(loop,80); }
     else { phase='frozen_hold'; loop(); }
   }else if(phase==='frozen_hold'){
     stage.classList.remove('shake');
@@ -121,7 +123,7 @@ function __m33_start(){
 
 
 function __m33_reset(){
-  fznStarted=false; fznT=0; fznLevel=0; castleH=0; olafX=0; snowFall=[];
+  fznStarted=false; fznT=0; fznLevel=0; castleH=0; olafX=0; snowFall=[]; fznWinterT=0;
 }
 
 

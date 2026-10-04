@@ -146,7 +146,7 @@ if(phase==='ghost'){
       else { ghostPhase='puft'; loop(); }
     }else if(ghostPhase==='puft'){
       // the Stay Puft Marshmallow Man arrives and stomps through town
-      puftDmg=Math.min(1, puftDmg+0.02);
+      puftDmg=Math.min(1, puftDmg+0.0148);
       const {grid,mg}=ghostRender(ghostT,'puft');
       scene.innerHTML=paint(grid,mg,'city');
       stage.classList.add('shake');

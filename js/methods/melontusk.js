@@ -70,6 +70,8 @@ const endLines=[
   "MELON TUSK: GOOD LANDING.",
   "OPTIMUS: NOMINAL.",
 ];
+// a fixed per-line window shortchanges the longer dialogue lines — size each to its own length
+function tuskLineFrames(text, delay){ return Math.max(16, Math.ceil(text.length/17*1000/delay)); }
 function tuskStarfield(grid, mg){
   for(let k=0;k<COLS*0.2;k++){ const c=(Math.random()*COLS)|0, r=(Math.random()*Math.floor(ROWS*0.7))|0;
     if(grid[r] && grid[r][c]===" "){ setCh(grid,r,c,(Math.random()<0.5?"*":".")); setMode(mg,r,c,'tuskstar'); } }
@@ -199,10 +201,10 @@ if(phase==='tusk'){
     scene.innerHTML=paint(grid,mg,'tuskstar');
     stage.classList.remove('shake');
     tuskLineT++;
-    if(tuskLineT>40 && tuskLineIdx<missionLines1.length-1){ tuskLineT=0; tuskLineIdx++; }
+    if(tuskLineT>tuskLineFrames(missionLines1[tuskLineIdx],90) && tuskLineIdx<missionLines1.length-1){ tuskLineT=0; tuskLineIdx++; }
     sub.textContent=missionLines1[tuskLineIdx]; sub.style.color="#a0c0ff"; sub.style.textShadow="0 0 8px #2a6a9a";
     tuskT++;
-    if(!(tuskLineIdx>=missionLines1.length-1 && tuskLineT>40)){ timer=setTimeout(loop,90); }
+    if(!(tuskLineIdx>=missionLines1.length-1 && tuskLineT>tuskLineFrames(missionLines1[tuskLineIdx],90))){ timer=setTimeout(loop,90); }
     else {
       phase='tusk_reenter'; tuskT=0; tuskLineIdx=0; tuskLineT=0;
       document.body.style.background="#140806";
@@ -215,10 +217,13 @@ if(phase==='tusk'){
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.add('shake');
     tuskLineT++;
-    if(tuskLineT>35 && tuskLineIdx<missionLines2.length-1){ tuskLineT=0; tuskLineIdx++; }
+    if(tuskLineT>tuskLineFrames(missionLines2[tuskLineIdx],60) && tuskLineIdx<missionLines2.length-1){ tuskLineT=0; tuskLineIdx++; }
     sub.textContent=missionLines2[tuskLineIdx]; sub.style.color="#ff8c1a"; sub.style.textShadow="0 0 8px #ff6a00";
     tuskT++;
-    if(!done){ timer=setTimeout(loop,60); }
+    // the dive can physically finish before the dialogue has — don't cut to the flash
+    // until the LAST line has also had its full window, not just whenever "done" first flips
+    const linesDone = tuskLineIdx>=missionLines2.length-1 && tuskLineT>tuskLineFrames(missionLines2[tuskLineIdx],60);
+    if(!(done && linesDone)){ timer=setTimeout(loop,60); }
     else { phase='tusk_flash'; loop(); }
   }else if(phase==='tusk_flash'){
     flash.style.transition="opacity 0.02s"; flash.style.opacity=1;
@@ -232,7 +237,7 @@ if(phase==='tusk'){
     const {grid,mg}=tuskImpactRender(tuskCraterX, tuskBlastR);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="A CONCUSSIVE BOOM ROLLS OUTWARD, BLOCK BY BLOCK"; sub.style.color="#ff8c1a"; sub.style.textShadow="0 0 8px #ff6a00";
-    tuskBlastR+=Math.max(1, COLS/45);
+    tuskBlastR+=Math.max(0.3, COLS/150);
     if(tuskBlastR < Math.floor(COLS*0.35)){ timer=setTimeout(loop,60); }
     else { phase='tusk_rise'; tuskT=0; loop(); }
   }else if(phase==='tusk_rise'){
@@ -241,7 +246,7 @@ if(phase==='tusk'){
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="OPTIMUS: LANDING... COMPLETE. DEVIATION FROM TARGET: ZERO METERS. EXCELLENT."; sub.style.color="#40c0ff"; sub.style.textShadow="0 0 8px #2a6a9a";
     tuskT++;
-    if(tuskT<30){ timer=setTimeout(loop,90); }
+    if(tuskT<50){ timer=setTimeout(loop,90); }
     else {
       phase='tusk_arrival'; tuskT=0; tuskArrivalLineIdx=0; tuskArrivalLineT=0;
       tuskCyberX=tuskCraterX+8; tuskTuskX=tuskCyberX+2; tuskReporterX=COLS+6;

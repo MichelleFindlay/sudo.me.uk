@@ -17,7 +17,7 @@ function locustStep(t){
     if(l.x>COLS+2){ l.x=-2-((Math.random()*10)|0); l.y=(Math.random()*streetRow)|0; }
   }
   // the swarm eats inward from the left as it passes over the city
-  locEaten=Math.min(COLS, locEaten + Math.max(1,Math.floor(COLS/44)));
+  locEaten=Math.min(COLS, locEaten + Math.max(1,Math.floor(COLS/60)));
 }
 function locustRender(t){
   if(cityGridArr.length!==ROWS){ cityGridArr=buildCity(); }

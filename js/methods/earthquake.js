@@ -50,7 +50,7 @@ if(phase==='quake'){
     scene.style.textShadow="0 0 8px #a9743a";
     if(!qStarted){ qStarted=true; qT=0; qFall=0; qCracks=[]; document.body.style.background="#0c0805"; }
     stepRain();
-    qFall=Math.min(1, qFall+0.03);
+    qFall=Math.min(1, qFall+0.027);
     const {grid,mg}=quakeRender(qT, qFall);
     drawRain(grid,mg);
     scene.innerHTML=paint(grid,mg,'city');

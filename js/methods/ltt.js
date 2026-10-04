@@ -182,7 +182,7 @@ if(phase==='ltt'){
     stage.classList.add('shake');
     const districtLeft=Math.floor(COLS*0.12), districtRight=Math.floor(COLS*0.82);
     lttFloodR=Math.min(1, lttFloodR+0.03);
-    lttDataR=Math.min(1, lttDataR+0.025);
+    lttDataR=Math.min(1, lttDataR+0.019);
     lttSpireAngle=Math.min(70, lttSpireAngle+2.2);
     lttDemolishDistrict(districtLeft, districtRight, 0.02);
     const grid=cityGridArr.slice();
@@ -207,7 +207,7 @@ if(phase==='ltt'){
     stage.classList.remove('shake');
     const districtLeft=Math.floor(COLS*0.12), districtRight=Math.floor(COLS*0.82);
     const wasComplete = lttSponsorT>=1;
-    lttSponsorT=Math.min(1, lttSponsorT+0.03);
+    lttSponsorT=Math.min(1, lttSponsorT+0.023);
     if(lttSponsorT>=1 && !wasComplete){ lttRestoreDistrict(districtLeft,districtRight); }
     const grid=cityGridArr.slice();
     const mg=modeGridFill(ROWS,COLS,'city');

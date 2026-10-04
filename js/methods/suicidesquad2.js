@@ -111,7 +111,7 @@ function __m51_loop(){
 if(phase==='squad2_decoy'){
     scene.style.textShadow="0 0 8px #c02020";
     if(!squad2Started){ squad2Started=true; squad2T=0; squad2DecoyInit(); document.body.style.background="#0a0604"; }
-    const firing = squad2T>10;
+    const firing = squad2T>33;
     if(firing){ for(const d of squad2Decoys){ if(!d.down && Math.random()<0.15) d.down=true; } }
     const {grid,mg}=squad2DecoyRender(firing);
     scene.innerHTML=paint(grid,mg,'city');
@@ -120,7 +120,7 @@ if(phase==='squad2_decoy'){
     sub.style.color="#ff8080"; sub.style.textShadow="0 0 8px #800000";
     squad2T++;
     const allDown = squad2Decoys.every(d=>d.down);
-    if(!(allDown && squad2T>30)){ timer=setTimeout(loop,80); }
+    if(!(allDown && squad2T>62)){ timer=setTimeout(loop,80); }
     else { phase='squad2_infiltrate'; squad2T=0; squad2MemberXs=[-3,-7,-11,-15,-19]; loop(); }
   }else if(phase==='squad2_infiltrate'){
     const targetCol=Math.floor(COLS*0.75);
@@ -136,7 +136,7 @@ if(phase==='squad2_decoy'){
   }else if(phase==='squad2_explode'){
     stage.classList.add('shake');
     const col=Math.floor(COLS*0.75);
-    squad2DomeR=Math.min(14, squad2DomeR+1.3);
+    squad2DomeR=Math.min(14, squad2DomeR+0.31);
     const {grid,mg}=squad2ExplodeRender(col, squad2DomeR);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="JOTUNHEIM GOES UP — AND SOMETHING BREAKS FREE"; sub.style.color="#ff8000"; sub.style.textShadow="0 0 10px #ff2000";
@@ -153,12 +153,12 @@ if(phase==='squad2_decoy'){
     sub.textContent="STARRO RAMPAGES — MIND-CONTROLLED THRALLS SWARM THE STREETS";
     sub.style.color="#c060e0"; sub.style.textShadow="0 0 8px #4a1a6a";
     squad2T++;
-    if(!(squad2DomeR>=Math.floor(COLS*0.4) && squad2T>40)){ timer=setTimeout(loop,70); }
+    if(!(squad2DomeR>=Math.floor(COLS*0.4) && squad2T>52)){ timer=setTimeout(loop,70); }
     else { phase='squad2_fight'; squad2T=0; squad2RatR=0; loop(); }
   }else if(phase==='squad2_fight'){
     stage.classList.add('shake');
     const col=Math.floor(COLS*0.75);
-    squad2RatR=Math.min(16, squad2RatR+1);
+    squad2RatR=Math.min(16, squad2RatR+0.67);
     const {grid,mg}=squad2Render(col, squad2DomeR, squad2RatR, squad2RatR<16);
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent = squad2RatR<16 ? "RATCATCHER 2 UNLEASHES THE SWARM" : "BLOODSPORT LANDS THE KILLING BLOW";

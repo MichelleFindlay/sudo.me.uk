@@ -80,7 +80,7 @@ if(phase==='godzilla'){
     scene.style.textShadow="0 0 10px #3a5a2a";
     if(!gzStarted){ gzStarted=true; gzX=COLS-14; gzFrame=0; document.body.style.background="#0d0a05"; }
     stepRain();
-    const breathOn=(Math.floor(gzFrame/3)%3===0);   // fire breath in bursts
+    const breathOn=(Math.floor(gzFrame/19)%3===0);   // fire breath in bursts, slow enough to actually read each caption
     const {grid,mg}=godzilla(gzX, breathOn, gzDmgL, gzDmgR, gzFrame);
     drawRain(grid,mg);
     if(breathOn) stage.classList.add('shake'); else stage.classList.remove('shake');

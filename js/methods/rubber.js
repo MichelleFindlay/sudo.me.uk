@@ -1,4 +1,4 @@
-let rubberStarted=false, rubberT=0, rubberTireX=0, rubberPeople=[], rubberTargetIdx=0, rubberFocusT=0, rubberSubPhase='approach';
+let rubberStarted=false, rubberT=0, rubberTireX=0, rubberPeople=[], rubberTargetIdx=0, rubberFocusT=0, rubberSubPhase='approach', rubberApproachT=0;
 
 
 // ---- RUBBER: a telepathic car tire named Robert rolls around making heads explode ----
@@ -72,8 +72,11 @@ if(phase==='rubber'){
     stage.classList.remove('shake');
     if(rubberSubPhase==='approach'){
       const stopX=target.x-7, diff=stopX-rubberTireX;
+      rubberApproachT++;
       if(Math.abs(diff)>1){ rubberTireX += Math.sign(diff)*Math.min(Math.abs(diff), Math.max(1,COLS/60)); }
-      else { rubberSubPhase='focus'; rubberFocusT=0; }
+      // physically arriving isn't enough on its own — nearby targets could make this a
+      // one-frame flash, so hold "approach" a minimum stretch regardless of travel distance
+      if(Math.abs(diff)<=1 && rubberApproachT>19){ rubberSubPhase='focus'; rubberFocusT=0; }
     } else if(rubberSubPhase==='focus'){
       beamOn=true; stage.classList.add('shake');
       rubberFocusT++;
@@ -81,7 +84,7 @@ if(phase==='rubber'){
     } else if(rubberSubPhase==='explode'){
       stage.classList.add('shake');
       target.burstT++;
-      if(target.burstT>10){ target.state='gone'; rubberTargetIdx++; rubberSubPhase='approach'; rubberFocusT=0; }
+      if(target.burstT>10){ target.state='gone'; rubberTargetIdx++; rubberSubPhase='approach'; rubberFocusT=0; rubberApproachT=0; }
     }
     const spin=Math.floor(rubberT/2)%2===0;
     const {grid,mg}=rubberRender(rubberTireX, spin, rubberPeople, rubberTargetIdx, beamOn);
@@ -111,7 +114,7 @@ function __m61_start(){
 
 
 function __m61_reset(){
-  rubberStarted=false; rubberT=0; rubberTireX=0; rubberPeople=[]; rubberTargetIdx=0; rubberFocusT=0; rubberSubPhase='approach';
+  rubberStarted=false; rubberT=0; rubberTireX=0; rubberPeople=[]; rubberTargetIdx=0; rubberFocusT=0; rubberSubPhase='approach'; rubberApproachT=0;
 }
 
 

@@ -59,10 +59,10 @@ if(phase==='deathstar'){
     const {grid,mg}=deathstarRender(dsT,'charge',0,0);
     scene.innerHTML=paint(grid,mg,'city');
     stage.classList.remove('shake');
-    sub.textContent= dsT<10 ? "THE DEATH STAR HOVERS ABOVE THE CITY" : "SUPERLASER CHARGING…";
+    sub.textContent= dsT<27 ? "THE DEATH STAR HOVERS ABOVE THE CITY" : "SUPERLASER CHARGING…";
     sub.style.color="#7affa0"; sub.style.textShadow="0 0 8px #1a6a2a";
     dsT++;
-    if(dsT<24){ timer=setTimeout(loop,80); }
+    if(dsT<44){ timer=setTimeout(loop,80); }
     else { phase='deathstar_beam'; dsT=0; loop(); }
   }else if(phase==='deathstar_beam'){
     stage.classList.add('shake');
@@ -72,7 +72,7 @@ if(phase==='deathstar'){
     scene.innerHTML=paint(grid,mg,'city');
     sub.textContent="IT UNLEASHES ITS LASER";
     sub.style.color="#aaffc0"; sub.style.textShadow="0 0 10px #4aff6a";
-    if(dsT<14){ timer=setTimeout(loop,55); }
+    if(dsT<24){ timer=setTimeout(loop,55); }
     else { phase='deathstar_blast'; dsT=0; dsBlastR=0; loop(); }
   }else if(phase==='deathstar_blast'){
     stage.classList.add('shake');

@@ -46,7 +46,7 @@ if(phase==='tikes'){
     if(!tikesStarted){ tikesStarted=true; tikesT=0; tikesX=14; childX=-4; tikesBoarded=false; tikesMomX=-2; tikesMomDown=false; document.body.style.background="#100504"; }
     const boardAt=tikesX-tikesSprite[0].length+2;
     if(!tikesBoarded){
-      childX=Math.min(boardAt, childX+0.35);
+      childX=Math.min(boardAt, childX+0.25);
       if(childX>=boardAt) tikesBoarded=true;
     }
     tikesMomX=Math.min(boardAt-2, tikesMomX+0.3);     // furious, but always a step behind
@@ -63,7 +63,7 @@ if(phase==='tikes'){
     stage.classList.add('shake');
     if(!tikesMomDown){ tikesMomDown=true; }           // the engine roars to life right as she catches up
     const stopAt=Math.floor(COLS/3);                 // knocks over a third of the city
-    tikesX=Math.min(stopAt, tikesX+Math.max(1,Math.floor(COLS/40)));
+    tikesX=Math.min(stopAt, tikesX+Math.max(0.5,Math.floor(COLS/40)*0.5));
     const arrived=tikesX>=stopAt;
     const {grid,mg}=tikesRender(tikesX, 0, false, null, tikesMomX, true);
     scene.innerHTML=paint(grid,mg,'city');

@@ -8,7 +8,7 @@ function steelInit(){
   for(let i=0;i<2;i++){ fighters.push({ x:cx+(i?20:-20), y:Math.floor(streetRow*0.4), tx:cx, ty:Math.floor(streetRow*0.4), team:i, trail:[] }); }
 }
 function steelStep(t){
-  weDmg=Math.min(cx+2, weDmg+Math.max(1,Math.floor(COLS/44)));   // gravity pulse spreads
+  weDmg=Math.min(cx+2, weDmg+Math.max(0.6,Math.floor(COLS/44)*0.4));   // gravity pulse spreads
   // periodically emit a shock ring from ground zero
   if(t%6===0) shockRings.push({r:1});
   for(const s of shockRings){ s.r+=2; }

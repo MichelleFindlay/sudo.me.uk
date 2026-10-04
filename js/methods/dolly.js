@@ -27,6 +27,8 @@ const dollyLines=[
   "But the boss won't seem to let me",
   "I swear sometimes that man is out to get me",
 ];
+// longer lyric lines need more than the baseline 12 frames to actually be readable
+function dollyLineFrames(text){ return Math.max(17, Math.ceil(text.length/17*1000/80)); }
 function dollyInit(){
   dollyWorkers=[];
   const n=Math.max(6,Math.floor(COLS/14));
@@ -83,7 +85,7 @@ if(phase==='dolly'){
       scene.innerHTML=paint(grid,mg,'city');
       stage.classList.remove('shake');
       dollyLineT++;
-      if(dollyLineT>11){ dollyLineT=0; dollyLineIdx=Math.min(dollyLines.length-1, dollyLineIdx+1); }
+      if(dollyLineT>dollyLineFrames(dollyLines[dollyLineIdx])){ dollyLineT=0; dollyLineIdx=Math.min(dollyLines.length-1, dollyLineIdx+1); }
       sub.textContent=dollyLines[dollyLineIdx]; sub.style.color="#ff8fc0"; sub.style.textShadow="0 0 8px #a0308a";
       dollyT++;
       const allArrived=dollyWorkers.every(w=>w.arrived);
@@ -94,10 +96,14 @@ if(phase==='dolly'){
       const {grid,mg}=dollyRender("WORKING 9 TO 5");
       scene.innerHTML=paint(grid,mg,'city');
       dollyLineT++;
-      if(dollyLineT>11){ dollyLineT=0; dollyLineIdx=Math.min(dollyLines.length-1, dollyLineIdx+1); }
+      const atLastLine=dollyLineIdx>=dollyLines.length-1;
+      const lineNeeds=dollyLineFrames(dollyLines[dollyLineIdx]);
+      // keep advancing through lines as each finishes its dwell time, but once on the
+      // last line, wait out ITS dwell time too rather than cutting away the instant we reach it
+      if(dollyLineT>lineNeeds && !atLastLine){ dollyLineT=0; dollyLineIdx++; }
       sub.textContent=dollyLines[dollyLineIdx]; sub.style.color="#ff8fc0"; sub.style.textShadow="0 0 8px #a0308a";
       dollyT++;
-      if(dollyLineIdx<dollyLines.length-1){ timer=setTimeout(loop,80); }
+      if(!(atLastLine && dollyLineT>lineNeeds)){ timer=setTimeout(loop,80); }
       else { dollySubPhase='leave'; dollyT=0; loop(); }
     }else if(dollySubPhase==='leave'){
       dollyStepLeave();

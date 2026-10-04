@@ -290,7 +290,7 @@ if(phase==='bttf'){
       const mg=modeGridFill(ROWS,COLS,tourScene.mode);
       // re-tag scene chars to the era palette (mode grid full-covers by mode already; keep 'city' default for 1985)
       // roll the DeLorean through
-      deloX+=Math.max(2,Math.floor(COLS/24));
+      deloX+=Math.max(1,Math.floor(COLS/32));
       const carRow=streetRow-deloSprite.length+1;
       for(let i=0;i<deloSprite.length;i++){ const art=deloSprite[i], r=carRow+i;
         for(let j=0;j<art.length;j++){ const c=Math.round(deloX)+j; if(c<0||c>=COLS||r<0||r>=ROWS)continue; if(art[j]===" ")continue; setCh(grid,r,c,art[j]); setMode(mg,r,c,'delorean'); } }

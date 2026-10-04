@@ -79,7 +79,7 @@ if(phase==='alien'){
     if(!ufoStarted){ ufoStarted=true; ufoT=0; ufoY=-5; ufoX=-Math.floor(ufoSprite[0].length/2); document.body.style.background="#02100a"; }
     stepRain();
     const hoverTop=2;
-    if(ufoY<hoverTop){ ufoY+=1; }
+    if(ufoY<hoverTop){ ufoY+=0.37; }
     const firing = ufoY>=hoverTop;
     const shipHalf=Math.floor(ufoSprite[0].length/2);   // beam is exactly ship-width
     let beams=[], dmg=[], beamHalf=0;

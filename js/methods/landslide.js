@@ -6,7 +6,7 @@ function landslideInit(){
   lsFront=-6; boulders=[]; lsDebris=[];
 }
 function landslideStep(t){
-  lsFront += Math.max(1, Math.floor(COLS/34));   // the leading edge advances rightward
+  lsFront += Math.max(1, Math.floor(COLS/65));   // the leading edge advances rightward
   // spawn tumbling boulders rolling ahead of the slide front
   if(t%3===0){ boulders.push({ x:lsFront + (Math.random()*8), y:streetRow-1-((Math.random()*Math.floor(streetRow*0.3))|0), vx:1+Math.random()*1.5, vy:0.2+Math.random()*0.5, g:0.12, spin:0 }); }
   for(const b of boulders){ b.x+=b.vx; b.y+=b.vy; b.vy+=b.g; b.spin+=0.5; if(b.y>=streetRow-1){ b.y=streetRow-1; b.vy=-b.vy*0.3; b.vx*=0.8; } }
