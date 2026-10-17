@@ -1,6 +1,6 @@
 # sudo.me.uk
 
-A stupid little ASCII terminal simulator that destroys a procedurally generated city 76 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
+A stupid little ASCII terminal simulator that destroys a procedurally generated city 77 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
 
 🔗 **Live:** [sudo.me.uk](https://sudo.me.uk)
 
@@ -12,7 +12,7 @@ No backend logic, no database, no point. Just a page that renders everything as 
 
 ## Methods
 
-All 76 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
+All 77 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 
 | # | Method | Category | What happens |
 |---|--------|----------|---------------|
@@ -92,12 +92,13 @@ All 76 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 | 73 | Dumpster Fire | Whimsical | A burning bin rolls through the city, setting fire to everything in its wake |
 | 74 | Barney | Whimsical | A wished-to-life plush dinosaur lays waste to Milton Keynes, one over-enthusiastic hug at a time |
 | 75 | Blobby vs Barney | Whimsical | Clash of the Wobbly Titans — two huggers meet, and the city doesn't survive the affection |
+| 76 | Matilda | Movie/game | The Trunchbull hammer-throws Amanda Thripp by her pigtails, and she takes out the whole town before landing in the duck pond |
 
 ## How it works
 
 Everything is rendered as monospace text — a shared procedural city generator builds a skyline, a character-grid painter colors each cell per "mode," and a state machine of animation phases drives each scenario frame by frame. No canvas, no images, no sprites — just strings and `setTimeout`.
 
-Each of the 76 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 76 methods' worth of code up front.
+Each of the 77 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 77 methods' worth of code up front.
 
 Every method also has a real, shareable URL (`?m=<id>`) that launches it directly, and a share button in the bottom-right corner lets you share either the current destruction or the bare site link.
 
