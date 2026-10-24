@@ -2,6 +2,20 @@
 // ---- local config (version number + secrets) — see config.sample.php ----
 require_once __DIR__ . '/config.php';
 
+// ---- security headers ----
+// a fresh nonce per response lets the page's own inline <style>/<script> blocks run
+// without allowing 'unsafe-inline' for anything else; method files load from 'self'
+$CSP_NONCE = base64_encode(random_bytes(16));
+header_remove('X-Powered-By');
+header("Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-{$CSP_NONCE}'; style-src 'nonce-{$CSP_NONCE}'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests");
+header('Strict-Transport-Security: max-age=31536000');
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), browsing-topics=(), web-share=(self)');
+header('Cross-Origin-Opener-Policy: same-origin');
+header('Cross-Origin-Resource-Policy: same-origin');
+
 // ---- version & update check ----
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
@@ -165,7 +179,7 @@ if (isset($_GET['stats'])) {
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>sudo rm -rf /* <?= $isDevBuild ? 'DEV' : 'v'.htmlspecialchars($VERSION) ?></title>
-<style>
+<style nonce="<?= $CSP_NONCE ?>">
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; padding: 0; background: #000;
@@ -425,6 +439,7 @@ if (isset($_GET['stats'])) {
     #cmd { padding:4px 0; }
   }
 </style>
+<style nonce="<?= $CSP_NONCE ?>" id="paintColors"></style>
 </head>
 <body>
 <div id="topBarLeft">
@@ -560,7 +575,7 @@ if (isset($_GET['stats'])) {
   </div>
 </div>
 
-<script>
+<script nonce="<?= $CSP_NONCE ?>">
 const scene=document.getElementById('scene'),cmd=document.getElementById('cmd'),
       sub=document.getElementById('sub'),flash=document.getElementById('flash'),
       stage=document.getElementById('stage'),root=document.documentElement,
@@ -1836,6 +1851,15 @@ function colorFor(ch,r,c,mode){
   return "#cccccc";
 }
 
+// colours become classes whose rules are added through the CSSOM (which CSP doesn't
+// restrict), so painted spans need no inline style attributes; the palette is all
+// fixed hex literals, so this stays a small, bounded set of rules
+const paintSheet=document.getElementById('paintColors').sheet, paintClasses=new Map();
+function colorClass(col){
+  let k=paintClasses.get(col);
+  if(!k){ k='k'+paintClasses.size.toString(36); paintSheet.insertRule('#scene .'+k+'{color:'+col+'}',paintSheet.cssRules.length); paintClasses.set(col,k); }
+  return k;
+}
 // Build an HTML string from a char grid + a same-shape "mode grid".
 // modeGrid[r][c] gives the palette mode for that cell; falls back to base.
 function paint(grid, modeGrid, base){
@@ -1851,11 +1875,11 @@ function paint(grid, modeGrid, base){
       // escape html-sensitive chars
       if(ch==="<")ch="&lt;"; else if(ch===">")ch="&gt;"; else if(ch==="&")ch="&amp;";
       if(col!==curColor){
-        if(buf) out+= curColor?`<span style="color:${curColor}">${buf}</span>`:buf;
+        if(buf) out+= curColor?`<span class="${colorClass(curColor)}">${buf}</span>`:buf;
         buf=ch; curColor=col;
       } else buf+=ch;
     }
-    if(buf) out+= curColor?`<span style="color:${curColor}">${buf}</span>`:buf;
+    if(buf) out+= curColor?`<span class="${colorClass(curColor)}">${buf}</span>`:buf;
     out+="\n";
   }
   return out;
