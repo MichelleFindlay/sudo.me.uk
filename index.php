@@ -2,6 +2,20 @@
 // ---- local config (version number + secrets) — see config.sample.php ----
 require_once __DIR__ . '/config.php';
 
+// ---- security headers ----
+// a fresh nonce per response lets the page's own inline <style>/<script> blocks run
+// without allowing 'unsafe-inline' for anything else; method files load from 'self'
+$CSP_NONCE = base64_encode(random_bytes(16));
+header_remove('X-Powered-By');
+header("Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-{$CSP_NONCE}'; style-src 'nonce-{$CSP_NONCE}'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests");
+header('Strict-Transport-Security: max-age=31536000');
+header('X-Frame-Options: DENY');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), browsing-topics=(), web-share=(self)');
+header('Cross-Origin-Opener-Policy: same-origin');
+header('Cross-Origin-Resource-Policy: same-origin');
+
 // ---- version & update check ----
 $GITHUB_REPO = 'MichelleFindlay/sudo.me.uk';
 $CACHE_FILE = sys_get_temp_dir() . '/sudo_me_uk_version_cache.json';
@@ -165,7 +179,7 @@ if (isset($_GET['stats'])) {
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>sudo rm -rf /* <?= $isDevBuild ? 'DEV' : 'v'.htmlspecialchars($VERSION) ?></title>
-<style>
+<style nonce="<?= $CSP_NONCE ?>">
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; padding: 0; background: #000;
@@ -292,6 +306,7 @@ if (isset($_GET['stats'])) {
   #methodBox .m-dumpster { color:#4a9a5a; text-shadow:0 0 8px #ff6a00; }
   #methodBox .m-barney { color:#a0308a; text-shadow:0 0 8px #3aa050; }
   #methodBox .m-clash { color:#ff5ac0; text-shadow:0 0 8px #a0308a; }
+  #methodBox .m-matilda { color:#8ab04a; text-shadow:0 0 8px #c0302a; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -424,6 +439,7 @@ if (isset($_GET['stats'])) {
     #cmd { padding:4px 0; }
   }
 </style>
+<style nonce="<?= $CSP_NONCE ?>" id="paintColors"></style>
 </head>
 <body>
 <div id="topBarLeft">
@@ -529,6 +545,7 @@ if (isset($_GET['stats'])) {
       <a href="?m=73" class="m-dumpster pick" data-method="73" data-cat="fun">Dumpster Fire</a>
       <a href="?m=74" class="m-barney pick" data-method="74" data-cat="fun">Barney</a>
       <a href="?m=75" class="m-clash pick" data-method="75" data-cat="fun">Blobby vs Barney</a>
+      <a href="?m=76" class="m-matilda pick" data-method="76" data-cat="movie">Matilda</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -558,7 +575,7 @@ if (isset($_GET['stats'])) {
   </div>
 </div>
 
-<script>
+<script nonce="<?= $CSP_NONCE ?>">
 const scene=document.getElementById('scene'),cmd=document.getElementById('cmd'),
       sub=document.getElementById('sub'),flash=document.getElementById('flash'),
       stage=document.getElementById('stage'),root=document.documentElement,
@@ -1801,9 +1818,48 @@ function colorFor(ch,r,c,mode){
   if(mode==='balloon'){                                            // lonely, deflating, on the horizon
     return "#e05a9a";
   }
+  if(mode==='trunchbull'){                                         // the Trunchbull
+    if(ch==="("||ch===")"||ch==="o"||ch===">"||ch==="<"||ch==="O") return "#e0b090";
+    if(ch==="_") return "#3a2a1a";                                 // hair and scowl
+    if(ch==="#") return "#4a6a2a";                                 // green smock
+    return "#7a6040";                                              // breeches, arms
+  }
+  if(mode==='amanda'){                                             // Amanda Thripp
+    if(ch==="~") return "#e08a2a";                                 // the pigtails
+    if(ch==="o") return "#f0c8a0";
+    if(ch==="%") return "#3a9a3a";                                 // pond weed
+    return "#4a7ad0";
+  }
+  if(mode==='trbpigtail') return "#e08a2a";
+  if(mode==='trbwind') return "#9ab0c8";
+  if(mode==='trbroar') return "#ff5030";
+  if(mode==='trbfence') return "#8a6a3a";
+  if(mode==='trbsign') return "#e0d8b0";
+  if(mode==='trbchurch'){ if(ch==="+") return "#ffd700"; if(ch==="o") return "#d0a030"; return "#b8b0a0"; }
+  if(mode==='trbbell') return "#e0b030";
+  if(mode==='trbbank'){ if(/[A-Z]/.test(ch)) return "#ffd700"; if(ch==="$") return "#5ac05a"; return "#d8d0b0"; }
+  if(mode==='trbcash'){ const k=Math.random(); return k<0.4?"#5ac05a":(k<0.8?"#3a9a3a":"#a0e0a0"); }
+  if(mode==='trbgas') return ch==="#"?"#5a6a4a":"#7a8a6a";
+  if(mode==='trbcarpark') return ch==="="?"#7a7a82":"#9a9a9a";
+  if(mode==='trbstore') return /[A-Z]/.test(ch)?"#ff7ab0":"#c0a0b0";
+  if(mode==='trbclock') return (ch==="o"||ch===":"||/[0-9]/.test(ch))?"#f0f0e0":"#c0a060";
+  if(mode==='trbtower') return ch==="~"?"#2e9bd8":"#7a8aa0";
+  if(mode==='trbspark') return "#ffe060";
+  if(mode==='trbdust'){ const k=Math.random(); return k<0.4?"#a09080":(k<0.8?"#7a6a5a":"#c0b0a0"); }
+  if(mode==='trbreed') return "#4a8a3a";
+  if(mode==='trbduck'){ if(ch===">") return "#ff9a1a"; if(ch===".") return "#202020"; return "#5a9a4a"; }
   return "#cccccc";
 }
 
+// colours become classes whose rules are added through the CSSOM (which CSP doesn't
+// restrict), so painted spans need no inline style attributes; the palette is all
+// fixed hex literals, so this stays a small, bounded set of rules
+const paintSheet=document.getElementById('paintColors').sheet, paintClasses=new Map();
+function colorClass(col){
+  let k=paintClasses.get(col);
+  if(!k){ k='k'+paintClasses.size.toString(36); paintSheet.insertRule('#scene .'+k+'{color:'+col+'}',paintSheet.cssRules.length); paintClasses.set(col,k); }
+  return k;
+}
 // Build an HTML string from a char grid + a same-shape "mode grid".
 // modeGrid[r][c] gives the palette mode for that cell; falls back to base.
 function paint(grid, modeGrid, base){
@@ -1819,11 +1875,11 @@ function paint(grid, modeGrid, base){
       // escape html-sensitive chars
       if(ch==="<")ch="&lt;"; else if(ch===">")ch="&gt;"; else if(ch==="&")ch="&amp;";
       if(col!==curColor){
-        if(buf) out+= curColor?`<span style="color:${curColor}">${buf}</span>`:buf;
+        if(buf) out+= curColor?`<span class="${colorClass(curColor)}">${buf}</span>`:buf;
         buf=ch; curColor=col;
       } else buf+=ch;
     }
-    if(buf) out+= curColor?`<span style="color:${curColor}">${buf}</span>`:buf;
+    if(buf) out+= curColor?`<span class="${colorClass(curColor)}">${buf}</span>`:buf;
     out+="\n";
   }
   return out;
@@ -2239,7 +2295,8 @@ const METHOD_FILES = {
   72: 'blobby.js',
   73: 'dumpsterfire.js',
   74: 'barney.js',
-  75: 'blobbyvsbarney.js'
+  75: 'blobbyvsbarney.js',
+  76: 'matilda.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2469,12 +2526,14 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WISH ON THE PLUSH"; sub.style.color="#c060b0"; sub.style.textShadow="0 0 8px #3aa050"; } }
   else if(cmdColor===75){ cmd.style.color="#ff5ac0"; cmd.style.textShadow="0 0 18px #a0308a";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — CLASH OF THE WOBBLY TITANS"; sub.style.color="#ff5ac0"; sub.style.textShadow="0 0 8px #a0308a"; } }
+  else if(cmdColor===76){ cmd.style.color="#8ab04a"; cmd.style.textShadow="0 0 18px #4a6a2a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SWING HER BY THE PIGTAILS"; sub.style.color="#8ab04a"; sub.style.textShadow="0 0 8px #4a6a2a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%76; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%77; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
