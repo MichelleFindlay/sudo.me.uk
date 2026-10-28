@@ -307,6 +307,9 @@ if (isset($_GET['stats'])) {
   #methodBox .m-barney { color:#a0308a; text-shadow:0 0 8px #3aa050; }
   #methodBox .m-clash { color:#ff5ac0; text-shadow:0 0 8px #a0308a; }
   #methodBox .m-matilda { color:#8ab04a; text-shadow:0 0 8px #c0302a; }
+  #methodBox .m-elmo { color:#e8262a; text-shadow:0 0 8px #ff8a1a; }
+  #methodBox .m-pingu { color:#e8f0ff; text-shadow:0 0 8px #ff8a1a; }
+  #methodBox .m-cheese { color:#ffd23a; text-shadow:0 0 8px #c08a10; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -546,6 +549,9 @@ if (isset($_GET['stats'])) {
       <a href="?m=74" class="m-barney pick" data-method="74" data-cat="fun">Barney</a>
       <a href="?m=75" class="m-clash pick" data-method="75" data-cat="fun">Blobby vs Barney</a>
       <a href="?m=76" class="m-matilda pick" data-method="76" data-cat="movie">Matilda</a>
+      <a href="?m=77" class="m-elmo pick" data-method="77" data-cat="fun">Elmo</a>
+      <a href="?m=78" class="m-pingu pick" data-method="78" data-cat="fun">Pingu</a>
+      <a href="?m=79" class="m-cheese pick" data-method="79" data-cat="fun">Cheese</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1847,6 +1853,37 @@ function colorFor(ch,r,c,mode){
   if(mode==='trbspark') return "#ffe060";
   if(mode==='trbdust'){ const k=Math.random(); return k<0.4?"#a09080":(k<0.8?"#7a6a5a":"#c0b0a0"); }
   if(mode==='trbreed') return "#4a8a3a";
+  if(mode==='elmo'||mode==='elmomad'){                             // Elmo
+    if(ch==="("||ch===")") return "#ffffff";                       // eyes
+    if(ch==="O") return mode==='elmomad'?"#ff2020":"#101010";      // pupils, until the toast burns
+    if(ch==="@") return "#ff8a1a";                                 // nose
+    if(ch==="_"||ch==="'"||ch==="/"||ch==="\\") return "#3a0a0a";  // mouth
+    return (r+c)%3?"#e8262a":"#c81a1e";                            // fur
+  }
+  if(mode==='cheese') return ch==="o"?"#d09a10":((r+c)%2?"#ffd23a":"#ffe070");   // Cheese
+  if(mode==='chwheel') return ch==="o"?"#c08a10":((ch===":")?"#ffd23a":"#e0a020");
+  if(mode==='chmoon') return ch==="O"?"#a07a10":((ch===":")?((r+c)%3?"#ffe070":"#ffd23a"):"#d0a020");
+  if(mode==='chfondue') return (Math.random()<0.5)?"#ffc820":"#f0a010";
+  if(mode==='chsun') return "#fff060";
+  if(mode==='chsunhot') return (Math.random()<0.5)?"#ff8a1a":"#ffd23a";
+  if(mode==='chcloud') return "#e8eef8";
+  if(mode==='chcloudy') return "#ffe060";
+  if(mode==='chcrack') return "#f0f0f0";
+  if(mode==='chlamp') return ch==="o"?"#ffe8a0":"#8a92a0";
+  if(mode==='chmouse') return ch==="^"?"#ff9ab0":"#b0b0b8";
+  if(mode==='chtext') return "#ffffff";
+  if(mode==='pingu'){                                              // Pingu
+    if(ch==="o"||ch==="^"||ch===":"||ch==="("||ch===")") return "#f4f6ff";   // eyes, belly
+    if(ch==="="||ch==="<"||ch===">") return "#ff8a1a";             // beak, feet
+    return "#0c0c16";                                              // the rest of him
+  }
+  if(mode==='pgsnow') return "#e8f0ff";
+  if(mode==='pgdust') return (Math.random()<0.5)?"#c8d0dc":"#9aa4b4";
+  if(mode==='pgfish') return ch===">"?"#ff9a3a":"#c0d0e0";
+  if(mode==='elmtoaster') return ch==="="?"#5a5a62":"#c8ccd4";
+  if(mode==='elmtoast') return "#2a1a10";                          // burnt
+  if(mode==='elmgold') return "#e0a850";                           // perfectly golden
+  if(mode==='elmsmoke') return (Math.random()<0.5)?"#7a7a7a":"#5a5a5a";
   if(mode==='trbduck'){ if(ch===">") return "#ff9a1a"; if(ch===".") return "#202020"; return "#5a9a4a"; }
   return "#cccccc";
 }
@@ -2296,7 +2333,10 @@ const METHOD_FILES = {
   73: 'dumpsterfire.js',
   74: 'barney.js',
   75: 'blobbyvsbarney.js',
-  76: 'matilda.js'
+  76: 'matilda.js',
+  77: 'elmo.js',
+  78: 'pingu.js',
+  79: 'cheese.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2528,12 +2568,18 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — CLASH OF THE WOBBLY TITANS"; sub.style.color="#ff5ac0"; sub.style.textShadow="0 0 8px #a0308a"; } }
   else if(cmdColor===76){ cmd.style.color="#8ab04a"; cmd.style.textShadow="0 0 18px #4a6a2a";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SWING HER BY THE PIGTAILS"; sub.style.color="#8ab04a"; sub.style.textShadow="0 0 8px #4a6a2a"; } }
+  else if(cmdColor===77){ cmd.style.color="#e8262a"; cmd.style.textShadow="0 0 18px #ff8a1a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — MAKE ELMO SOME TOAST"; sub.style.color="#ff5a5a"; sub.style.textShadow="0 0 8px #ff8a1a"; } }
+  else if(cmdColor===78){ cmd.style.color="#e8f0ff"; cmd.style.textShadow="0 0 18px #ff8a1a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — FEED PINGU A FISH"; sub.style.color="#e8f0ff"; sub.style.textShadow="0 0 8px #ff8a1a"; } }
+  else if(cmdColor===79){ cmd.style.color="#ffd23a"; cmd.style.textShadow="0 0 18px #c08a10";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SAY CHEESE"; sub.style.color="#ffd23a"; sub.style.textShadow="0 0 8px #c08a10"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%77; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%80; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
