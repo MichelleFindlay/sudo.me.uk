@@ -1,6 +1,6 @@
 # sudo.me.uk
 
-A stupid little ASCII terminal simulator that destroys a procedurally generated city 80 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
+A stupid little ASCII terminal simulator that destroys a procedurally generated city 91 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
 
 🔗 **Live:** [sudo.me.uk](https://sudo.me.uk)
 
@@ -12,7 +12,7 @@ No backend logic, no database, no point. Just a page that renders everything as 
 
 ## Methods
 
-All 80 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
+All 91 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 
 | # | Method | Category | What happens |
 |---|--------|----------|---------------|
@@ -96,12 +96,23 @@ All 80 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 | 77 | Elmo | Whimsical | Someone gives Elmo a toaster. The toast burns, and Elmo bounces across town firing burnt toast until everything is rubble |
 | 78 | Pingu | Whimsical | Pingu eats a very unusual fish, grows to giant size, and stomps the skyline flat — NOOT NOOT |
 | 79 | Cheese | Whimsical | It rains cheese, a giant wheel rolls through, the rest melts into a fondue flood, and then a cheese moon lands on the city |
+| 80 | Oops | Whimsical | The whole city runs off one wall socket, and a giant hand needs to charge its phone. "oops." Segmentation fault (core dumped) |
+| 81 | Pac-Man | Movie/game | Pac-Man sweeps the skyline lane by lane, eating the city in chunks — with ghosts, a power pellet, and a level-clear flash |
+| 82 | Goat Simulator | Movie/game | Feature creep: a goat licks half the street onto its tongue, glitches the city, unlocks a jetpack, and headbutts the town hall into orbit. +1,000,000 POINTS |
+| 83 | THX | Movie/game | The Audience Is Listening: an outdoor screening's Deep Note builds into one perfect chord that resonates the whole city into dust |
+| 84 | Lego | Whimsical | Some Assembly Required: a brick city sings and dances itself to pieces, and the instructions say step 1 of 46,000 |
+| 85 | Thomas the Tank Engine | Movie/game | Thomas has a very important crate to deliver to the town hall, which isn't on the railway, so he takes a shortcut. So does everyone else |
+| 86 | Tank Engine | Movie/game | A tiny blue dot, a train whistle Doppler-shifting downward, and a cheerful tank engine falling nose-first onto the town square |
+| 87 | Teletubbies | Whimsical | Eh-oh! A hill appears in the square, the custard won't stop, the city goes on a loop, and a big hug leaves nothing but a smooth green hill |
+| 88 | Trashpanda | Whimsical | Trash Pandemonium: one raccoon tips one bin, and by the end the city is a junk mountain with a raccoon on a shopping-trolley throne |
+| 89 | Doom Crossing | Movie/game | A new resident moves into a cosy island village. Then a hell portal opens by the museum. Island rating: one star |
+| 90 | Nokia 3310 | Whimsical | The indestructible phone in the gutter rings, launches Snake across the city, and survives the tanks. R U OK? X |
 
 ## How it works
 
 Everything is rendered as monospace text — a shared procedural city generator builds a skyline, a character-grid painter colors each cell per "mode," and a state machine of animation phases drives each scenario frame by frame. No canvas, no images, no sprites — just strings and `setTimeout`.
 
-Each of the 80 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 80 methods' worth of code up front.
+Each of the 91 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 91 methods' worth of code up front.
 
 Every method also has a real, shareable URL (`?m=<id>`) that launches it directly, and a share button in the bottom-right corner lets you share either the current destruction or the bare site link.
 
