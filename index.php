@@ -310,6 +310,17 @@ if (isset($_GET['stats'])) {
   #methodBox .m-elmo { color:#e8262a; text-shadow:0 0 8px #ff8a1a; }
   #methodBox .m-pingu { color:#e8f0ff; text-shadow:0 0 8px #ff8a1a; }
   #methodBox .m-cheese { color:#ffd23a; text-shadow:0 0 8px #c08a10; }
+  #methodBox .m-oops { color:#ffd890; text-shadow:0 0 8px #3a7aff; }
+  #methodBox .m-pacman { color:#ffe600; text-shadow:0 0 8px #2121de; }
+  #methodBox .m-goat { color:#f0ece4; text-shadow:0 0 8px #3a9a3a; }
+  #methodBox .m-thx { color:#e8d8a0; text-shadow:0 0 8px #806020; }
+  #methodBox .m-lego { color:#ffd500; text-shadow:0 0 8px #d01010; }
+  #methodBox .m-thomas { color:#3a7aff; text-shadow:0 0 8px #d02020; }
+  #methodBox .m-tankengine { color:#6ab0ff; text-shadow:0 0 8px #ff8a1a; }
+  #methodBox .m-tubbies { color:#ffe066; text-shadow:0 0 8px #9a4ad0; }
+  #methodBox .m-trashpanda { color:#c8c0b0; text-shadow:0 0 8px #5a5a6a; }
+  #methodBox .m-doomx { color:#8ad040; text-shadow:0 0 8px #ff3010; }
+  #methodBox .m-nokia { color:#9adf5a; text-shadow:0 0 8px #4a6a9a; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -552,6 +563,17 @@ if (isset($_GET['stats'])) {
       <a href="?m=77" class="m-elmo pick" data-method="77" data-cat="fun">Elmo</a>
       <a href="?m=78" class="m-pingu pick" data-method="78" data-cat="fun">Pingu</a>
       <a href="?m=79" class="m-cheese pick" data-method="79" data-cat="fun">Cheese</a>
+      <a href="?m=80" class="m-oops pick" data-method="80" data-cat="fun">Oops</a>
+      <a href="?m=81" class="m-pacman pick" data-method="81" data-cat="movie">Pac-Man</a>
+      <a href="?m=82" class="m-goat pick" data-method="82" data-cat="movie">Goat Simulator</a>
+      <a href="?m=83" class="m-thx pick" data-method="83" data-cat="movie">THX</a>
+      <a href="?m=84" class="m-lego pick" data-method="84" data-cat="fun">Lego</a>
+      <a href="?m=85" class="m-thomas pick" data-method="85" data-cat="movie">Thomas</a>
+      <a href="?m=86" class="m-tankengine pick" data-method="86" data-cat="movie">Tank Engine</a>
+      <a href="?m=87" class="m-tubbies pick" data-method="87" data-cat="fun">Teletubbies</a>
+      <a href="?m=88" class="m-trashpanda pick" data-method="88" data-cat="fun">Trashpanda</a>
+      <a href="?m=89" class="m-doomx pick" data-method="89" data-cat="movie">Doom Crossing</a>
+      <a href="?m=90" class="m-nokia pick" data-method="90" data-cat="fun">Nokia 3310</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1860,6 +1882,271 @@ function colorFor(ch,r,c,mode){
     if(ch==="_"||ch==="'"||ch==="/"||ch==="\\") return "#3a0a0a";  // mouth
     return (r+c)%3?"#e8262a":"#c81a1e";                            // fur
   }
+  if(mode==='nkphone') return ch==="#"?"#4a5a7a":"#8a9ab8";       // Nokia 3310: grey-blue, indestructible
+  if(mode==='nkphonelit') return ch==="="?"#9adf5a":"#8a9ab8";
+  if(mode==='nkbig') return /[A-Z0-9]/.test(ch)?"#e0e8f0":"#7a8aa8";
+  if(mode==='nkscreen') return "#9adf5a";
+  if(mode==='nksnake') return ch==="@"?"#d0ff80":"#6ac030";
+  if(mode==='nkgameover') return (Math.random()<0.5)?"#9adf5a":"#d0ff80";
+  if(mode==='nkleaf') return ch==="&"?"#8a6a2a":"#a08030";
+  if(mode==='nkcrack') return "#e0e0e0";
+  if(mode==='nkring') return (Math.random()<0.5)?"#ffe060":"#ffffff";
+  if(mode==='nkprop') return "#8a92a0";
+  if(mode==='nksmart') return (Math.random()<0.5)?"#a0d0ff":"#ffffff";
+  if(mode==='nkglass') return (Math.random()<0.5)?"#e0f0ff":"#a0c0e0";
+  if(mode==='nkpiano') return ch==="#"?"#101010":"#e8e8e8";
+  if(mode==='nkdrill') return ch==="T"||ch==="|"&&c>0?"#ffd020":"#e8c090";
+  if(mode==='nktank') return "#6a7a4a";
+  if(mode==='nkshell') return "#ffe060";
+  if(mode==='nkbattery') return "#9adf5a";
+  if(mode==='nksmoke') return (Math.random()<0.5)?"#8a8a92":"#6a6a72";
+  if(mode==='nktext') return "#ffffff";
+  if(mode==='dcguy') return ch==="="||ch==="-"?"#ffb020":(ch==="#"?"#4a6a2a":"#5a8a3a");   // Doom Crossing
+  if(mode==='dcdog') return ch==="o"?"#202020":(ch==="#"||ch==="="||ch==="["||ch==="]"?"#c04060":"#f0d050");
+  if(mode==='dcgrass') return (c%2)?"#5ac040":"#4aa830";
+  if(mode==='dcscorch') return "#4a3a2a";
+  if(mode==='dcwood') return "#a0703a";
+  if(mode==='dcsign') return "#fff0c0";
+  if(mode==='dctree') return ch==="o"?"#ff5040":(ch==="|"?"#8a5a2a":"#3aa040");
+  if(mode==='dchouse') return ch==="/"||ch==="\\"?"#c0503a":(ch==="["||ch==="]"?"#ffe080":"#c8a070");
+  if(mode==='dcmuseum') return /[A-Z]/.test(ch)?"#ffffff":"#d8ccb0";
+  if(mode==='dcflower') return ch===","?"#6a4a2a":["#ff70b0","#ffe060","#ffffff"][c%3];
+  if(mode==='dctent') return /[A-Z]/.test(ch)?"#ffffff":"#3a9ad0";
+  if(mode==='dcmytent') return "#6a7a4a";
+  if(mode==='dclava') return (Math.random()<0.5)?"#ff3010":"#ffa020";
+  if(mode==='dcportal') return ch==="@"?((Math.random()<0.5)?"#ff3010":"#ff9020"):"#a01010";
+  if(mode==='dcimp') return ch==="^"?"#e0e0e0":(ch==="o"||ch==="O"?"#ffe020":"#a04020");
+  if(mode==='dcking') return ch==="^"||ch==="\\"||ch==="/"?"#e0e0e0":(ch==="O"?"#ffe020":"#901818");
+  if(mode==='dcbfg') return (Math.random()<0.5)?"#7aff5a":"#e0ffe0";
+  if(mode==='dcbfgun') return /[A-Z]/.test(ch)?"#7aff5a":"#8a92a0";
+  if(mode==='dcsaw') return "#ffd020";
+  if(mode==='dcsaw2') return "#c0c8d0";
+  if(mode==='dcbone') return "#f0e8d0";
+  if(mode==='dcplant') return ch==="*"?"#40c040":(ch==="u"?"#c06030":"#8a92a0");
+  if(mode==='dclist') return "#fff8e0";
+  if(mode==='dccoon') return ch==="o"?"#ffffff":(ch==="-"?"#101010":(ch==="="||ch==="["||ch==="]"?"#4aa0a0":"#8a8a94"));
+  if(mode==='dcplane') return ch==="~"?"#8ad0ff":"#e8e8f0";
+  if(mode==='dctally') return "#ffffff";
+  if(mode==='dccoffee') return "#c8a070";
+  if(mode==='dcsmoke') return (Math.random()<0.5)?"#8a8a92":"#a8a8b0";
+  if(mode==='dcbug') return (Math.random()<0.5)?"#ff9a30":"#ffe060";
+  if(mode==='dcnet') return ch==="Q"?"#e0e0e0":"#a0703a";
+  if(mode==='dcammo') return "#ffd020";
+  if(mode==='dcmetal') return (Math.random()<0.5)?"#ff3010":"#ffffff";
+  if(mode==='dcturnip') return (Math.random()<0.5)?"#f0f0f0":"#c060c0";
+  if(mode==='dctext') return "#ffffff";
+  if(mode==='rcrac'){                                              // Trashpanda: the raccoons
+    if(ch==="o"||ch==="O") return "#f0f0f0";
+    if(ch==="-") return "#101010";                                 // the mask
+    if(ch==="~") return (c%2)?"#202020":"#9a9aa4";                // striped tail
+    return "#8a8a94";
+  }
+  if(mode==='rceyes') return (Math.random()<0.85)?"#ffe060":"#a08a20";
+  if(mode==='rchedge') return "#1e4a22";
+  if(mode==='rcbin') return ch==="#"?"#2a2a30":"#3a6a3a";
+  if(mode==='rctrash') return ["#a07a4a","#6a8a5a","#c8c0b0","#d06040","#5a6aa0","#e0c040"][(r*3+c)%6];
+  if(mode==='rchole') return "#101010";
+  if(mode==='rcbox') return "#d8b070";
+  if(mode==='rclorry') return /[A-Z]/.test(ch)?"#ffffff":(ch==="o"?"#202020":"#30a040");
+  if(mode==='rchome') return ch==="o"||ch===")"?"#c8c8d0":"#e0a050";
+  if(mode==='rcpizza') return ch===":"?"#d04020":"#f0b040";
+  if(mode==='rcsandwich') return ch==="="?"#80c050":"#e8c890";
+  if(mode==='rcthrone') return "#a0a8b8";
+  if(mode==='rchat') return "#ffd500";
+  if(mode==='rcchip') return "#f0d060";
+  if(mode==='rcmoney') return "#50c050";
+  if(mode==='rccan') return (Math.random()<0.5)?"#e04040":"#4080e0";
+  if(mode==='rcatm') return /[A-Z]/.test(ch)?"#ffffff":(ch==="$"?"#50c050":"#6a7a9a");
+  if(mode==='rcvend') return /[A-Z]/.test(ch)?"#ffffff":(ch==="o"?"#e04040":"#c03030");
+  if(mode==='rcvault') return "#c8c8d0";
+  if(mode==='rcbike') return "#40a0e0";
+  if(mode==='rcphone') return "#202030";
+  if(mode==='rcbus') return "#d81e1e";
+  if(mode==='rcheart') return "#ff70a0";
+  if(mode==='rctext') return "#e8e0d0";
+  if(mode==='tbt0'||mode==='tbt1'||mode==='tbt2'||mode==='tbt3'){   // Teletubbies: purple, green, yellow, red
+    if(ch==="o") return "#202020";
+    if(ch===".") return "#f0c8a0";
+    if(ch==="#") return (Math.random()<0.5)?"#ffffff":"#c8e8ff";  // tummy screen, lit
+    if(ch==="["||ch==="]") return "#b0b0b8";
+    return ["#9a4ad0","#50c040","#f0e040","#e03030"][+mode[3]];
+  }
+  if(mode==='tbsun') return "#ffe066";
+  if(mode==='tbbaby') return ch==="^"?"#4a2a10":(ch==="v"||ch==="o"?"#e04060":"#f8d0a0");
+  if(mode==='tbgrass') return (r+c)%2?"#4ac040":"#3aa030";
+  if(mode==='tbgrasstop') return "#7ae060";
+  if(mode==='tbflower') return ["#ff70b0","#ffe060","#ffffff"][(r+c)%3];
+  if(mode==='tbrabbit') return "#f0ece4";
+  if(mode==='tblamp') return ch==="o"?"#ffe8a0":"#8a92a0";
+  if(mode==='tbbus') return ch==="["||ch==="]"?"#a0d0ff":(ch==="o"?"#202020":"#d81e1e");
+  if(mode==='tbbin') return "#4a8a4a";
+  if(mode==='tbcoffee') return "#c8a070";
+  if(mode==='tbpigeon') return ch==="v"?"#a0a0b0":"#ff9a30";
+  if(mode==='tbcustard') return (Math.random()<0.5)?"#ff9ac8":"#ff7ab0";
+  if(mode==='tbmachine') return ch==="@"?"#ff7ab0":"#a0a0a8";
+  if(mode==='tbtrumpet') return ch==="O"?"#202020":"#d0c060";
+  if(mode==='tbnoonoo') return ch==="o"?"#ffffff":"#3a7ae8";
+  if(mode==='tbvideo0') return "#50c040";                         // the same video, everywhere
+  if(mode==='tbvideo1') return "#8ad0ff";
+  if(mode==='tbvideo2') return "#ffe060";
+  if(mode==='tbvideo3') return "#ff9ac8";
+  if(mode==='tbtext') return "#ffffff";
+  if(mode==='tkbody') return ch==="="||ch==="_"?"#d02020":"#3a7aff";   // Tank Engine, Incoming
+  if(mode==='tkfin') return "#8a92a0";
+  if(mode==='tkface') return ch==="o"||ch==="O"?"#202020":"#d0d4dc";
+  if(mode==='tkwheel') return "#d02020";
+  if(mode==='tknum') return "#ffd500";
+  if(mode==='tkwin') return "#a0d0ff";
+  if(mode==='tksquare') return "#a0a0a8";
+  if(mode==='tksign') return /[A-Z]/.test(ch)?"#ffffff":"#3a6ad0";
+  if(mode==='tkwindow') return "#f0c8a0";
+  if(mode==='tkfire') return (Math.random()<0.5)?"#ff9a20":"#ffe060";
+  if(mode==='tksmoke') return ["#8a8a92","#a8a8b0","#6a6a72"][(Math.random()*3)|0];
+  if(mode==='tkfacesmoke') return "#e8e8ee";
+  if(mode==='tkring') return (Math.random()<0.5)?"#e8d0b0":"#ffffff";
+  if(mode==='tkrail') return ch==="+"?"#7a5a3a":"#c0c0c8";
+  if(mode==='tksooty') return ch==="u"||ch==="("||ch===")"?"#a0a4ac":(ch==="1"?"#c0a020":"#2a3a6a");
+  if(mode==='tkfaint') return "#7a9ad0";
+  if(mode==='tkshriek') return (Math.random()<0.5)?"#ffffff":"#ff4040";
+  if(mode==='tknote') return (Math.random()<0.5)?"#ffd500":"#6ab0ff";
+  if(mode==='tktext') return "#ffffff";
+  if(mode==='ttbody') return ch==="="||ch==="_"&&r>=streetRow-2?"#d02020":"#2a6ae8";   // Thomas: blue, red trim
+  if(mode==='ttgreen') return "#30a040";
+  if(mode==='ttred') return "#d83030";
+  if(mode==='ttblack') return (r+c)%2?"#5a5a68":"#3a3a48";
+  if(mode==='ttface') return ch==="o"||ch==="O"?"#202020":"#d0d4dc";
+  if(mode==='ttwheel') return "#d02020";
+  if(mode==='ttnum') return "#ffd500";
+  if(mode==='ttwin') return "#a0d0ff";
+  if(mode==='ttcrate') return /[A-Z]/.test(ch)?"#3a2a10":"#c8964a";
+  if(mode==='ttcroissant') return "#e0a040";
+  if(mode==='ttbike') return "#40a0e0";
+  if(mode==='ttbus') return ch==="["||ch==="]"?"#a0d0ff":(ch==="o"?"#202020":"#d81e1e");
+  if(mode==='ttfamily') return ch==="o"?"#f0c8a0":(ch==="("||ch===")"?"#c06060":"#8a5a3a");
+  if(mode==='ttstation') return "#a08a6a";
+  if(mode==='ttsign') return "#ffffff";
+  if(mode==='ttrail') return ch==="+"?"#7a5a3a":"#a0a0a8";
+  if(mode==='ttbuffer') return "#d02020";
+  if(mode==='ttbakery') return /[A-Z]/.test(ch)?"#ffd0a0":"#c8a070";
+  if(mode==='ttlibrary') return /[A-Z]/.test(ch)?"#ffffff":(ch==="="?"#8a3a3a":"#9a8a7a");
+  if(mode==='ttshops') return /[A-Z]/.test(ch)?"#ff5a8a":"#a0a0b8";
+  if(mode==='tthouse') return ch==="/"||ch==="\\"?"#c0503a":"#d8c8a8";
+  if(mode==='tthall') return /[A-Z]/.test(ch)?"#ffe080":"#d8ccb0";
+  if(mode==='ttboss') return ch==="o"?"#f0c8a0":(ch==="#"?"#e8e8e8":"#2a2a2a");
+  if(mode==='ttsteam') return (Math.random()<0.5)?"#e8eef4":"#b8c0cc";
+  if(mode==='ttspark') return (Math.random()<0.5)?"#ffe060":"#ff9030";
+  if(mode==='ttlabel') return (ch==="+"||ch==="-"||ch==="|")?"#c8964a":"#f4ecd8";
+  if(mode==='ttbig') return (Math.random()<0.5)?"#ffffff":"#ffd500";
+  if(mode==='tttext') return "#ffffff";
+  if(mode==='lgb0') return ch==="o"?"#ff6060":"#e82020";           // Lego: red, blue, yellow, green, white, orange bricks
+  if(mode==='lgb1') return ch==="o"?"#6ab0ff":"#2a7ad8";
+  if(mode==='lgb2') return ch==="o"?"#ffe040":"#f5c000";
+  if(mode==='lgb3') return ch==="o"?"#50d070":"#20a845";
+  if(mode==='lgb4') return ch==="o"?"#ffffff":"#e0e0e0";
+  if(mode==='lgb5') return ch==="o"?"#ffa040":"#ff7f00";
+  if(mode==='lgfig') return "#ffd500";
+  if(mode==='lglegs') return "#3a3a6a";
+  if(mode==='lgpolice') return "#1a3aa0";
+  if(mode==='lggown') return ch==="%"?"#e070a0":(ch==="|"?"#f0c8a0":"#ffd500");
+  if(mode==='lgscaffold') return ch==="o"?"#202020":(ch==="["||ch==="]"||ch==="="&&r<streetRow-4?"#d01010":"#a0a0a8");
+  if(mode==='lgcrane') return "#f5c000";
+  if(mode==='lgfountain') return "#a0a8b8";
+  if(mode==='lgtree') return ch==="|"?"#7a4a20":"#00852b";
+  if(mode==='lgbus') return ch==="("||ch===")"||ch===":"?"#ffd500":(ch==="["||ch==="]"?"#a0d0ff":"#d01010");
+  if(mode==='lgpigeon') return ch===">"||ch==="v"?"#ff9a30":"#9a9aa8";
+  if(mode==='lgnote') return (Math.random()<0.5)?"#ffd500":"#ff70b0";
+  if(mode==='lgtext') return "#ffd500";
+  if(mode==='lgclick') return "#c8ccd4";
+  if(mode==='lgbook') return "#f4f0e4";
+  if(mode==='lgbookink') return "#ffffff";
+  if(mode==='txtone0') return "#6a7aff";                           // THX: the tones, converging
+  if(mode==='txtone1') return "#a06aff";
+  if(mode==='txtone2') return "#6ad0ff";
+  if(mode==='txtone3') return "#ff8ad0";
+  if(mode==='txchord') return (Math.random()<0.5)?"#fff4c0":"#ffd060";
+  if(mode==='txaerial') return "#8a92a0";
+  if(mode==='txpigeon') return "#a0a0b0";
+  if(mode==='txalarm') return (Math.random()<0.5)?"#ff3030":"#ffb020";
+  if(mode==='txframe') return "#5a5a6a";
+  if(mode==='txscreen') return (Math.random()<0.9)?"#e0e8ff":"#8090b0";
+  if(mode==='txlogo') return "#d0b870";
+  if(mode==='txlogohot') return (Math.random()<0.5)?"#ffffff":"#ffe080";
+  if(mode==='txcrowd') return "#9a8a7a";
+  if(mode==='txpopcorn') return ch==="*"?"#fff8e0":"#e04040";
+  if(mode==='txface') return "#f0c8a0";
+  if(mode==='txglasses') return "#202020";
+  if(mode==='txbooth') return /[A-Z]/.test(ch)?"#ffe080":"#6a6a7a";
+  if(mode==='txbutton') return "#ff4040";
+  if(mode==='txsurvivor') return "#a09888";
+  if(mode==='txcrispbag') return "#ff9a30";
+  if(mode==='txglass') return ["#e0f8ff","#a0e0ff","#ffffff","#c0c8ff"][(Math.random()*4)|0];
+  if(mode==='txdust') return ["#ffe0a0","#e0c0ff","#a0e0ff","#ffd0e0"][(Math.random()*4)|0];
+  if(mode==='txclock') return ch==="o"?"#e0b030":"#c8b890";
+  if(mode==='txtext') return "#e8d8a0";
+  if(mode==='goat'){                                               // Goat Simulator
+    if(ch==="o") return "#202020";                                 // eye
+    if(ch===">"||ch==="=") return "#ff9ab0";                       // mouth
+    if(ch==="|"&&r>0) return "#c8c0b0";
+    if(ch==="["||ch==="#") return "#6a6a80";                       // jetpack
+    return "#f0ece4";
+  }
+  if(mode==='gttongue') return "#ff7aa0";
+  if(mode==='gtlamp') return ch==="o"?"#ffe8a0":"#8a92a0";
+  if(mode==='gtbin') return "#4a8a4a";
+  if(mode==='gtbike') return "#40a0e0";
+  if(mode==='gtcar') return ch==="o"?"#202020":"#e04040";
+  if(mode==='gtbus') return ch==="["||ch==="]"?"#a0d0ff":(ch==="o"?"#202020":"#d81e1e");
+  if(mode==='gtrb') return "#8a92a0";
+  if(mode==='gtsign') return /[A-Z]/.test(ch)?"#ffffff":"#3a6ad0";
+  if(mode==='gtpetrol') return /[A-Z]/.test(ch)?"#ffe040":"#2a9a4a";
+  if(mode==='gttower') return ch==="["||ch==="]"?"#a0c8ff":"#7a8aa8";
+  if(mode==='gthall') return ch==="o"?"#ffe8a0":"#d8ccb0";
+  if(mode==='gtdog') return "#c8904a";
+  if(mode==='gtpoints') return (Math.random()<0.5)?"#ffe040":"#ff9a30";
+  if(mode==='gtclang') return "#c8ccd4";
+  if(mode==='gtbanner') return "#7aff5a";
+  if(mode==='gtdust') return "#a09888";
+  if(mode==='pacman') return "#ffe600";                             // Pac-Man
+  if(mode==='pmblinky') return ch==="o"?"#ffffff":"#ff0000";
+  if(mode==='pmpinky') return ch==="o"?"#ffffff":"#ffb8ff";
+  if(mode==='pminky') return ch==="o"?"#ffffff":"#00ffff";
+  if(mode==='pmclyde') return ch==="o"?"#ffffff":"#ffb852";
+  if(mode==='pmscared') return ch==="o"?"#ffb8ae":"#2121de";
+  if(mode==='pmghostwhite') return ch==="o"?"#ff0000":"#ffffff";
+  if(mode==='pmeyes') return "#ffffff";
+  if(mode==='pmdot') return "#ffb8ae";
+  if(mode==='pmpellet') return "#ffb8ae";
+  if(mode==='pmcrumb') return "#ffe600";
+  if(mode==='pmflashw') return "#ffffff";
+  if(mode==='pmflashb') return "#2121de";
+  if(mode==='pmready') return "#ffe600";
+  if(mode==='pmpoints') return "#00ffff";
+  if(mode==='pmscore') return "#ffffff";
+  if(mode==='pmtext') return "#ffe600";
+  if(mode==='oodark') return "#2a2e3a";                            // Oops: a district with no power
+  if(mode==='oobright') return (Math.random()<0.5)?"#ffffff":"#fff4a0";
+  if(mode==='oomount') return ch==="."?"#4a3a3a":"#7a6a6a";
+  if(mode==='oosocket') return "#e8e8f0";
+  if(mode==='oobridge') return "#a08a6a";
+  if(mode==='oopost') return "#6a6a72";
+  if(mode==='oolightoff') return "#2a2a2a";
+  if(mode==='oolightred') return "#ff2a2a";
+  if(mode==='oolightamber') return "#ffb020";
+  if(mode==='oolightgreen') return "#30e060";
+  if(mode==='oocable') return ch==="="?"#9aa0b4":"#6a7084";
+  if(mode==='oospark') return (Math.random()<0.5)?"#6ab0ff":"#e0f0ff";
+  if(mode==='oosparkle') return "#fff4c0";
+  if(mode==='ooplug') return ch==="|"||ch==="-"?"#d0b060":"#f0f0f4";
+  if(mode==='oocharger') return "#ffffff";
+  if(mode==='oophone') return "#90a0b8";
+  if(mode==='ookettle') return "#c8ccd4";
+  if(mode==='ootoast') return "#d8a050";
+  if(mode==='oodryer') return (Math.random()<0.5)?"#ff70b0":"#ffffff";
+  if(mode==='oohouse') return ch==="/"||ch==="\\"?"#c0503a":"#d8c8a8";
+  if(mode==='oopop') return "#ffffff";
+  if(mode==='oosmoke') return (Math.random()<0.5)?"#b8b8c0":"#8a8a92";
+  if(mode==='oohand') return ch==="="?"#5a6aa0":"#f0c8a0";
+  if(mode==='ootext') return "#ffe0a0";
   if(mode==='cheese') return ch==="o"?"#d09a10":((r+c)%2?"#ffd23a":"#ffe070");   // Cheese
   if(mode==='chwheel') return ch==="o"?"#c08a10":((ch===":")?"#ffd23a":"#e0a020");
   if(mode==='chmoon') return ch==="O"?"#a07a10":((ch===":")?((r+c)%3?"#ffe070":"#ffd23a"):"#d0a020");
@@ -2336,7 +2623,18 @@ const METHOD_FILES = {
   76: 'matilda.js',
   77: 'elmo.js',
   78: 'pingu.js',
-  79: 'cheese.js'
+  79: 'cheese.js',
+  80: 'oops.js',
+  81: 'pacman.js',
+  82: 'goatsim.js',
+  83: 'thx.js',
+  84: 'lego.js',
+  85: 'thomas.js',
+  86: 'tankengine.js',
+  87: 'teletubbies.js',
+  88: 'trashpanda.js',
+  89: 'doomcrossing.js',
+  90: 'nokia.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2574,12 +2872,34 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — FEED PINGU A FISH"; sub.style.color="#e8f0ff"; sub.style.textShadow="0 0 8px #ff8a1a"; } }
   else if(cmdColor===79){ cmd.style.color="#ffd23a"; cmd.style.textShadow="0 0 18px #c08a10";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SAY CHEESE"; sub.style.color="#ffd23a"; sub.style.textShadow="0 0 8px #c08a10"; } }
+  else if(cmdColor===80){ cmd.style.color="#ffd890"; cmd.style.textShadow="0 0 18px #3a7aff";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — CHARGE YOUR PHONE"; sub.style.color="#ffd890"; sub.style.textShadow="0 0 8px #3a7aff"; } }
+  else if(cmdColor===81){ cmd.style.color="#ffe600"; cmd.style.textShadow="0 0 18px #2121de";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — INSERT COIN"; sub.style.color="#ffe600"; sub.style.textShadow="0 0 8px #2121de"; } }
+  else if(cmdColor===82){ cmd.style.color="#f0ece4"; cmd.style.textShadow="0 0 18px #3a9a3a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LICK SOMETHING"; sub.style.color="#f0ece4"; sub.style.textShadow="0 0 8px #3a9a3a"; } }
+  else if(cmdColor===83){ cmd.style.color="#e8d8a0"; cmd.style.textShadow="0 0 18px #806020";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — THE AUDIENCE IS LISTENING"; sub.style.color="#e8d8a0"; sub.style.textShadow="0 0 8px #806020"; } }
+  else if(cmdColor===84){ cmd.style.color="#ffd500"; cmd.style.textShadow="0 0 18px #d01010";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SOME ASSEMBLY REQUIRED"; sub.style.color="#ffd500"; sub.style.textShadow="0 0 8px #d01010"; } }
+  else if(cmdColor===85){ cmd.style.color="#3a7aff"; cmd.style.textShadow="0 0 18px #d02020";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — PEEP PEEP"; sub.style.color="#6ab0ff"; sub.style.textShadow="0 0 8px #d02020"; } }
+  else if(cmdColor===86){ cmd.style.color="#6ab0ff"; cmd.style.textShadow="0 0 18px #ff8a1a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LOOK UP"; sub.style.color="#6ab0ff"; sub.style.textShadow="0 0 8px #ff8a1a"; } }
+  else if(cmdColor===87){ cmd.style.color="#ffe066"; cmd.style.textShadow="0 0 18px #9a4ad0";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — EH-OH!"; sub.style.color="#ffe066"; sub.style.textShadow="0 0 8px #9a4ad0"; } }
+  else if(cmdColor===88){ cmd.style.color="#c8c0b0"; cmd.style.textShadow="0 0 18px #5a5a6a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — PUT THE BINS OUT"; sub.style.color="#c8c0b0"; sub.style.textShadow="0 0 8px #5a5a6a"; } }
+  else if(cmdColor===89){ cmd.style.color="#8ad040"; cmd.style.textShadow="0 0 18px #ff3010";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WELCOME TO THE ISLAND"; sub.style.color="#8ad040"; sub.style.textShadow="0 0 8px #ff3010"; } }
+  else if(cmdColor===90){ cmd.style.color="#9adf5a"; cmd.style.textShadow="0 0 18px #4a6a9a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — ANSWER THE PHONE"; sub.style.color="#9adf5a"; sub.style.textShadow="0 0 8px #4a6a9a"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%80; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%91; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
