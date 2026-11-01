@@ -1,6 +1,6 @@
 # sudo.me.uk
 
-A stupid little ASCII terminal simulator that destroys a procedurally generated city 91 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
+A stupid little ASCII terminal simulator that destroys a procedurally generated city 96 different ways. Pick your poison, watch the chaos animate in glorious green-on-black monospace, then hit reset and do it again.
 
 🔗 **Live:** [sudo.me.uk](https://sudo.me.uk)
 
@@ -12,7 +12,7 @@ No backend logic, no database, no point. Just a page that renders everything as 
 
 ## Methods
 
-All 91 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
+All 96 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 
 | # | Method | Category | What happens |
 |---|--------|----------|---------------|
@@ -107,12 +107,17 @@ All 91 methods, in picker order. Each has a real, shareable URL at `?m=<#>`.
 | 88 | Trashpanda | Whimsical | Trash Pandemonium: one raccoon tips one bin, and by the end the city is a junk mountain with a raccoon on a shopping-trolley throne |
 | 89 | Doom Crossing | Movie/game | A new resident moves into a cosy island village. Then a hell portal opens by the museum. Island rating: one star |
 | 90 | Nokia 3310 | Whimsical | The indestructible phone in the gutter rings, launches Snake across the city, and survives the tanks. R U OK? X |
+| 91 | Disney | Whimsical | Told as a kernel boot log: one boat ride, one song forking to every process in the city, and a world shrunk into a snow globe. Kernel panic - not syncing: everyone is syncing |
+| 92 | Nature | Whimsical | One dandelion becomes a meadow, the skyline becomes hedges, a stag becomes mayor, and humanity is gently composted. Please do not reinstall |
+| 93 | Team America | Movie/game | Marionette heroes on very visible strings liberate the town square, a café, the ducks, the mayor's office and the rest of the city. Another city saved |
+| 94 | Brian Blessed | Whimsical | A very loud, very happy man strides into town. HELLO! shatters every window; MAGNIFICENT! splits the Earth in half |
+| 95 | Red Bull | Whimsical | One crate in the reservoir and the whole city grows wings, takes up extreme sports, and leaves the planet. The Earth gets some rest |
 
 ## How it works
 
 Everything is rendered as monospace text — a shared procedural city generator builds a skyline, a character-grid painter colors each cell per "mode," and a state machine of animation phases drives each scenario frame by frame. No canvas, no images, no sprites — just strings and `setTimeout`.
 
-Each of the 91 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 91 methods' worth of code up front.
+Each of the 96 methods lives in its own file under `js/methods/`, fetched only the first time it's actually launched — the page itself just ships the shared engine and a small loader, not all 96 methods' worth of code up front.
 
 Every method also has a real, shareable URL (`?m=<id>`) that launches it directly, and a share button in the bottom-right corner lets you share either the current destruction or the bare site link.
 

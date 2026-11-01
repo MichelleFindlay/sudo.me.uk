@@ -321,6 +321,11 @@ if (isset($_GET['stats'])) {
   #methodBox .m-trashpanda { color:#c8c0b0; text-shadow:0 0 8px #5a5a6a; }
   #methodBox .m-doomx { color:#8ad040; text-shadow:0 0 8px #ff3010; }
   #methodBox .m-nokia { color:#9adf5a; text-shadow:0 0 8px #4a6a9a; }
+  #methodBox .m-disney { color:#7fff7f; text-shadow:0 0 8px #3a6aff; }
+  #methodBox .m-nature { color:#a8e080; text-shadow:0 0 8px #2a7a2a; }
+  #methodBox .m-teamamerica { color:#ffffff; text-shadow:0 0 8px #c02020; }
+  #methodBox .m-blessed { color:#ff4040; text-shadow:0 0 8px #ffd020; }
+  #methodBox .m-redbull { color:#ffcc33; text-shadow:0 0 8px #c81e3c; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -574,6 +579,11 @@ if (isset($_GET['stats'])) {
       <a href="?m=88" class="m-trashpanda pick" data-method="88" data-cat="fun">Trashpanda</a>
       <a href="?m=89" class="m-doomx pick" data-method="89" data-cat="movie">Doom Crossing</a>
       <a href="?m=90" class="m-nokia pick" data-method="90" data-cat="fun">Nokia 3310</a>
+      <a href="?m=91" class="m-disney pick" data-method="91" data-cat="fun">Disney</a>
+      <a href="?m=92" class="m-nature pick" data-method="92" data-cat="fun">Nature</a>
+      <a href="?m=93" class="m-teamamerica pick" data-method="93" data-cat="movie">Team America</a>
+      <a href="?m=94" class="m-blessed pick" data-method="94" data-cat="fun">Brian Blessed</a>
+      <a href="?m=95" class="m-redbull pick" data-method="95" data-cat="fun">Red Bull</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1882,6 +1892,114 @@ function colorFor(ch,r,c,mode){
     if(ch==="_"||ch==="'"||ch==="/"||ch==="\\") return "#3a0a0a";  // mouth
     return (r+c)%3?"#e8262a":"#c81a1e";                            // fur
   }
+  if(mode==='rdwing') return (Math.random()<0.5)?"#ffffff":"#e8eef8";   // Red Bull
+  if(mode==='rdglow') return (Math.random()<0.5)?"#ffcc33":"#fff4a0";
+  if(mode==='rdgown') return ch==="o"?"#f0c8a0":"#e070a0";
+  if(mode==='rdgran') return ch==="o"?"#f0c8a0":"#b080c0";
+  if(mode==='rdmug') return "#e8e8e8";
+  if(mode==='rdcan') return (r+c)%2?"#3a6ad0":"#c8ccd4";
+  if(mode==='rdlorry') return ch==="#"?"#c81e3c":(ch==="o"?"#202020":"#c8ccd4");
+  if(mode==='rdkettle') return ch==="~"?"#c8c8d0":"#a0a0a8";
+  if(mode==='rdbin') return "#3a7a3a";
+  if(mode==='rdtar') return "#2a2a2a";
+  if(mode==='rdplane') return "#e8eefc";
+  if(mode==='rdsat') return (Math.random()<0.5)?"#a0c8ff":"#e0e0e0";
+  if(mode==='rdiss') return ch==="#"?"#3a6ad0":"#e0e0e0";
+  if(mode==='rdstar') return "#ffffff";
+  if(mode==='rdpigeon') return "#a0a0b0";
+  if(mode==='rdsign') return "#a0d0ff";
+  if(mode==='rdtext') return "#ffffff";
+  if(mode==='bbman'){                                              // Brian Blessed
+    if(ch==="o"||ch==="O") return "#202020";
+    if(ch==="#") return "#e8e8ec";                                 // the beard
+    if(ch==="("||ch===")"||ch==="."||ch==="-") return "#f0c0a0";
+    if(ch==="/"||ch==="\\"||ch==="|"&&(c%2)) return "#c01818";   // the cape
+    return "#6a4a2a";
+  }
+  if(mode==='bbbig') return (Math.random()<0.5)?"#ff4040":"#ffd020";
+  if(mode==='bbecho') return "#6a6a7a";
+  if(mode==='bbglass') return (Math.random()<0.5)?"#e0f0ff":"#a0c0e0";
+  if(mode==='bbalarm') return (Math.random()<0.5)?"#ff3030":"#ffb020";
+  if(mode==='bbdog') return "#c8904a";
+  if(mode==='bbballoon') return ch==="o"?"#ff3060":"#c8c8c8";
+  if(mode==='bbpigeon') return "#a0a0b0";
+  if(mode==='bbfete') return /[A-Z]/.test(ch)?"#ffffff":((c%2)?"#e04040":"#ffffff");
+  if(mode==='bbmic') return ch==="O"?"#404048":"#8a92a0";
+  if(mode==='bbdust') return "#a0a0a8";
+  if(mode==='bbplug') return "#ffb060";
+  if(mode==='bbbird') return "#c8d0dc";
+  if(mode==='bbmoon') return "#e8e0b0";
+  if(mode==='bbmount') return ch==="^"?"#e8eef8":"#7a8090";
+  if(mode==='bbvolc') return "#6a4a3a";
+  if(mode==='bbsmoke') return "#8a8a92";
+  if(mode==='bbtext') return "#ffffff";
+  if(mode==='tmhero') return ch==="@"?"#e8c040":(ch==="#"||ch==="("||ch===")"?"#3a5aa0":"#f0c8a0");   // Team America
+  if(mode==='tmstring') return ch==="*"?"#ffffff":"#8a92a0";
+  if(mode==='tmjet') return "#c8ccd4";
+  if(mode==='tmred') return "#d82020";
+  if(mode==='tmwhite') return "#ffffff";
+  if(mode==='tmstar') return ch==="*"?"#ffffff":"#2a3a9a";
+  if(mode==='tmboom') return (Math.random()<0.5)?"#ffe040":"#ff6020";
+  if(mode==='tmriff') return (Math.random()<0.5)?"#ff4040":"#ffffff";
+  if(mode==='tmrocket') return "#ffd020";
+  if(mode==='tmgran') return ch==="o"?"#f0c8a0":"#b080c0";
+  if(mode==='tmduck') return ch===">"?"#ff9a30":"#5a9a4a";
+  if(mode==='tmcroissant') return "#e0a040";
+  if(mode==='tmeagle') return ch==="o"?"#202020":(ch===">"?"#ffd020":(ch==="_"||ch==="("?"#ffffff":"#6a4a2a"));
+  if(mode==='tmtear') return "#8ad0ff";
+  if(mode==='tmsmoke') return (Math.random()<0.5)?"#8a8a92":"#6a6a72";
+  if(mode==='tmcafe') return /[A-Z]/.test(ch)?"#ffe0a0":"#c8a070";
+  if(mode==='tmsquare') return ch==="~"?"#6ab0ff":"#a0a0a8";
+  if(mode==='tmmuseum'||mode==='tmlibrary'||mode==='tmmayor'||mode==='tmmall') return /[A-Z]/.test(ch)?"#ffffff":"#d8ccb0";
+  if(mode==='tmcathedral') return ch==="+"?"#ffe060":"#c8c0b0";
+  if(mode==='tmtext') return "#ffffff";
+  if(mode==='ntivy') return ["#2a8a2a","#3aa040","#1e6a24","#4ab040"][(r*3+c)%4];   // Nature
+  if(mode==='ntgrass') return (c%2)?"#5ac040":"#4aa830";
+  if(mode==='ntflower') return ["#ffe040","#ff80b0","#ffffff","#c080ff"][(r+c)%4];
+  if(mode==='ntdandelion') return "#ffe040";
+  if(mode==='ntoak') return ["#2a7a2a","#3a9030","#1e5a20"][(r+c)%3];
+  if(mode==='ntbark') return "#7a4a20";
+  if(mode==='ntbed') return ch==="*"?"#ff80b0":(ch==="."?"#ffe040":"#5a8a3a");
+  if(mode==='ntmyc') return "#c8b8a0";
+  if(mode==='ntpulse') return (Math.random()<0.5)?"#fff4c0":"#c8ff80";
+  if(mode==='ntshroom') return "#e8d0b0";
+  if(mode==='ntdirt') return "#6a4a2a";
+  if(mode==='ntbadger') return ch==="="?"#ffffff":"#3a3a3a";
+  if(mode==='ntfox') return ch==="o"?"#202020":(ch==="~"?"#ffffff":"#e8701a");
+  if(mode==='ntstag') return ch==="Y"||ch==="\\"&&r<streetRow-2||ch==="/"&&r<streetRow-2?"#d8c8a0":"#8a5a2a";
+  if(mode==='ntpigeon') return "#a0a0b0";
+  if(mode==='ntbird') return "#c8d0dc";
+  if(mode==='ntrobin') return ch==="o"?"#202020":(ch==="("?"#e04020":"#8a5a2a");
+  if(mode==='ntnest') return "#a07a3a";
+  if(mode==='ntphone') return "#6a7a8a";
+  if(mode==='ntmower') return ch==="o"?"#f0c8a0":"#e03030";
+  if(mode==='ntlanyard') return "#3a7ae8";
+  if(mode==='ntshop') return /[A-Z0-9]/.test(ch)?"#ffe040":"#a0a0b0";
+  if(mode==='ntcivic') return /[A-Z$]/.test(ch)?"#ffe0a0":"#d8ccb0";
+  if(mode==='ntmall') return /[A-Z]/.test(ch)?"#ff9ad0":"#a0a8c0";
+  if(mode==='ntsign') return "#ffffff";
+  if(mode==='ntopinion') return "#e8d0b0";
+  if(mode==='nttext') return "#ffffff";
+  if(mode==='dzlog') return "#7fff7f";                              // Disney: the boot log
+  if(mode==='dzlogwarn') return "#ffd040";
+  if(mode==='dzlogerr') return "#ff4040";
+  if(mode==='dzlogend') return "#a0c8ff";
+  if(mode==='dzface') return (Math.random()<0.5)?"#ffe0a0":"#ffc0d0";
+  if(mode==='dzcouncil') return /[A-Z]/.test(ch)?"#ffffff":(ch==="o"?"#ffe0a0":"#a8a0c0");
+  if(mode==='dzdoll0'||mode==='dzdoll1'||mode==='dzdoll2'||mode==='dzdoll3') return ch==="o"?"#ffe0c0":["#ff70b0","#70c0ff","#ffe060","#90e070"][+mode[6]];
+  if(mode==='dzboat') return ch==="o"?"#ffe0c0":"#ff9ad0";
+  if(mode==='dzbasement') return "#5a5a6a";
+  if(mode==='dzhuman') return ch==="o"?"#f0c8a0":"#202020";
+  if(mode==='dzbattery') return "#ffb020";
+  if(mode==='dzfire') return /[A-Z]/.test(ch)?"#ffffff":(ch==="o"?"#202020":"#e02020");
+  if(mode==='dzplane') return "#e8eefc";
+  if(mode==='dzpeople') return ["#ff70b0","#70c0ff","#ffe060","#90e070","#ffffff"][c%5];
+  if(mode==='dzglass') return "#c8e8ff";
+  if(mode==='dzsign') return "#ffe0a0";
+  if(mode==='dzsnow') return "#ffffff";
+  if(mode==='dznote') return ["#ff70b0","#70c0ff","#ffe060","#90e070"][(r+c)%4];
+  if(mode==='dzpixie') return (Math.random()<0.5)?"#ffe060":"#fff8d0";
+  if(mode==='dztext') return "#ffffff";
   if(mode==='nkphone') return ch==="#"?"#4a5a7a":"#8a9ab8";       // Nokia 3310: grey-blue, indestructible
   if(mode==='nkphonelit') return ch==="="?"#9adf5a":"#8a9ab8";
   if(mode==='nkbig') return /[A-Z0-9]/.test(ch)?"#e0e8f0":"#7a8aa8";
@@ -2634,7 +2752,12 @@ const METHOD_FILES = {
   87: 'teletubbies.js',
   88: 'trashpanda.js',
   89: 'doomcrossing.js',
-  90: 'nokia.js'
+  90: 'nokia.js',
+  91: 'disney.js',
+  92: 'nature.js',
+  93: 'teamamerica.js',
+  94: 'brianblessed.js',
+  95: 'redbull.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -2894,12 +3017,22 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — WELCOME TO THE ISLAND"; sub.style.color="#8ad040"; sub.style.textShadow="0 0 8px #ff3010"; } }
   else if(cmdColor===90){ cmd.style.color="#9adf5a"; cmd.style.textShadow="0 0 18px #4a6a9a";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — ANSWER THE PHONE"; sub.style.color="#9adf5a"; sub.style.textShadow="0 0 8px #4a6a9a"; } }
+  else if(cmdColor===91){ cmd.style.color="#7fff7f"; cmd.style.textShadow="0 0 18px #3a6aff";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — BOARD THE BOAT"; sub.style.color="#7fff7f"; sub.style.textShadow="0 0 8px #3a6aff"; } }
+  else if(cmdColor===92){ cmd.style.color="#a8e080"; cmd.style.textShadow="0 0 18px #2a7a2a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — LET IT GROW"; sub.style.color="#a8e080"; sub.style.textShadow="0 0 8px #2a7a2a"; } }
+  else if(cmdColor===93){ cmd.style.color="#ffffff"; cmd.style.textShadow="0 0 18px #c02020";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — FREEDOM IS COMING"; sub.style.color="#ffffff"; sub.style.textShadow="0 0 8px #c02020"; } }
+  else if(cmdColor===94){ cmd.style.color="#ff4040"; cmd.style.textShadow="0 0 18px #ffd020";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SAY HELLO"; sub.style.color="#ff4040"; sub.style.textShadow="0 0 8px #ffd020"; } }
+  else if(cmdColor===95){ cmd.style.color="#ffcc33"; cmd.style.textShadow="0 0 18px #c81e3c";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — TAKE A SIP"; sub.style.color="#ffcc33"; sub.style.textShadow="0 0 8px #c81e3c"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%91; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%96; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
