@@ -326,6 +326,9 @@ if (isset($_GET['stats'])) {
   #methodBox .m-teamamerica { color:#ffffff; text-shadow:0 0 8px #c02020; }
   #methodBox .m-blessed { color:#ff4040; text-shadow:0 0 8px #ffd020; }
   #methodBox .m-redbull { color:#ffcc33; text-shadow:0 0 8px #c81e3c; }
+  #methodBox .m-doommusic { color:#ff4020; text-shadow:0 0 8px #ffa020; }
+  #methodBox .m-bigbird { color:#ffe040; text-shadow:0 0 8px #ff8a1a; }
+  #methodBox .m-grimace { color:#a050e0; text-shadow:0 0 8px #ff70d0; }
   /* animated flame gradient text (for the SUN command) */
   .flametext { background:linear-gradient(0deg,#c81400,#ff2a00,#ff8c00,#ffd000,#fff6a0);
     background-size:100% 300%; -webkit-background-clip:text; background-clip:text;
@@ -584,6 +587,9 @@ if (isset($_GET['stats'])) {
       <a href="?m=93" class="m-teamamerica pick" data-method="93" data-cat="movie">Team America</a>
       <a href="?m=94" class="m-blessed pick" data-method="94" data-cat="fun">Brian Blessed</a>
       <a href="?m=95" class="m-redbull pick" data-method="95" data-cat="fun">Red Bull</a>
+      <a href="?m=96" class="m-doommusic pick" data-method="96" data-cat="movie">Doom Music</a>
+      <a href="?m=97" class="m-bigbird pick" data-method="97" data-cat="fun">Big Bird</a>
+      <a href="?m=98" class="m-grimace pick" data-method="98" data-cat="fun">Grimace</a>
     </div>
   </div>
   <div id="cmd">sudo rm -rf /*</div>
@@ -1892,6 +1898,58 @@ function colorFor(ch,r,c,mode){
     if(ch==="_"||ch==="'"||ch==="/"||ch==="\\") return "#3a0a0a";  // mouth
     return (r+c)%3?"#e8262a":"#c81a1e";                            // fur
   }
+  if(mode==='gmblob') return ch==="#"?((r+c)%2?"#8a3ad0":"#9a4ae0"):(ch==="^"?"#202020":"#c890ff");   // Grimace: solid purple, dark eyes
+  if(mode==='gmpurple') return "#a050e0";
+  if(mode==='gmpurple2') return "#c890ff";
+  if(mode==='gmplanet') return ch==="*"?"#ffb0ff":((r+c)%3?"#7a2ac0":"#8a3ad0");
+  if(mode==='gmrim') return "#c890ff";
+  if(mode==='gmslush') return (Math.random()<0.5)?"#b070f0":"#d0a0ff";
+  if(mode==='gmshop') return /[A-Z!]/.test(ch)?"#ffd020":"#d02020";
+  if(mode==='gmsmall') return "#c8a8e0";
+  if(mode==='gmcup') return ch==="|"?"#ffffff":"#a050e0";
+  if(mode==='gmdown') return ch==="o"?"#f0c8a0":"#9a80c0";
+  if(mode==='gmphone') return "#a0d0ff";
+  if(mode==='gmred') return "#d82020";
+  if(mode==='gmdoor') return ch==="1"||ch==="0"?"#ffffff":"#202028";
+  if(mode==='gmfount') return "#a0a8b8";
+  if(mode==='gmsci') return ch==="o"?"#f0c8a0":"#ffffff";
+  if(mode==='gmclip') return "#c8a070";
+  if(mode==='gmfish') return "#ff9ad0";
+  if(mode==='gmconf') return ["#ff70b0","#ffe040","#70c0ff","#90e070"][(r+c)%4];
+  if(mode==='gmtext') return "#ffffff";
+  if(mode==='bgbird'){                                             // Big Bird
+    if(ch==="o"||ch==="^"&&r<streetRow-3) return "#202020";
+    if(ch==="v"||ch==="\\"&&r<streetRow-4||ch==="/"&&r<streetRow-4&&ch!=="/") return "#ff8a1a";
+    if(ch==="|"&&r>=streetRow-2||ch==="^") return "#ff8a1a";       // legs
+    if(ch==="("||ch===")"||ch==="_") return "#ffffff";
+    return (r+c)%2?"#ffe040":"#f0c820";                            // feathers
+  }
+  if(mode==='bgfriend') return ch==="o"?"#202020":((r+c)%2?"#7a4a2a":"#8a5a32");
+  if(mode==='bgfeather') return (Math.random()<0.5)?"#ffe040":"#fff0a0";
+  if(mode==='bgdrift') return (r+c)%2?"#ffe040":"#f0c820";
+  if(mode==='bgwind') return "#c8d0dc";
+  if(mode==='bgbig') return (Math.random()<0.5)?"#ffe040":"#40c0ff";
+  if(mode==='bgsign') return "#ffffff";
+  if(mode==='bghouses') return ch==="/"||ch==="\\"?"#c0503a":(ch==="["||ch==="]"?"#ffe080":"#c8a070");
+  if(mode==='bgschool'||mode==='bgbank'||mode==='bgbus'||mode==='bghall') return /[A-Z$]/.test(ch)?"#ffffff":"#d8ccb0";
+  if(mode==='bgbridge') return "#a08a6a";
+  if(mode==='bgcathedral') return ch==="+"?"#ffe060":"#c8c0b0";
+  if(mode==='bgstadium') return "#c8c8d0";
+  if(mode==='bgtext') return "#ffffff";
+  if(mode==='dmlow') return "#6a3a8a";                              // Doom Music
+  if(mode==='dmlava') return (Math.random()<0.5)?"#ff3010":"#ffa020";
+  if(mode==='dmimp') return ch==="^"||ch==="\\"&&r<streetRow-6||ch==="/"&&r<streetRow-6?"#e0e0e0":(ch==="o"||ch==="O"?"#ffe020":"#a02818");
+  if(mode==='dmoffice') return ch==="V"?"#d02020":(ch==="o"||ch==="O"||ch==="^"?"#f0c8a0":"#4a5a7a");
+  if(mode==='dmgran') return ch==="o"?"#f0c8a0":(ch==="%"?"#b080c0":"#8a6a3a");
+  if(mode==='dmsaw') return ch==="o"?"#f0c8a0":"#ffd020";
+  if(mode==='dmcath') return ch==="+"?"#ffe060":"#c8c0b0";
+  if(mode==='dmmoon') return "#e8e0b0";
+  if(mode==='dmnote') return (Math.random()<0.5)?"#ff4020":"#ffa020";
+  if(mode==='dmsolo') return (Math.random()<0.5)?"#ffffff":"#ff6040";
+  if(mode==='dmheart') return "#ff3060";
+  if(mode==='dmvol') return "#ffa020";
+  if(mode==='dmbig') return (Math.random()<0.5)?"#ff3010":"#ffd020";
+  if(mode==='dmtext') return "#ffffff";
   if(mode==='rdwing') return (Math.random()<0.5)?"#ffffff":"#e8eef8";   // Red Bull
   if(mode==='rdglow') return (Math.random()<0.5)?"#ffcc33":"#fff4a0";
   if(mode==='rdgown') return ch==="o"?"#f0c8a0":"#e070a0";
@@ -2757,7 +2815,10 @@ const METHOD_FILES = {
   92: 'nature.js',
   93: 'teamamerica.js',
   94: 'brianblessed.js',
-  95: 'redbull.js'
+  95: 'redbull.js',
+  96: 'doommusic.js',
+  97: 'bigbird.js',
+  98: 'grimace.js'
 };
 function registerMethod(id, def){
   methodDefs[id] = def;
@@ -3027,12 +3088,18 @@ function paintCmd2(){
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — SAY HELLO"; sub.style.color="#ff4040"; sub.style.textShadow="0 0 8px #ffd020"; } }
   else if(cmdColor===95){ cmd.style.color="#ffcc33"; cmd.style.textShadow="0 0 18px #c81e3c";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — TAKE A SIP"; sub.style.color="#ffcc33"; sub.style.textShadow="0 0 8px #c81e3c"; } }
+  else if(cmdColor===96){ cmd.style.color="#ff4020"; cmd.style.textShadow="0 0 18px #ffa020";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE RIFF"; sub.style.color="#ff4020"; sub.style.textShadow="0 0 8px #ffa020"; } }
+  else if(cmdColor===97){ cmd.style.color="#ffe040"; cmd.style.textShadow="0 0 18px #ff8a1a";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — CAN YOU TELL ME HOW TO GET..."; sub.style.color="#ffe040"; sub.style.textShadow="0 0 8px #ff8a1a"; } }
+  else if(cmdColor===98){ cmd.style.color="#a050e0"; cmd.style.textShadow="0 0 18px #ff70d0";
+    if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — TRY THE NEW SHAKE"; sub.style.color="#c890ff"; sub.style.textShadow="0 0 8px #ff70d0"; } }
   else{ cmd.style.color="#f00"; cmd.style.textShadow="0 0 18px #f00";
     if(phase==='intro'){ sub.textContent="CLICK / PRESS ANY KEY — DROP THE BOMB"; sub.style.color="#ff5030"; sub.style.textShadow="0 0 8px #f00"; } }
 }
 function startCycle(){
   cmdColor=0; paintCmd2();
-  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%96; paintCmd2(); }, 2500);
+  cycleTimer=setInterval(()=>{ if(phase!=='intro')return; cmdColor=(cmdColor+1)%99; paintCmd2(); }, 2500);
 }
 
 // build a mode grid for a city-based scene, tagging planes + optional bomb + rain
